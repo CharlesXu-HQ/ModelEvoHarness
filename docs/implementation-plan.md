@@ -2,7 +2,7 @@
 
 **Goal:** Publish a standalone cross-scenario Agent model-iteration harness, then validate its CouponEvo integration on a full public dataset.
 
-**Architecture:** The independent package owns a pinned FunRec coverage catalog and a host-adapter experiment loop. CouponEvo consumes the published package through an opt-in adapter and retains training, GPU sandbox, data split and causal evaluation.
+**Architecture:** The independent package owns a source-pinned research catalog and a host-adapter experiment loop. CouponEvo tracks it as a Git submodule, uses an opt-in adapter, and retains training, GPU sandbox, data split and causal evaluation.
 
 **Tech stack:** Python 3.12 standard library for the package; existing PyTorch and EconML stack only in CouponEvo.
 

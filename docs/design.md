@@ -18,14 +18,14 @@ The journal identity includes the dataset/task fingerprint, frozen objective and
 
 ## First consumer
 
-CouponEvo constructs the task profile from its training split, passes it to the installed package, and uses the package's catalog, proposal validation, and history policy in its existing sandboxed `search` loop. CouponEvo's candidate interface, CUDA requirement, data split, paired bootstrap, and final-test isolation remain its responsibility. The independently runnable loop is tested with an adapter fixture; the CouponEvo path is tested separately with its real evaluator.
+CouponEvo tracks this repository as a Git submodule, constructs the task profile from its training split, and uses the package's catalog and proposal validation in its existing sandboxed `search` loop. CouponEvo's candidate interface, CUDA requirement, data split, paired bootstrap, and final-test isolation remain its responsibility. The independently runnable loop is tested with an adapter fixture; the CouponEvo path is tested separately with its real evaluator.
 
 ## Acceptance criteria
 
 1. Source inventory covers all substantive FunRec chapter pages, all 38 current model files, 54 supporting modules and 50 production-backend modules at one pinned upstream tree, with tests rejecting unmapped paths and missing method cards.
 2. The independent package installs and runs a multi-trial Agent loop through a host adapter, records comparable hypotheses/results/reflections, rejects unknown input fields and unavailable capabilities, resumes deterministically, and never needs CouponEvo imports.
 3. Public repo has an Apache-2.0 license, English and Chinese README, usage example, tests, and a GitHub URL under CharlesXu-HQ.
-4. CouponEvo installs the package from the published repository, can opt into it without a copied catalog, and records the package/catalog identity in its task journal.
+4. CouponEvo installs the package from its Git submodule, can opt into it without a copied catalog, and records the package/catalog identity in its task journal.
 5. A fixed full-public-data A/B run compares CouponEvo with and without the new harness using the same split, objective, GPU task, Agent model, and trial budget. Report selection and paired confidence intervals; do not claim a lift unless the evidence supports it.
 
 ## Risks and boundaries

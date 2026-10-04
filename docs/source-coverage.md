@@ -1,4 +1,4 @@
-# FunRec coverage and applicability
+# Research source coverage and applicability
 
 This is a pinned, independently written research map of [FunRec](https://github.com/datawhalechina/fun-rec), not a port of its code. The upstream [commit](https://github.com/datawhalechina/fun-rec/commit/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572) is `5f7bd84d4403b5f92b6bedbd31e3984ef00a4572` and its Git tree is `84a4e63da7d7cb0ca8ea7e47128174535f0ab40a`. The [inventory](../src/model_evo_harness/data/upstream_inventory.json) records 55 substantive chapter pages, 38 model modules, 54 supporting core modules and 50 production-backend Python modules. `coverage_report` checks that each maps to exactly one family. FunRec's chapter on bias and cold start is included alongside the newer outline in its top-level README. Frontend assets and image files are recorded by the upstream tree but have no model-iteration mechanism, so they are outside this code inventory.
 

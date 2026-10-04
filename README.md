@@ -1,10 +1,10 @@
 # ModelEvoHarness
 
-[中文](README.zh-CN.md) · [FunRec coverage](docs/funrec-coverage.md) · [Adapter contract](docs/adapter-contract.md)
+[中文](README.zh-CN.md) · [Research coverage](docs/source-coverage.md) · [Adapter contract](docs/adapter-contract.md)
 
 ModelEvoHarness runs **Agent-led, falsifiable offline model experiments** across recommendation, search, advertising, and marketing. An Agent reads the fixed task and previous results, chooses a mechanism, states a control and predicted result, submits a candidate, then reflects on the measured outcome. The harness checks data prerequisites and records the experiment. Your task adapter trains the candidate and evaluates it under your own split, metrics and execution rules.
 
-The research catalog is a complete, pinned map of the substantive topics in [FunRec](https://github.com/datawhalechina/fun-rec): 55 chapter pages, 38 model modules, 54 supporting modules and 50 production backend modules mapped to 19 research families. The 38 model modules also have method cards with mechanism, required data contracts, controlled comparison, failure signals and implementation boundary. **FunRec models are references, not bundled implementations.** The Agent can choose a ready family, choose a ready method card, or propose a direction outside the catalog.
+The research catalog maps 55 chapter pages, 38 model modules, 54 supporting modules and 50 production backend modules into 19 research families. Each model module has a method card describing its mechanism, required data contracts, controlled comparison, failure signals and implementation boundary. The Agent can choose a ready family or method card, or propose a direction outside the catalog. These are research references, not bundled model implementations.
 
 ## Why this exists
 
@@ -48,4 +48,4 @@ The journal records baseline and trial scores, research designs, evaluation fail
 
 ## Source and license
 
-The catalog links to FunRec's chapter and model paths at a pinned upstream tree. FunRec's work is marked [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml). ModelEvoHarness independently writes its guidance, method cards and code under [Apache-2.0](LICENSE), with no FunRec source code copied.
+The initial [research coverage](docs/source-coverage.md) is mapped to a pinned tree of [FunRec](https://github.com/datawhalechina/fun-rec). Its work is marked [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml). ModelEvoHarness independently writes its guidance, method cards and code under [Apache-2.0](LICENSE), with no upstream source code copied.

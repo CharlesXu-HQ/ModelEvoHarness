@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--output", type=Path, required=True, metavar="DIR")
     run.add_argument("--max-steps", type=int, required=True, metavar="N")
     run.add_argument("--resume", action="store_true")
-    commands.add_parser("catalog-check", help="check upstream FunRec coverage")
+    commands.add_parser("catalog-check", help="check research source coverage")
     args = parser.parse_args(argv)
 
     if args.command == "catalog-check":

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "FunRec-informed model research",
+  "name": "Cross-scenario model research",
   "source_commit_sha": "5f7bd84d4403b5f92b6bedbd31e3984ef00a4572",
   "source_tree_sha": "84a4e63da7d7cb0ca8ea7e47128174535f0ab40a",
   "guidance": "Use families as evidence-based research lenses, not a closed model menu. Confirm data semantics and time boundaries. Keep the host task objective, evaluation and resource budget fixed. A family with no upstream code is a documented concept, not an installed model.",

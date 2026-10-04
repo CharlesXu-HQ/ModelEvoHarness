@@ -1,10 +1,10 @@
 # ModelEvoHarness
 
-[English](README.md) · [FunRec 覆盖清单](docs/funrec-coverage.md) · [任务适配接口](docs/adapter-contract.md)
+[English](README.md) · [研究覆盖清单](docs/source-coverage.md) · [任务适配接口](docs/adapter-contract.md)
 
 ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离线模型迭代框架**。Agent 读取固定任务和历史结果，选择要检验的机制，说明对照与预期，提交候选模型，并根据评估结果反思。Harness 检查数据条件，调度实验并保存记录。任务适配器负责真实训练、数据切分、指标和运行环境。
 
-研究目录完整核对了 [FunRec](https://github.com/datawhalechina/fun-rec) 当前版本中 55 个实质性章节页面、38 个模型模块、54 个支撑模块和 50 个生产后端模块，归入 19 个可交叉的研究方向。38 个模型模块还对应 method card，写明机制、数据条件、对照实验、失败信号和实现边界。**这些模型是参考实例，并未作为代码复制进本项目。** Agent 可以选择可执行的方向、可执行的 method card，也可以提出目录之外的新方向。
+研究目录将 55 个实质性章节页面、38 个模型模块、54 个支撑模块和 50 个生产后端模块归入 19 个可交叉的研究方向。每个模型模块对应一张 method card，写明机制、数据条件、对照实验、失败信号和实现边界。Agent 可以选择可执行的方向或 method card，也可以提出目录之外的新方向。这些内容是研究参考，项目没有打包模型实现。
 
 ## 实验为什么需要 harness
 
@@ -48,4 +48,4 @@ model-evo-harness run \
 
 ## 来源与许可证
 
-目录对 FunRec 的章节和模型路径建立固定版本的映射。FunRec 标注为 [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml)。ModelEvoHarness 的指南、method card 和代码独立编写，采用 [Apache-2.0](LICENSE)，未复制 FunRec 模型源码。
+首版[研究覆盖清单](docs/source-coverage.md)对 [FunRec](https://github.com/datawhalechina/fun-rec) 的固定版本建立映射。该项目标注为 [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml)。ModelEvoHarness 的指南、method card 和代码独立编写，采用 [Apache-2.0](LICENSE)，未复制上游源码。
