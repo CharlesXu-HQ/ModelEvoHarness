@@ -12,7 +12,7 @@
 
 - [x] Capture every substantive FunRec chapter page, core Python module and production-backend Python module at one tree hash, map each exactly once to a research family, and add one method card per upstream model module. Check: `coverage_report` returns no unmapped, unknown, duplicate or misassigned paths.
 - [x] Build the independent Agent loop and provider transport. Check: fake adapter tests exercise baseline → hypotheses → candidate evaluations → reflections → best selection, rejection before training, and resume after interrupted reflection.
-- [ ] Publish package metadata, two READMEs, adapter contract, Apache license and CI. Check: clean install, unit tests, CLI catalog check and a GitHub clone from the new public repository.
+- [x] Publish package metadata, two READMEs, adapter contract, Apache license and CI. Check: clean install, unit tests, CLI catalog check and a GitHub clone from the new public repository.
 - [ ] Integrate the package into CouponEvo without copying its catalog. Check: existing test suite and an opt-in search using a real full dataset.
 - [ ] Run a fixed-budget A/B on the RTX 5090 host with the same public data, split, objective, Agent configuration and candidate budget. Check: store journals, compare selected candidates on a paired final evaluation, and report uncertainty and limitations.
 
