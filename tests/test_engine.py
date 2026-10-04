@@ -130,6 +130,50 @@ class EngineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "identity"):
             run_search(task, Agent([]), output=self.output, catalog=changed_catalog, max_steps=1, resume=True)
 
+    def test_evaluation_protocol_is_exposed_and_freezes_comparison(self):
+        class ProtocolTask(Task):
+            def __init__(self):
+                super().__init__()
+                self.candidate_universe = "all-eligible-items"
+
+            def snapshot(self):
+                return {**super().snapshot(), "evaluation_protocol": {
+                    "unit": "user", "split": "fixed-v1", "metric": "ndcg_at_10",
+                    "candidate_universe": self.candidate_universe,
+                    "negative_source": "none-full-catalog"}}
+
+        task = ProtocolTask()
+        agent = Agent([experiment()])
+        result = run_search(task, agent, output=self.output, catalog=self.catalog, max_steps=1)
+        self.assertEqual(len(result["identity"]["evaluation_protocol_sha256"]), 64)
+        self.assertEqual(agent.contexts[0]["task"]["evaluation_protocol"]["candidate_universe"],
+                         "all-eligible-items")
+        task.candidate_universe = "sampled-100"
+        with self.assertRaisesRegex(ValueError, "evaluation protocol"):
+            run_search(task, Agent([]), output=self.output, catalog=self.catalog, max_steps=1,
+                       resume=True)
+
+    def test_partial_evaluation_protocol_is_rejected(self):
+        class PartialProtocolTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "evaluation_protocol": {"split": "fixed-v1"}}
+
+        with self.assertRaisesRegex(ValueError, "evaluation_protocol"):
+            run_search(PartialProtocolTask(), Agent([]), output=self.output,
+                       catalog=self.catalog, max_steps=0)
+
+    def test_retrieval_protocol_needs_candidate_and_negative_definitions(self):
+        class RetrievalTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "stage": "retrieval",
+                        "capabilities": ["implicit_feedback"],
+                        "evaluation_protocol": {"unit": "user", "split": "fixed-v1",
+                                                "metric": "recall_at_10"}}
+
+        with self.assertRaisesRegex(ValueError, "candidate_universe, negative_source"):
+            run_search(RetrievalTask(), Agent([]), output=self.output,
+                       catalog=self.catalog, max_steps=0)
+
     def test_resume_rejects_changed_installed_implementation(self):
         task = Task()
         run_search(task, Agent([experiment()]), output=self.output,

@@ -1,0 +1,39 @@
+{
+  "decision_checks": [
+    {
+      "id": "evaluation_protocol",
+      "stages": [], "requires": [],
+      "question": "Are these scores computed under the same unit, fixed split, metric and candidate universe?",
+      "guardrail": "Use the host evaluation_protocol when present. For retrieval or ranking, state full versus sampled candidates, K, label provenance and any time cutoff; do not compare unlike estimands.",
+      "source_url": "https://recbole.io/docs/user_guide/config/evaluation_settings.html"
+    },
+    {
+      "id": "typed_feature_inputs",
+      "stages": ["ranking", "policy", "advertising"], "requires": ["tabular_features"],
+      "question": "Which inputs are categorical, dense or variable-length, and when were they observed?",
+      "guardrail": "Request the field and sequence contract before field-aware or sequence models; do not infer semantics or event order from a column name.",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/docs/source/Features.md"
+    },
+    {
+      "id": "negative_sampling",
+      "stages": ["retrieval", "ranking"], "requires": ["implicit_feedback"],
+      "question": "What is the source and distribution of negatives for this stage?",
+      "guardrail": "Separate observed negative labels from unobserved sampled items. Freeze the sampler for a model ablation; change it only as its own experiment.",
+      "source_url": "https://recbole.io/docs/user_guide/data/label_of_data.html"
+    },
+    {
+      "id": "prediction_to_decision",
+      "stages": ["ranking", "reranking", "policy", "advertising"], "requires": [],
+      "question": "Does the bottleneck lie in prediction or the rule that chooses an action from predictions?",
+      "guardrail": "A decision-rule experiment should hold the predictor fixed. Use declared business value and costs, feasible actions and a task-valid offline evaluator.",
+      "source_url": "https://github.com/wangshusen/RecommenderSystem/blob/8c8796c560c13059b19b51f5b5b963137f4ef287/Slides/03_Rank_03.pdf"
+    },
+    {
+      "id": "shared_resource_interference",
+      "stages": [], "requires": ["shared_resource_constraints"],
+      "question": "Would competing users, items, creators or budgets invalidate an independent-row offline conclusion?",
+      "guardrail": "Record randomization unit and shared constraints; treat an online rollout as a separate validation question.",
+      "source_url": "https://github.com/wangshusen/RecommenderSystem/blob/8c8796c560c13059b19b51f5b5b963137f4ef287/Slides/07_ColdStart_06.pdf"
+    }
+  ]
+}

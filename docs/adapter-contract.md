@@ -15,6 +15,11 @@ class Task:
             "capabilities": ["tabular_features", "observed_outcome_labels", "item_catalog"],
             "objective": {"name": "ndcg_at_10", "direction": "max"},
             "constraints": {"max_training_minutes": 30},
+            "evaluation_protocol": {
+                "unit": "user", "split": "fixed-train-validation-v1",
+                "metric": "ndcg_at_10", "candidate_universe": "all-eligible-items",
+                "negative_source": "none-at-evaluation", "time_cutoff": "2025-01-01",
+            },
         }
 
     def baseline(self, trial_dir: Path) -> dict:
@@ -31,13 +36,15 @@ The numeric examples above describe the **return shape**, not a bundled dataset 
 
 `fields` lists raw inputs the Agent may name. `capabilities` is an open set of data contracts established by the host, such as `tabular_features`, `observed_outcome_labels`, `event_sequence`, `interaction_graph`, `item_catalog`, `candidate_slates`, `multiple_outcomes`, `scenario_context`, `assignment_or_exposure_propensity`, or `generative_targets`. Do not infer a capability from a column dtype or invented business meaning. Freeze `snapshot()` for a run; changing the snapshot, dataset digest, package version or catalog digest prevents resume.
 
+`evaluation_protocol` is optional for older adapters and recommended for comparable experiments. When present it needs nonempty `unit`, `split` and `metric`; retrieval and reranking also need `candidate_universe`, and an `implicit_feedback` task needs `negative_source`. Declare full versus sampled evaluation, cutoff/order, label provenance, preprocessing, K and sampler identity wherever relevant. The harness fingerprints the entire protocol and refuses resume if it changes. It does not infer these facts from data or make full-catalog and sampled-negative metrics comparable. The host still enforces the actual split and evaluator. A host can also supply a `feature_schema` in the snapshot and declare `typed_feature_schema` or `categorical_field_identities` only after verifying categorical/dense/sequence semantics and decision-time availability.
+
 ```python
 class Agent:
     def propose(self, context: dict) -> dict: ...
     def reflect(self, observation: dict) -> dict: ...
 ```
 
-`context` includes the task snapshot, catalog, per-family applicability, per-method applicability, baseline, completed trials, best ID and remaining step count. `observation` includes the new trial and its evaluation status so the Agent can compare the outcome with its prediction or react to a failed candidate evaluation. The provider included in this package implements the same two methods; a host can supply its own Agent.
+`context` includes the task snapshot, catalog, per-family and per-method applicability, decision-check applicability, baseline, completed trials, best ID and remaining step count. The catalog also contains structural patterns: each describes the change in computation, measured symptom that would justify trying it, needed evidence, control and rejection signal. `observation` includes the new trial and its evaluation status so the Agent can compare the outcome with its prediction or react to a failed candidate evaluation. The provider included in this package implements the same two methods; a host can supply its own Agent.
 
 An experiment proposal uses this JSON shape:
 

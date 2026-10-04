@@ -1,0 +1,76 @@
+{
+  "method_cards": [
+    {
+      "id": "dcn_v2",
+      "family_id": "feature_interactions",
+      "source_repo": "torch-rechub",
+      "source_model": "torch_rechub/models/ranking/dcn_v2.py",
+      "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/ranking/dcn_v2.py",
+      "mechanism": "Uses matrix-based explicit crosses, with optional low-rank expert mixtures, instead of the original vector cross.",
+      "requires": ["tabular_features", "typed_feature_schema", "observed_outcome_labels"],
+      "comparison": "On identical fields and split, compare vector-cross DCN with matrix or low-rank crosses under a declared parameter or latency budget.",
+      "failure_signals": "No held-out gain beyond the simpler cross, sparse-field instability, or excessive memory or latency.",
+      "implementation_boundary": "The linked PyTorch implementation is a source example; the host adapter must implement and validate its own candidate."
+    },
+    {
+      "id": "fwfm",
+      "family_id": "feature_interactions",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/models/fwfm.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/fwfm.py",
+      "mechanism": "Weights each pairwise factorization interaction by its field pair, allowing different field-pair strengths.",
+      "requires": ["tabular_features", "categorical_field_identities", "observed_outcome_labels"],
+      "comparison": "On the same categorized fields and split, compare field-pair weights with plain FM at matched embedding width.",
+      "failure_signals": "No held-out gain, or rare field pairs produce unstable coefficients.",
+      "implementation_boundary": "DeepCTR is TensorFlow/Keras; the card transfers the ablation question, not a model implementation or benchmark result."
+    },
+    {
+      "id": "mlr",
+      "family_id": "adaptive_segmentation",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/models/mlr.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/mlr.py",
+      "mechanism": "Uses soft learned regions to combine local linear response functions.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "Compare with one linear model and a similarly sized MLP on the fixed split; inspect effective region support.",
+      "failure_signals": "A region has too few examples, or the mixture fails to beat simpler baselines at the same budget.",
+      "implementation_boundary": "The linked TensorFlow model is a reference for a host-owned implementation; region membership is not a causal segment effect."
+    },
+    {
+      "id": "aitm",
+      "family_id": "multiobjective",
+      "source_repo": "torch-rechub",
+      "source_model": "torch_rechub/models/multi_task/aitm.py",
+      "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/multi_task/aitm.py",
+      "mechanism": "Transfers information from an earlier task representation to a later ordered task through attention.",
+      "requires": ["tabular_features", "multiple_outcomes", "ordered_outcome_labels"],
+      "comparison": "On identical examples and label definitions, compare ordered transfer with independent heads and a shared-bottom control.",
+      "failure_signals": "The declared outcome order is unsupported, or an auxiliary-task gain harms the primary task.",
+      "implementation_boundary": "Treatment and outcome columns alone do not establish an ordered multi-step label funnel."
+    },
+    {
+      "id": "narm",
+      "family_id": "interest_retrieval",
+      "source_repo": "torch-rechub",
+      "source_model": "torch_rechub/models/matching/narm.py",
+      "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/narm.py",
+      "mechanism": "Combines a session-level representation with attention to the current session intent for item retrieval.",
+      "requires": ["event_sequence", "item_catalog", "session_boundaries", "target_item_ids"],
+      "comparison": "With the same time-cut session data and candidate universe, compare session attention with masked history pooling.",
+      "failure_signals": "No full-catalog recall gain, missing session boundaries, or future events enter the history.",
+      "implementation_boundary": "Aggregated user windows cannot be substituted for ordered session events."
+    },
+    {
+      "id": "youtube_sbc",
+      "family_id": "two_tower_matching",
+      "source_repo": "torch-rechub",
+      "source_model": "torch_rechub/models/matching/youtube_sbc.py",
+      "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/youtube_sbc.py",
+      "mechanism": "Corrects in-batch item logits using the logged item sampling weight.",
+      "requires": ["item_catalog", "user_features", "item_sampling_weights", "negative_sampler_definition"],
+      "comparison": "Correct versus uncorrected logits with identical sampled items and the same full-catalog evaluation universe.",
+      "failure_signals": "Weights are unknown or do not match the sampler, or gains disappear under full-catalog evaluation.",
+      "implementation_boundary": "Sampling weights describe retrieval training negatives, not treatment-assignment or exposure propensities."
+    }
+  ]
+}

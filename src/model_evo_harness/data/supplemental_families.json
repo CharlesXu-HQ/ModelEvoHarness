@@ -1,0 +1,40 @@
+{
+  "families": [
+    {
+      "id": "adaptive_segmentation",
+      "name": "Adaptive piecewise response models",
+      "source_repo": "deepctr",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/mlr.py",
+      "stages": ["ranking", "policy", "advertising"],
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "question": "Does a small mixture of local response functions capture heterogeneity missed by one global model?",
+      "experiment": "Compare a soft-gated mixture with one linear model and a capacity-matched nonlinear baseline on the same rows and split.",
+      "pitfalls": "Tiny effective segments can overfit; check per-segment support and latency.",
+      "source_docs": [], "source_models": [], "source_support": [], "source_project": []
+    },
+    {
+      "id": "decision_mapping",
+      "name": "Prediction-to-decision mapping",
+      "source_repo": "wangshusen-recommendersystem",
+      "source_url": "https://github.com/wangshusen/RecommenderSystem/blob/8c8796c560c13059b19b51f5b5b963137f4ef287/Slides/03_Rank_03.pdf",
+      "stages": ["ranking", "reranking", "policy", "advertising"],
+      "requires": ["decision_rule_adapter"],
+      "question": "Would a different action rule improve the declared business objective with the same predictions?",
+      "experiment": "Freeze the predictor and validation protocol; compare a threshold, score fusion or feasible-set rule against the current decision rule.",
+      "pitfalls": "A higher click score is not an incremental treatment effect; use observed value and cost only when their definitions are valid.",
+      "source_docs": [], "source_models": [], "source_support": [], "source_project": []
+    },
+    {
+      "id": "knowledge_graph_retrieval",
+      "name": "Typed knowledge-graph retrieval",
+      "source_repo": "recbole",
+      "source_url": "https://recbole.io/docs/user_guide/data/atomic_files.html",
+      "stages": ["retrieval"],
+      "requires": ["item_catalog", "knowledge_graph_triples", "item_entity_links"],
+      "question": "Do typed entity relations add retrieval signal beyond interaction and item-side baselines?",
+      "experiment": "Hold the candidate pool and evaluation protocol fixed; ablate relation-aware information against matched item representations.",
+      "pitfalls": "Entity links or graph edges formed after the evaluation cutoff leak future information.",
+      "source_docs": [], "source_models": [], "source_support": [], "source_project": []
+    }
+  ]
+}

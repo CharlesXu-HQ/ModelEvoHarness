@@ -17,7 +17,11 @@ def _bundled(name: str) -> dict:
 
 def load_catalog(*, extra_families: list[dict] | None = None) -> dict:
     catalog = _bundled("catalog.json")
+    catalog["families"].extend(_bundled("supplemental_families.json")["families"])
     catalog["method_cards"] = _bundled("method_cards.json")["method_cards"]
+    catalog["method_cards"].extend(_bundled("supplemental_method_cards.json")["method_cards"])
+    catalog["decision_checks"] = _bundled("decision_checks.json")["decision_checks"]
+    catalog["structure_patterns"] = _bundled("structure_patterns.json")["structure_patterns"]
     if extra_families:
         catalog["families"].extend(extra_families)
     validate_catalog(catalog)
@@ -38,8 +42,11 @@ def implementation_digest() -> str:
     """Identify installed decision logic as well as its bundled catalog."""
     package = files("model_evo_harness")
     digest = hashlib.sha256()
-    for name in ("catalog.py", "engine.py", "provider.py", "data/catalog.json",
-                 "data/method_cards.json", "data/upstream_inventory.json"):
+    for name in ("__init__.py", "catalog.py", "engine.py", "provider.py", "data/catalog.json",
+                 "data/supplemental_families.json", "data/method_cards.json",
+                 "data/supplemental_method_cards.json",
+                 "data/decision_checks.json", "data/structure_patterns.json",
+                 "data/upstream_inventory.json"):
         digest.update(name.encode())
         digest.update(package.joinpath(name).read_bytes())
     return digest.hexdigest()
@@ -61,6 +68,12 @@ def validate_catalog(catalog: dict) -> None:
         if family["id"] in seen:
             raise ValueError(f"duplicate family id: {family['id']}")
         seen.add(family["id"])
+        source_repo = family.get("source_repo", "funrec")
+        if not isinstance(source_repo, str) or not source_repo.strip():
+            raise ValueError(f"family {family['id']} needs nonempty source_repo")
+        if source_repo != "funrec" and (not isinstance(family.get("source_url"), str) or
+                                       not family["source_url"].startswith("https://")):
+            raise ValueError(f"family {family['id']} needs HTTPS source_url")
         for key in ("stages", "requires", "source_docs", "source_models",
                     "source_support", "source_project"):
             value = family.get(key, []) if key.startswith("source_") else family.get(key)
@@ -82,23 +95,74 @@ def validate_catalog(catalog: dict) -> None:
         card_ids.add(card["id"])
         if card["family_id"] not in seen:
             raise ValueError(f"method {card['id']} has unknown family_id")
+        source_repo = card.get("source_repo", "funrec")
+        if not isinstance(source_repo, str) or not source_repo.strip():
+            raise ValueError(f"method {card['id']} needs nonempty source_repo")
+        if source_repo != "funrec" and (not isinstance(card.get("source_url"), str) or
+                                       not card["source_url"].startswith("https://")):
+            raise ValueError(f"method {card['id']} needs HTTPS source_url")
         if not isinstance(card.get("requires"), list) or any(
                 not isinstance(value, str) or not value for value in card["requires"]):
             raise ValueError(f"method {card['id']} needs string list requires")
+    checks = catalog.get("decision_checks", [])
+    if not isinstance(checks, list):
+        raise ValueError("decision_checks must be a list")
+    check_ids = set()
+    for check in checks:
+        if not isinstance(check, dict):
+            raise ValueError("decision check must be an object")
+        for key in ("id", "question", "guardrail", "source_url"):
+            if not isinstance(check.get(key), str) or not check[key].strip():
+                raise ValueError(f"decision check needs nonempty {key}")
+        if check["id"] in check_ids:
+            raise ValueError(f"duplicate decision check id: {check['id']}")
+        check_ids.add(check["id"])
+        if not check["source_url"].startswith("https://"):
+            raise ValueError(f"decision check {check['id']} needs HTTPS source_url")
+        for key in ("stages", "requires"):
+            if not isinstance(check.get(key), list) or any(
+                    not isinstance(value, str) or not value for value in check[key]):
+                raise ValueError(f"decision check {check['id']} needs string list {key}")
+    patterns = catalog.get("structure_patterns", [])
+    if not isinstance(patterns, list):
+        raise ValueError("structure_patterns must be a list")
+    pattern_ids = set()
+    linked_methods = set()
+    for pattern in patterns:
+        if not isinstance(pattern, dict):
+            raise ValueError("structure pattern must be an object")
+        for key in ("id", "name", "structural_change", "when_to_try",
+                    "required_evidence", "controlled_comparison", "reject_if"):
+            if not isinstance(pattern.get(key), str) or not pattern[key].strip():
+                raise ValueError(f"structure pattern needs nonempty {key}")
+        if pattern["id"] in pattern_ids:
+            raise ValueError(f"duplicate structure pattern id: {pattern['id']}")
+        pattern_ids.add(pattern["id"])
+        method_ids = pattern.get("method_ids")
+        if not isinstance(method_ids, list) or not method_ids or any(
+                not isinstance(value, str) or value not in card_ids for value in method_ids):
+            raise ValueError(f"structure pattern {pattern['id']} needs known method_ids")
+        if linked_methods.intersection(method_ids) or len(set(method_ids)) != len(method_ids):
+            raise ValueError("a method cannot belong to duplicate structure patterns")
+        linked_methods.update(method_ids)
 
 
 def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
     """Check explicit coverage of upstream topic pages and model modules."""
     validate_catalog(catalog)
     inventory = inventory or load_inventory()
-    documents = [path for family in catalog["families"] for path in family.get("source_docs", [])]
-    models = [path for family in catalog["families"] for path in family.get("source_models", [])]
-    support = [path for family in catalog["families"] for path in family.get("source_support", [])]
-    project = [path for family in catalog["families"] for path in family.get("source_project", [])]
+    funrec_families = [family for family in catalog["families"]
+                       if family.get("source_repo", "funrec") == "funrec"]
+    documents = [path for family in funrec_families for path in family.get("source_docs", [])]
+    models = [path for family in funrec_families for path in family.get("source_models", [])]
+    support = [path for family in funrec_families for path in family.get("source_support", [])]
+    project = [path for family in funrec_families for path in family.get("source_project", [])]
     expected_docs, expected_models = set(inventory["docs"]), set(inventory["models"])
-    method_paths = [card["source_model"] for card in catalog.get("method_cards", [])]
+    funrec_cards = [card for card in catalog.get("method_cards", [])
+                    if card.get("source_repo", "funrec") == "funrec"]
+    method_paths = [card["source_model"] for card in funrec_cards]
     family_models = {family["id"]: set(family["source_models"])
-                     for family in catalog["families"]}
+                     for family in funrec_families}
     return {
         "source_commit_sha": inventory["commit_sha"],
         "source_tree_sha": inventory["tree_sha"],
@@ -116,8 +180,9 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
         "unknown_method_models": sorted(set(method_paths) - expected_models),
         "duplicate_method_models": sorted({path for path in method_paths
                                             if method_paths.count(path) > 1}),
-        "misassigned_method_models": sorted(card["source_model"] for card in catalog.get("method_cards", [])
-                                            if card["source_model"] not in family_models[card["family_id"]]),
+        "misassigned_method_models": sorted(card["source_model"] for card in funrec_cards
+                                            if card["source_model"] not in
+                                            family_models.get(card["family_id"], set())),
         "unmapped_support": sorted(set(inventory["support_modules"]) - set(support)),
         "unknown_support": sorted(set(support) - set(inventory["support_modules"])),
         "duplicate_support": sorted({path for path in support if support.count(path) > 1}),
@@ -160,6 +225,21 @@ def method_applicability(snapshot: dict, catalog: dict) -> list[dict]:
                        "status": status, "missing_capabilities": missing,
                        "reason": family["reason"] if status == "other_stage" else
                                  f"requires {', '.join(missing)}" if missing else "requirements available"})
+    return result
+
+
+def decision_applicability(snapshot: dict, catalog: dict) -> list[dict]:
+    """Identify research checks relevant to the declared task data and stage."""
+    validate_catalog(catalog)
+    stage = snapshot.get("stage")
+    capabilities = set(snapshot.get("capabilities", []))
+    result = []
+    for check in catalog.get("decision_checks", []):
+        missing = sorted(set(check["requires"]) - capabilities)
+        status = ("other_stage" if check["stages"] and stage not in check["stages"] else
+                  "not_triggered" if missing else "ready")
+        result.append({"check_id": check["id"], "status": status,
+                       "missing_capabilities": missing if status == "not_triggered" else []})
     return result
 
 

@@ -1,14 +1,16 @@
 # ModelEvoHarness
 
-[中文](README.zh-CN.md) · [Research coverage](docs/source-coverage.md) · [Adapter contract](docs/adapter-contract.md)
+[中文](README.zh-CN.md) · [Model-structure guide](docs/multi-source-guidance.md) · [Research coverage](docs/source-coverage.md) · [Adapter contract](docs/adapter-contract.md)
 
 ModelEvoHarness runs **Agent-led, falsifiable offline model experiments** across recommendation, search, advertising, and marketing. An Agent reads the fixed task and previous results, chooses a mechanism, states a control and predicted result, submits a candidate, then reflects on the measured outcome. The harness checks data prerequisites and records the experiment. Your task adapter trains the candidate and evaluates it under your own split, metrics and execution rules.
 
-The research catalog maps 55 chapter pages, 38 model modules, 54 supporting modules and 50 production backend modules into 19 research families. Each model module has a method card describing its mechanism, required data contracts, controlled comparison, failure signals and implementation boundary. The Agent can choose a ready family or method card, or propose a direction outside the catalog. These are research references, not bundled model implementations.
+The original research map traces 55 FunRec chapter pages, 38 model modules, 54 supporting modules and 50 production backend modules into 19 families. Each model module has a method card describing its mechanism, required data contracts, controlled comparison, failure signals and implementation boundary. A separate review of DeepCTR, Torch-RecHub, RecBole and Wang Shusen's recommendation materials adds six method cards, three conditional families, structural-change patterns and experiment decision checks. The Agent can choose a ready family or method card, or propose a direction outside the catalog. These are research references, not bundled model implementations.
 
 ## Why this exists
 
 A model name is not an experiment. To tell whether a new architecture helps, the Agent must identify the bottleneck it expects to fix, compare against a stable control, use fields that exist before the decision, and name a result that would reject the hypothesis. ModelEvoHarness makes those steps part of the executable loop. It distinguishes a considered alternative from a completed trial and binds lessons to the exact task and dataset version.
+
+The [model-structure guide](docs/multi-source-guidance.md) answers **when to try a structure**: explicit or field-aware crosses for a measured interaction gap, session intent for ordered in-session events, ordered-task transfer for a real multi-step label funnel, and other data-conditional choices. Each pattern records the expected mechanism, prerequisite evidence, controlled ablation and rejection signal. Architecture changes compete with simpler explanations, including feature semantics, sampling, evaluation protocol and the rule that maps predictions to actions.
 
 | Boundary | Owner |
 | --- | --- |
@@ -38,7 +40,7 @@ model-evo-harness run \
 
 `agent.json` specifies `provider_url`, `model`, `api_key_env`, `iteration_effort` (`high`) and `review_effort` (`max`). A local Agent object can be supplied with `--agent module:symbol` instead. Python applications can call `run_search(task, agent, output=..., catalog=load_catalog(), max_steps=4)` directly. The library has no dependency on a specific model framework, provider, recommender dataset or CouponEvo.
 
-Each task snapshot declares a stage, available capabilities and actual input fields. The catalog labels every family and method card `ready`, `needs_data` or `other_stage`, with a reason. For example, a tabular coupon trial can test some feature interaction methods while sequence ranking requires time-safe event histories. `ready` establishes input availability; it does not claim that a model implementation exists or will improve a metric.
+Each task snapshot declares a stage, available capabilities and actual input fields. The catalog labels every family and method card `ready`, `needs_data` or `other_stage`, with a reason, and passes applicable decision checks to the Agent. For example, a tabular coupon trial can test some feature interaction methods while sequence ranking requires time-safe event histories. `ready` establishes input availability; it does not claim that a model implementation exists or will improve a metric. An optional host-supplied `evaluation_protocol` records the unit, fixed split and metric plus candidate and sampling conditions where relevant; a changed protocol cannot resume the same run.
 
 The journal records baseline and trial scores, research designs, evaluation failures, reflections, selected best candidate, catalog digest and task identity. Resume fails if the dataset, objective, package implementation or catalog changes. History is scoped to the same run identity and dataset fingerprint. Keep final holdout data inside the task adapter; use validation results for iteration and reserve final evaluation for the selected candidate.
 
@@ -48,4 +50,4 @@ The journal records baseline and trial scores, research designs, evaluation fail
 
 ## Source and license
 
-The initial [research coverage](docs/source-coverage.md) is mapped to a pinned tree of [FunRec](https://github.com/datawhalechina/fun-rec). Its work is marked [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml). ModelEvoHarness independently writes its guidance, method cards and code under [Apache-2.0](LICENSE), with no upstream source code copied.
+The initial [research coverage](docs/source-coverage.md) is mapped to a pinned tree of [FunRec](https://github.com/datawhalechina/fun-rec). The [additional source comparison](docs/multi-source-guidance.md) records pinned revisions and accepted or deferred ideas from four other projects. FunRec's work is marked [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml). ModelEvoHarness independently writes its guidance, method cards and code under [Apache-2.0](LICENSE), with no upstream source code copied.

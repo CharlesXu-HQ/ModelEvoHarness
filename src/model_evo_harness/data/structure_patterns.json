@@ -1,0 +1,144 @@
+{
+  "structure_patterns": [
+    {
+      "id": "collaborative_signal",
+      "name": "Neighborhood and latent collaborative signals",
+      "method_ids": ["user_cf", "item_cf", "swing", "funksvd", "biassvd"],
+      "structural_change": "Use interaction neighborhoods or learned user and item ID factors as an additional retrieval signal; neighborhood methods aggregate observed co-interactions, while factor methods compress them into vectors.",
+      "when_to_try": "A popularity or content-only baseline misses repeat-interest items on a fixed user cohort, and interaction density is sufficient to estimate neighbors or factors.",
+      "required_evidence": "Time-ordered user-item interactions, catalog membership, interaction-density and cold-user/item slices, and a fixed retrieval candidate universe.",
+      "controlled_comparison": "Hold the interaction split, candidate universe, negative protocol, and top-K budget fixed; compare with popularity/content baselines and inspect sparse-user and cold-item slices.",
+      "reject_if": "The gain disappears on the held-out temporal split, is only popularity concentration, or sparse users/items degrade beyond the declared guardrail."
+    },
+    {
+      "id": "item_context_embedding",
+      "name": "Item context and side-information embeddings",
+      "method_ids": ["item2vec", "eges"],
+      "structural_change": "Learn item representations from local co-occurrence contexts; optionally blend item ID and side-attribute embeddings to represent less-observed items.",
+      "when_to_try": "ID-only item representations underperform on low-history items while temporally valid item contexts or side attributes have measurable coverage.",
+      "required_evidence": "Pre-decision ordered item contexts, item catalog, side-attribute availability when used, and coverage metrics by item age and interaction count.",
+      "controlled_comparison": "Keep the same context pairs and retrieval protocol; compare against ID-only vectors and a shuffled-context control, then isolate the side-attribute blend.",
+      "reject_if": "Cold-item gains are absent, shuffled contexts perform similarly, or side attributes are unavailable at serving time."
+    },
+    {
+      "id": "pairwise_feature_interaction",
+      "name": "Pairwise feature interactions",
+      "method_ids": ["fm", "deepfm", "nfm", "pnn", "afm", "fibinet", "fwfm"],
+      "structural_change": "Add second-order field interactions through factorized products, pooled product vectors, field-pair weights, or attention and gating over pairs.",
+      "when_to_try": "A linear or plain MLP baseline leaves repeatable validation errors on supported pairs of pre-decision fields, such as user segment by offer attribute.",
+      "required_evidence": "Typed field schema, pre-decision availability, support counts for candidate field pairs, and slice-level residuals on a held-out split.",
+      "controlled_comparison": "Add one pair-interaction mechanism to the same inputs and prediction head; keep embedding width, training budget, split, and metric fixed, then ablate the interaction branch.",
+      "reject_if": "No held-out improvement over the ablation, gains come from rare or leaked pairs, or latency exceeds the stated budget."
+    },
+    {
+      "id": "explicit_high_order_cross",
+      "name": "Explicit and attention-based higher-order crosses",
+      "method_ids": ["wide_deep", "dcn", "dcn_v2", "xdeepfm", "autoint"],
+      "structural_change": "Add configured wide crosses, bounded-degree cross layers, matrix or expert cross layers, vector-wise crossing, or field attention alongside the prediction backbone.",
+      "when_to_try": "Pairwise interactions still leave stable residual patterns across three or more supported fields, or the existing wide crosses require excessive manual enumeration.",
+      "required_evidence": "Typed and serving-available fields, repeatable higher-order slice effects, adequate joint support, and a parameter and inference-cost budget.",
+      "controlled_comparison": "Compare one cross mechanism against the same backbone with the cross branch disabled and against a pairwise baseline, using identical fields and split.",
+      "reject_if": "The cross branch does not improve held-out slices, depends on unsupported combinations, or exceeds the agreed cost budget."
+    },
+    {
+      "id": "independent_retrieval_towers",
+      "name": "Indexable user and item representations",
+      "method_ids": ["dssm", "fm_recall", "youtubednn"],
+      "structural_change": "Encode user context and catalog items into separately computable vectors so dot product or cosine similarity can retrieve candidates from an index.",
+      "when_to_try": "The current candidate generator has low recall at a fixed candidate count, and user and item features support separately computed representations.",
+      "required_evidence": "Item catalog and index update cadence, user/item features available before retrieval, labeled interactions, and a fixed candidate and negative-sampling protocol.",
+      "controlled_comparison": "Keep the catalog, top-K, index freshness, training examples, and retrieval metric fixed; compare with a simpler linear tower or collaborative retriever.",
+      "reject_if": "Recall or coverage fails to improve at fixed K, index freshness breaks feature consistency, or serving cost breaches the budget."
+    },
+    {
+      "id": "retrieval_sampling_correction",
+      "name": "Sampled-item logit correction",
+      "method_ids": ["youtube_sbc"],
+      "structural_change": "Adjust in-batch item logits using the item's logged sampling weight while retaining the retrieval tower and candidate representation.",
+      "when_to_try": "In-batch training overweights frequently sampled items and held-out recall or calibration varies systematically by item popularity.",
+      "required_evidence": "Known sampling weights from the actual training sampler, item-frequency slices, and an unchanged evaluation candidate universe.",
+      "controlled_comparison": "Train corrected and uncorrected logits with the same tower, batches, sampler, and evaluation protocol; inspect recall and calibration by item-frequency slice.",
+      "reject_if": "Sampling weights are unknown or inconsistent with the sampler, or corrected logits provide no held-out improvement."
+    },
+    {
+      "id": "target_conditioned_history",
+      "name": "Target-aware history for ranking",
+      "method_ids": ["din", "dien", "dsin"],
+      "structural_change": "Condition attention over past behavior on the candidate item; optionally model interest evolution or aggregate within and across sessions before target activation.",
+      "when_to_try": "The same user receives different outcomes for candidate types and a pooled-history baseline has persistent target-specific residuals.",
+      "required_evidence": "Timestamped histories strictly before each candidate decision, candidate features, valid session boundaries when used, and adequate sequence coverage.",
+      "controlled_comparison": "Use the same prior events and candidate features; replace target-aware aggregation with masked mean pooling, then ablate evolution or session components separately.",
+      "reject_if": "No held-out gain over pooling, post-decision events enter histories, or sequence length and latency exceed the fixed budget."
+    },
+    {
+      "id": "ordered_sequence_retrieval",
+      "name": "Order-sensitive sequence retrieval",
+      "method_ids": ["sasrec", "sdm", "narm", "hstu"],
+      "structural_change": "Encode the ordered history or current session with causal attention, recurrent states, or short- and long-term fusion to predict the next item.",
+      "when_to_try": "Next-item errors vary with recency or within-session order, and an order-agnostic history representation leaves stable temporal residuals.",
+      "required_evidence": "Event timestamps, session boundaries where applicable, pre-decision sequence construction, a fixed next-item candidate universe, and negative-sampling details.",
+      "controlled_comparison": "Keep the histories, temporal split, sampler, and candidate universe fixed; compare with an order-agnostic pooled-history retriever at the same top-K budget.",
+      "reject_if": "Order adds no held-out gain, future events leak into prefixes, or sequence inference cost exceeds the budget."
+    },
+    {
+      "id": "multiple_interest_retrieval",
+      "name": "Multiple user-interest vectors",
+      "method_ids": ["mind"],
+      "structural_change": "Represent one user's history with multiple interest vectors and select the target-relevant interest during training or retrieval.",
+      "when_to_try": "A single user vector misses distinct, supported interest clusters within the same users while total top-K is held fixed.",
+      "required_evidence": "Sufficient per-user behavioral diversity, stable interest-cluster slices, item embeddings, and a deduplicated fixed-K candidate protocol.",
+      "controlled_comparison": "Compare one and multiple interest vectors with the same encoder inputs, item catalog, total retrieved K, and training sampler.",
+      "reject_if": "Interest vectors collapse, gains disappear after deduplication at fixed K, or sparse users regress beyond guardrails."
+    },
+    {
+      "id": "shared_multi_task_representation",
+      "name": "Shared and task-specific experts",
+      "method_ids": ["shared_bottom", "mmoe", "ple", "m2m"],
+      "structural_change": "Share a representation across observed tasks, then separate task heads or use gated shared and task-specific experts; scenario-conditioned gates are possible when the scenario is known.",
+      "when_to_try": "Related task metrics diverge across training runs, a single shared trunk harms at least one task, or independent models waste signal on sparse task labels.",
+      "required_evidence": "Aligned task labels and missingness rules, task priorities and guardrails, sample counts per task, and scenario labels if scenario-conditioned gating is tested.",
+      "controlled_comparison": "Hold inputs and task losses fixed; compare independent heads, a shared bottom, and one gated-expert variant at matched training and parameter budgets.",
+      "reject_if": "Primary-task improvement is offset by an unacceptable task regression, gates collapse, or label missingness is mistaken for negative outcomes."
+    },
+    {
+      "id": "ordered_task_transfer",
+      "name": "Ordered outcome transfer",
+      "method_ids": ["esmm", "aitm"],
+      "structural_change": "Transfer information along an ordered outcome chain through a probability product constraint or attention between earlier and later task representations.",
+      "when_to_try": "Later-stage outcomes are sparse and direct training has unstable validation behavior, while earlier-stage labels are observed at substantially higher coverage.",
+      "required_evidence": "A genuine temporal and semantic outcome order, impression-level labels, valid masking for later outcomes, and calibration metrics at each stage.",
+      "controlled_comparison": "Compare with independent or unconstrained task heads on the same impression split; evaluate the later-stage outcome and calibration while monitoring earlier stages.",
+      "reject_if": "The outcomes are not truly ordered, the constraint miscalibrates joint probability, or later-stage gains disappear on low-coverage slices."
+    },
+    {
+      "id": "scenario_conditioned_parameters",
+      "name": "Scenario-conditioned experts and normalization",
+      "method_ids": ["star", "hmoe", "pepnet"],
+      "structural_change": "Condition normalization, expert gates, or layer activations on a known scenario while retaining shared parameters across scenarios.",
+      "when_to_try": "A global model has repeatable, materially different residuals across scenarios, and separate per-scenario models lack enough data or are costly to serve.",
+      "required_evidence": "Scenario identity available before inference, per-scenario counts and held-out metrics, and a stable definition of scenario across training and serving.",
+      "controlled_comparison": "Use identical fields and split; compare a global shared model, separate scenario heads, and one conditioned variant with fixed aggregate and per-scenario guardrails.",
+      "reject_if": "Small scenarios regress, scenario identity drifts or leaks outcomes, or the conditioning yields no held-out gain over a shared model."
+    },
+    {
+      "id": "low_rank_or_soft_segment",
+      "name": "Low-rank adaptation and soft segmentation",
+      "method_ids": ["apg", "mlr"],
+      "structural_change": "Adapt a shared transformation through compact context-generated factors or softly partition examples among simple local response functions.",
+      "when_to_try": "Response patterns vary across supported contexts, but a global model underfits and fully separate high-capacity models overfit or exceed memory limits.",
+      "required_evidence": "Pre-decision context fields, support and response metrics by context, and an explicit parameter, memory, and latency budget.",
+      "controlled_comparison": "Hold features and split fixed; compare the global model, explicit per-segment baselines, and one compact adaptive or soft-segment variant at matched cost.",
+      "reject_if": "Soft regions or generated factors collapse, held-out context gains vanish, or complexity exceeds the declared budget."
+    },
+    {
+      "id": "slate_aware_decision",
+      "name": "Slate-aware reranking and position response",
+      "method_ids": ["prm", "prs"],
+      "structural_change": "Score candidates jointly with position and neighboring-item context, or model per-position response and continuation before selecting an order.",
+      "when_to_try": "Item-level scores are stable but observed slate outcomes vary by position or neighboring items, and independent score sorting leaves a measurable slate-level gap.",
+      "required_evidence": "Logged candidate sets and displayed positions, pre-decision slate features, exposure and position-bias assumptions, and a valid slate-level evaluation protocol.",
+      "controlled_comparison": "Reorder the same fixed candidate set under the same placement constraints; compare with independent-score sorting on slate-level outcomes and position slices.",
+      "reject_if": "Position or exposure effects cannot be identified from logs, the gain is only an offline bias artifact, or item-level guardrails fail."
+    }
+  ]
+}

@@ -57,6 +57,17 @@ def _snapshot(task: object) -> dict:
     if not isinstance(snapshot.get("capabilities"), list) or any(
             not isinstance(capability, str) or not capability for capability in snapshot["capabilities"]):
         raise ValueError("task snapshot needs a list of capabilities")
+    protocol = snapshot.get("evaluation_protocol")
+    if "evaluation_protocol" in snapshot:
+        required = ["unit", "split", "metric"]
+        if snapshot["stage"] in ("retrieval", "reranking"):
+            required.append("candidate_universe")
+        if "implicit_feedback" in snapshot["capabilities"]:
+            required.append("negative_source")
+        if not isinstance(protocol, dict) or any(
+                not isinstance(protocol.get(key), str) or not protocol[key].strip()
+                for key in required):
+            raise ValueError("evaluation_protocol needs nonempty " + ", ".join(required))
     _json_bytes(snapshot)
     return snapshot
 
@@ -132,11 +143,13 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
     if not isinstance(catalog, dict):
         raise ValueError("catalog must be a dict")
 
-    from .catalog import applicability, catalog_digest, implementation_digest, method_applicability
+    from .catalog import (applicability, catalog_digest, decision_applicability,
+                          implementation_digest, method_applicability)
 
     snapshot = _snapshot(task)
     applicability_report = applicability(snapshot, catalog)
     method_report = method_applicability(snapshot, catalog)
+    decision_report = decision_applicability(snapshot, catalog)
     identity = {
         "task_id": snapshot["task_id"],
         "dataset_digest": snapshot["dataset_digest"],
@@ -145,6 +158,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         "package_version": PACKAGE_VERSION,
         "implementation_sha256": implementation_digest(),
     }
+    if "evaluation_protocol" in snapshot:
+        identity["evaluation_protocol_sha256"] = _digest(snapshot["evaluation_protocol"])
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     journal_path = output / "journal.json"
@@ -153,6 +168,9 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         if not journal_path.exists():
             raise FileNotFoundError(f"cannot resume without {journal_path}")
         state = json.loads(journal_path.read_text(encoding="utf-8"))
+        if (state.get("identity", {}).get("evaluation_protocol_sha256") !=
+                identity.get("evaluation_protocol_sha256")):
+            raise ValueError("journal evaluation protocol differs from this task")
         if state.get("identity") != identity:
             raise ValueError("journal identity differs from task, catalog, package version, or implementation")
         if state["status"] in ("stopped", "needs_data"):
@@ -175,6 +193,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "catalog": catalog,
             "applicability": applicability_report,
             "method_applicability": method_report,
+            "decision_applicability": decision_report,
             "baseline": state["baseline"],
             "steps": state["steps"],
             "best_id": state["best_id"],

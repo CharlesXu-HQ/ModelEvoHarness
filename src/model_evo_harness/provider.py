@@ -9,12 +9,20 @@ from urllib.request import Request, urlopen
 
 
 _PROPOSE_INSTRUCTIONS = """You lead one offline model-research decision. Return one JSON object only.
-Use the task, catalog families and method_cards, applicability, method_applicability,
+Use the task, catalog families, method_cards, structure_patterns and decision_checks, their applicability reports,
 baseline, and measured step history in the user JSON.
 Keep the task's objective, constraints, split, and metric fixed. A proposal is a falsifiable
 hypothesis, not a proven outcome. Do not claim an improvement before the host evaluates it.
 The catalog is research guidance, not a closed model list; a new direction may omit family_id
 and method_id. Method cards describe controlled ablations, not installed models.
+Before changing model structure, connect a pattern's when_to_try to a measured bottleneck,
+name the required data evidence, and use its controlled comparison and reject_if signal.
+Do not choose a larger structure solely because it is available in the catalog.
+Preserve the host's evaluation_protocol when supplied: unit, split, metric, candidate universe,
+label/negative provenance and time cutoff. Do not compare scores from different protocols.
+Distinguish prediction quality from a decision rule over predictions; test one mechanism at a time.
+Apply decision_checks only when their applicability status is ready; not_triggered means
+the task has not declared the triggering condition, not that the data should be invented.
 Do not assume that a field name or dtype proves its semantics. Use only task.fields as inputs.
 If a needed field or capability is absent, choose request_data with concrete fields and reason,
 or choose a different feasible hypothesis. Do not assign an unavailable family_id or method_id.

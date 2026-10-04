@@ -1,14 +1,16 @@
 # ModelEvoHarness
 
-[English](README.md) · [研究覆盖清单](docs/source-coverage.md) · [任务适配接口](docs/adapter-contract.md)
+[English](README.md) · [模型结构选择指南](docs/multi-source-guidance.md) · [研究覆盖清单](docs/source-coverage.md) · [任务适配接口](docs/adapter-contract.md)
 
 ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离线模型迭代框架**。Agent 读取固定任务和历史结果，选择要检验的机制，说明对照与预期，提交候选模型，并根据评估结果反思。Harness 检查数据条件，调度实验并保存记录。任务适配器负责真实训练、数据切分、指标和运行环境。
 
-研究目录将 55 个实质性章节页面、38 个模型模块、54 个支撑模块和 50 个生产后端模块归入 19 个可交叉的研究方向。每个模型模块对应一张 method card，写明机制、数据条件、对照实验、失败信号和实现边界。Agent 可以选择可执行的方向或 method card，也可以提出目录之外的新方向。这些内容是研究参考，项目没有打包模型实现。
+初始研究目录将 FunRec 的 55 个实质性章节页面、38 个模型模块、54 个支撑模块和 50 个生产后端模块归入 19 个可交叉的研究方向。每个模型模块对应一张 method card，写明机制、数据条件、对照实验、失败信号和实现边界。对 DeepCTR、Torch-RecHub、RecBole 和王树森推荐系统资料的补充研究新增了六张 method card、三个条件性研究方向，以及结构选择模式和实验判断检查项。Agent 可以选择可执行的方向或 method card，也可以提出目录之外的新方向。这些内容是研究参考，项目没有打包模型实现。
 
 ## 实验为什么需要 harness
 
 替换模型名称并不能说明实验有效。一次有用的迭代需要说明：现有结果暴露了什么问题，新机制预计改变什么，使用哪些决策前字段，与哪个稳定基线比较，什么结果会推翻假设。ModelEvoHarness 把这些要求写入执行循环；它区分“考虑过的备选方案”与“实际完成的实验”，经验绑定到具体任务和数据集版本。
+
+[模型结构选择指南](docs/multi-source-guidance.md)回答“什么情况下值得构建某种结构”：交叉特征不足时考虑显式或字段感知交叉，有真实会话序列时考虑短期兴趣建模，有完整分步标签时考虑有序任务迁移。每种结构都要说明机制、前置证据、对照实验和否定条件。Agent 同时检查更基础的解释，例如字段语义、负采样、评估口径，以及预测分数到实际动作的映射。
 
 | 边界 | 负责方 |
 | --- | --- |
@@ -38,7 +40,7 @@ model-evo-harness run \
 
 `agent.json` 配置 `provider_url`、`model`、`api_key_env`，以及迭代的 `high` 和复核的 `max`。也可以用 `--agent module:symbol` 提供自己的 Agent，或从 Python 调用 `run_search(...)`。框架本身不依赖特定训练框架、模型供应商、推荐数据集或 CouponEvo。
 
-任务摘要声明所处阶段、已有数据能力和实际字段。目录会为每个方向和 method card 给出 `ready`、`needs_data` 或 `other_stage` 及原因。例如静态优惠券数据可检验部分特征交叉方法；序列方法需要按决策时点截断的真实行为历史。`ready` 只表示输入条件具备，不表示模型已经预装或指标会提升。
+任务摘要声明所处阶段、已有数据能力和实际字段。目录会为每个方向和 method card 给出 `ready`、`needs_data` 或 `other_stage` 及原因，并把适用的实验判断检查项交给 Agent。例如静态优惠券数据可检验部分特征交叉方法；序列方法需要按决策时点截断的真实行为历史。`ready` 只表示输入条件具备，不表示模型已经预装或指标会提升。任务适配器还可提供 `evaluation_protocol`，声明评估单位、固定切分、指标，以及适用时的候选集和采样条件；协议变化后不能续跑同一个实验。
 
 日志保存基线、候选指标、评估失败、研究设计、反思、最佳候选以及任务和目录指纹。更换数据集、目标、包实现或目录后不能混用旧实验。经验绑定到同一运行身份和数据集指纹。最终留出集由任务适配器隔离，Agent 只依据验证结果迭代。
 
@@ -48,4 +50,4 @@ model-evo-harness run \
 
 ## 来源与许可证
 
-首版[研究覆盖清单](docs/source-coverage.md)对 [FunRec](https://github.com/datawhalechina/fun-rec) 的固定版本建立映射。该项目标注为 [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml)。ModelEvoHarness 的指南、method card 和代码独立编写，采用 [Apache-2.0](LICENSE)，未复制上游源码。
+首版[研究覆盖清单](docs/source-coverage.md)对 [FunRec](https://github.com/datawhalechina/fun-rec) 的固定版本建立映射。[补充资料对照](docs/multi-source-guidance.md)记录其他四个项目的固定版本，以及采纳和暂缓的方向。FunRec 标注为 [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml)。ModelEvoHarness 的指南、method card 和代码独立编写，采用 [Apache-2.0](LICENSE)，未复制上游源码。
