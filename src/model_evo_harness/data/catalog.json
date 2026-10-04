@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "name": "FunRec-informed model research",
+  "source_commit_sha": "5f7bd84d4403b5f92b6bedbd31e3984ef00a4572",
+  "source_tree_sha": "84a4e63da7d7cb0ca8ea7e47128174535f0ab40a",
+  "guidance": "Use families as evidence-based research lenses, not a closed model menu. Confirm data semantics and time boundaries. Keep the host task objective, evaluation and resource budget fixed. A family with no upstream code is a documented concept, not an installed model.",
+  "families": [
+    {
+      "id": "task_framing",
+      "name": "Task framing and measurement",
+      "stages": [],
+      "requires": [],
+      "question": "What decision is being optimized, at which stage, under which observable feedback?",
+      "experiment": "Freeze the unit, target, split, metric, guardrails and comparison before selecting a model family.",
+      "pitfalls": "A better proxy metric does not by itself establish a better downstream decision.",
+      "source_docs": [
+        "docs/chapter_0_introduction/1.intro.html",
+        "docs/chapter_0_introduction/2.outline.html"
+      ],
+      "source_models": [],
+      "source_support": [
+        "src/funrec/config/data_config.py",
+        "src/funrec/data/data_utils.py",
+        "src/funrec/data/loaders.py",
+        "src/funrec/data/preprocess/e_commerce.py",
+        "src/funrec/data/preprocess/kuairand.py",
+        "src/funrec/data/preprocess/movielens.py",
+        "src/funrec/evaluation/evaluator.py",
+        "src/funrec/evaluation/metrics.py",
+        "src/funrec/experiment.py",
+        "src/funrec/models/layers.py",
+        "src/funrec/models/utils.py",
+        "src/funrec/training/loss.py",
+        "src/funrec/training/trainer.py",
+        "src/funrec/utils.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "collaborative_retrieval",
+      "name": "Collaborative retrieval",
+      "stages": [
+        "retrieval"
+      ],
+      "requires": [
+        "interaction_graph",
+        "item_catalog"
+      ],
+      "question": "Can user-item co-occurrence recover useful candidates beyond a simple popularity baseline?",
+      "experiment": "Compare neighborhood and factorization representations at fixed candidate count and retrieval metric.",
+      "pitfalls": "Time leakage in interaction graphs and unseen-item support can invalidate the comparison.",
+      "source_docs": [
+        "docs/chapter_1_retrieval/1.cf/1.itemcf.html",
+        "docs/chapter_1_retrieval/1.cf/2.swing.html",
+        "docs/chapter_1_retrieval/1.cf/3.usercf.html",
+        "docs/chapter_1_retrieval/1.cf/4.mf.html"
+      ],
+      "source_models": [
+        "src/funrec/models/item_cf.py",
+        "src/funrec/models/user_cf.py",
+        "src/funrec/models/swing.py",
+        "src/funrec/models/funksvd.py",
+        "src/funrec/models/biassvd.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_biassvd.py",
+        "src/funrec/config/config_funksvd.py",
+        "src/funrec/config/config_item_cf.py",
+        "src/funrec/config/config_swing.py",
+        "src/funrec/config/config_user_cf.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "item_representation",
+      "name": "Item embeddings and graph retrieval",
+      "stages": [
+        "retrieval"
+      ],
+      "requires": [
+        "item_catalog",
+        "interaction_graph"
+      ],
+      "question": "Does item-context structure improve nearest-neighbor retrieval?",
+      "experiment": "Compare co-occurrence, embedding and graph-aware item representations at matched retrieval budget.",
+      "pitfalls": "Transductive embeddings can absorb evaluation-period interactions.",
+      "source_docs": [
+        "docs/chapter_1_retrieval/2.i2i/1.word2vec.html",
+        "docs/chapter_1_retrieval/2.i2i/2.item2vec.html",
+        "docs/chapter_1_retrieval/2.i2i/3.eges.html",
+        "docs/chapter_1_retrieval/2.i2i/4.airbnb.html"
+      ],
+      "source_models": [
+        "src/funrec/models/item2vec.py",
+        "src/funrec/models/eges.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_eges.py",
+        "src/funrec/config/config_item2vec.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "two_tower_matching",
+      "name": "Two-tower matching",
+      "stages": [
+        "retrieval"
+      ],
+      "requires": [
+        "item_catalog",
+        "user_features"
+      ],
+      "question": "Does learned user-item matching improve recall within latency and index limits?",
+      "experiment": "Compare a simple matching baseline with dot-product towers and assess recall, coverage and serving cost.",
+      "pitfalls": "A matching score is not a calibrated treatment effect or business value.",
+      "source_docs": [
+        "docs/chapter_1_retrieval/3.two_tower/1.fm.html",
+        "docs/chapter_1_retrieval/3.two_tower/2.dssm.html",
+        "docs/chapter_1_retrieval/3.two_tower/3.youtubednn.html"
+      ],
+      "source_models": [
+        "src/funrec/models/fm_recall.py",
+        "src/funrec/models/dssm.py",
+        "src/funrec/models/youtubednn.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_dssm.py",
+        "src/funrec/config/config_fm_recall.py",
+        "src/funrec/config/config_youtubednn.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "interest_retrieval",
+      "name": "Interest and sequence retrieval",
+      "stages": [
+        "retrieval"
+      ],
+      "requires": [
+        "event_sequence",
+        "item_catalog"
+      ],
+      "question": "Do multiple interests or event order improve retrieval?",
+      "experiment": "Ablate pooled history, multiple interests and sequential attention using pre-cutoff event histories.",
+      "pitfalls": "Aggregates cannot be expanded into event order; negative sampling must match the task.",
+      "source_docs": [
+        "docs/chapter_1_retrieval/4.sequence/1.mind.html",
+        "docs/chapter_1_retrieval/4.sequence/2.sdm.html"
+      ],
+      "source_models": [
+        "src/funrec/models/mind.py",
+        "src/funrec/models/sdm.py",
+        "src/funrec/models/sasrec.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_mind.py",
+        "src/funrec/config/config_sasrec.py",
+        "src/funrec/config/config_sdm.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "streaming_index",
+      "name": "Streaming retrieval and indexing",
+      "stages": [
+        "retrieval"
+      ],
+      "requires": [
+        "item_catalog",
+        "streaming_updates"
+      ],
+      "question": "Is representation freshness or index maintenance limiting quality?",
+      "experiment": "Compare fixed and updated representations with consistent latency, freshness and recall measurements.",
+      "pitfalls": "Offline static data cannot validate online update consistency or service latency.",
+      "source_docs": [
+        "docs/chapter_1_retrieval/5.streaming_index/1.trinity.html",
+        "docs/chapter_1_retrieval/5.streaming_index/2.streaming_vq.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "feature_interactions",
+      "name": "Feature representation and interactions",
+      "stages": [
+        "ranking",
+        "policy"
+      ],
+      "requires": [
+        "tabular_features"
+      ],
+      "question": "Which feature dependency is missed by the current representation?",
+      "experiment": "Compare a fixed baseline with explicit or learned crosses and ablate the interaction component.",
+      "pitfalls": "Capacity alone is not evidence for interaction benefit; use only available time-safe fields.",
+      "source_docs": [
+        "docs/chapter_2_ranking/1.wide_and_deep.html",
+        "docs/chapter_2_ranking/2.feature_crossing/1.second_order.html",
+        "docs/chapter_2_ranking/2.feature_crossing/2.higher_order.html"
+      ],
+      "source_models": [
+        "src/funrec/models/wide_deep.py",
+        "src/funrec/models/fm.py",
+        "src/funrec/models/deepfm.py",
+        "src/funrec/models/nfm.py",
+        "src/funrec/models/afm.py",
+        "src/funrec/models/dcn.py",
+        "src/funrec/models/xdeepfm.py",
+        "src/funrec/models/pnn.py",
+        "src/funrec/models/fibinet.py",
+        "src/funrec/models/autoint.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_afm.py",
+        "src/funrec/config/config_autoint.py",
+        "src/funrec/config/config_dcn.py",
+        "src/funrec/config/config_deepfm.py",
+        "src/funrec/config/config_fibinet.py",
+        "src/funrec/config/config_fm.py",
+        "src/funrec/config/config_nfm.py",
+        "src/funrec/config/config_pnn.py",
+        "src/funrec/config/config_wide_deep.py",
+        "src/funrec/config/config_xdeepfm.py",
+        "src/funrec/features/feature_column.py",
+        "src/funrec/features/processors.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "sequence_ranking",
+      "name": "Behavior sequence ranking",
+      "stages": [
+        "ranking",
+        "policy"
+      ],
+      "requires": [
+        "event_sequence"
+      ],
+      "question": "Does recency, evolving interest or session structure improve target-conditioned prediction?",
+      "experiment": "Compare static aggregates with time-safe sequential encoders and attention ablations.",
+      "pitfalls": "Target-conditioned attention needs a real target representation; single-row aggregates are not sequences.",
+      "source_docs": [
+        "docs/chapter_2_ranking/3.sequence.html"
+      ],
+      "source_models": [
+        "src/funrec/models/din.py",
+        "src/funrec/models/dien.py",
+        "src/funrec/models/dsin.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_dien.py",
+        "src/funrec/config/config_din.py",
+        "src/funrec/config/config_dsin.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "multiobjective",
+      "name": "Multiple outcomes and task dependence",
+      "stages": [
+        "ranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [
+        "multiple_outcomes"
+      ],
+      "question": "Can sharing across observed outcomes improve the fixed primary objective?",
+      "experiment": "Compare separate heads, shared representations and gated experts with auxiliary-loss ablations.",
+      "pitfalls": "Auxiliary labels and funnel dependencies must be observed; guard against negative transfer.",
+      "source_docs": [
+        "docs/chapter_2_ranking/4.multi_objective/1.arch.html",
+        "docs/chapter_2_ranking/4.multi_objective/2.dependency_modeling.html",
+        "docs/chapter_2_ranking/4.multi_objective/3.multi_loss_optim.html"
+      ],
+      "source_models": [
+        "src/funrec/models/shared_bottom.py",
+        "src/funrec/models/esmm.py",
+        "src/funrec/models/mmoe.py",
+        "src/funrec/models/ple.py",
+        "src/funrec/models/m2m.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_esmm.py",
+        "src/funrec/config/config_m2m.py",
+        "src/funrec/config/config_mmoe.py",
+        "src/funrec/config/config_ple.py",
+        "src/funrec/config/config_shared_bottom.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "multiscenario",
+      "name": "Scenario and context specialization",
+      "stages": [
+        "ranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [
+        "scenario_context"
+      ],
+      "question": "Do documented contexts have distinct response mechanisms?",
+      "experiment": "Compare pooled and context-conditioned parameters with support and transfer checks.",
+      "pitfalls": "Anonymous columns do not establish scenario meaning; small segments can overfit.",
+      "source_docs": [
+        "docs/chapter_2_ranking/5.multi_scenario/1.multi_tower.html",
+        "docs/chapter_2_ranking/5.multi_scenario/2.dynamic_weight.html"
+      ],
+      "source_models": [
+        "src/funrec/models/star.py",
+        "src/funrec/models/apg.py",
+        "src/funrec/models/pepnet.py",
+        "src/funrec/models/hmoe.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_apg.py",
+        "src/funrec/config/config_hmoe.py",
+        "src/funrec/config/config_pepnet.py",
+        "src/funrec/config/config_star.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "slate_reranking",
+      "name": "Slate reranking and diversity",
+      "stages": [
+        "reranking"
+      ],
+      "requires": [
+        "candidate_slates"
+      ],
+      "question": "Does joint selection improve relevance, diversity or constrained slate value?",
+      "experiment": "Compare pointwise ordering with greedy or slate-aware selection at fixed candidate set and slate size.",
+      "pitfalls": "A single binary action per user does not provide a slate or diversity target.",
+      "source_docs": [
+        "docs/chapter_3_rerank/1.greedy.html",
+        "docs/chapter_3_rerank/2.personalized.html"
+      ],
+      "source_models": [
+        "src/funrec/models/prm.py",
+        "src/funrec/models/prs.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_prm.py",
+        "src/funrec/config/config_prs.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "feedback_bias",
+      "name": "Feedback bias and causal support",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "reranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [
+        "assignment_or_exposure_propensity"
+      ],
+      "question": "Could exposure or selection bias explain apparent model quality?",
+      "experiment": "Compare naive estimates with a design-appropriate correction and inspect support/variance.",
+      "pitfalls": "A logged probability does not prove exchangeability; response scores are not effects.",
+      "source_docs": [
+        "docs/chapter_4_trends/1.debias.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "cold_start",
+      "name": "Cold-start and sparse entities",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "reranking",
+        "policy"
+      ],
+      "requires": [
+        "cold_start_segments"
+      ],
+      "question": "Does performance fail on new users, items or sparse contexts?",
+      "experiment": "Predefine cold-start cohorts and compare metadata/representation baselines on the same cohorts.",
+      "pitfalls": "Do not identify cold-start cohorts from post-outcome activity.",
+      "source_docs": [
+        "docs/chapter_4_trends/2.cold_start.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "generative_foundations",
+      "name": "Generative representations and tokenization",
+      "stages": [
+        "generation"
+      ],
+      "requires": [
+        "item_tokens",
+        "event_sequence"
+      ],
+      "question": "Is a generative representation suitable for the available item and sequence contract?",
+      "experiment": "Compare tokenization and sequence objectives with a fixed non-generative baseline.",
+      "pitfalls": "Token design, catalog coverage and output validity must be measured before quality claims.",
+      "source_docs": [
+        "docs/chapter_4_trends/3.generative.html",
+        "docs/chapter_5_gr_basic/1.gr_intro.html",
+        "docs/chapter_5_gr_basic/2.gr_arch_base.html",
+        "docs/chapter_5_gr_basic/3.llm_base.html",
+        "docs/chapter_5_gr_basic/4.codebook.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "scaling_architecture",
+      "name": "Scaling and hardware-aware architecture",
+      "stages": [
+        "ranking",
+        "generation"
+      ],
+      "requires": [
+        "event_sequence",
+        "compute_budget"
+      ],
+      "question": "Does scaling architecture improve quality at a feasible training and serving cost?",
+      "experiment": "Measure quality against parameters, FLOPs, memory, latency and sequence length.",
+      "pitfalls": "A single larger run is not a scaling law; document compute and data budgets.",
+      "source_docs": [
+        "docs/chapter_6_scaling/1.hstu.html",
+        "docs/chapter_6_scaling/2.gen_rank.html",
+        "docs/chapter_6_scaling/3.mtgr.html",
+        "docs/chapter_6_scaling/4.rankmixer.html",
+        "docs/chapter_6_scaling/5.one_trans.html"
+      ],
+      "source_models": [
+        "src/funrec/models/hstu.py"
+      ],
+      "source_support": [
+        "src/funrec/config/config_hstu.py"
+      ],
+      "source_project": []
+    },
+    {
+      "id": "generative_applications",
+      "name": "End-to-end generation for recommendation, search and ads",
+      "stages": [
+        "generation",
+        "search",
+        "advertising"
+      ],
+      "requires": [
+        "generative_targets"
+      ],
+      "question": "Can generation directly represent the target action or retrieved object?",
+      "experiment": "Compare generated outputs with retrieval or ranking baselines under validity and cost constraints.",
+      "pitfalls": "Generation cannot replace a missing action catalog, relevance labels or policy evaluation.",
+      "source_docs": [
+        "docs/chapter_7_gr_e2e/1.recommendation.html",
+        "docs/chapter_7_gr_e2e/2.search.html",
+        "docs/chapter_7_gr_e2e/3.ad.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "reasoning_recommendation",
+      "name": "Semantic and reasoning recommendation",
+      "stages": [
+        "generation",
+        "ranking"
+      ],
+      "requires": [
+        "semantic_item_context"
+      ],
+      "question": "Does semantic alignment or explicit reasoning improve decisions beyond simpler representations?",
+      "experiment": "Ablate semantic alignment and reasoning steps against matched model/compute baselines.",
+      "pitfalls": "Unverifiable rationales are not evidence of better recommendations.",
+      "source_docs": [
+        "docs/chapter_8_thinking/1.semantic_alignment.html",
+        "docs/chapter_8_thinking/2.reasoning_framework.html",
+        "docs/chapter_8_thinking/3.autonomous_reasoning.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "diffusion_recommendation",
+      "name": "Diffusion augmentation and recommendation",
+      "stages": [
+        "generation",
+        "ranking"
+      ],
+      "requires": [
+        "event_sequence",
+        "item_catalog"
+      ],
+      "question": "Does diffusion-based augmentation or representation help under the actual data distribution?",
+      "experiment": "Compare with non-diffusion augmentation while auditing generated sample validity.",
+      "pitfalls": "Synthetic interactions must not be treated as randomized outcomes.",
+      "source_docs": [
+        "docs/chapter_9_diffusion/1.basics.html",
+        "docs/chapter_9_diffusion/2.augmentation.html",
+        "docs/chapter_9_diffusion/3.application.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "production_lifecycle",
+      "name": "Offline-online system lifecycle",
+      "stages": [],
+      "requires": [
+        "deployment_context"
+      ],
+      "question": "Which offline gain survives retrieval, feature freshness and serving constraints?",
+      "experiment": "Check replay, feature parity, latency and deployment guardrails at a fixed model choice.",
+      "pitfalls": "Offline benchmark success does not establish online production effect.",
+      "source_docs": [
+        "docs/chapter_10_projects/1.intro.html",
+        "docs/chapter_10_projects/2.architecture.html",
+        "docs/chapter_10_projects/3.offline_pipeline.html",
+        "docs/chapter_10_projects/4.online_pipeline.html",
+        "docs/chapter_10_projects/5.frontend.html",
+        "docs/chapter_10_projects/6.deployment.html"
+      ],
+      "source_models": [],
+      "source_support": [],
+      "source_project": [
+        "web_project/backend/app/api/deps.py",
+        "web_project/backend/app/api/v1/api.py",
+        "web_project/backend/app/api/v1/endpoints/auth.py",
+        "web_project/backend/app/api/v1/endpoints/genres.py",
+        "web_project/backend/app/api/v1/endpoints/health.py",
+        "web_project/backend/app/api/v1/endpoints/movies.py",
+        "web_project/backend/app/api/v1/endpoints/people.py",
+        "web_project/backend/app/api/v1/endpoints/ratings.py",
+        "web_project/backend/app/api/v1/endpoints/recommendations.py",
+        "web_project/backend/app/api/v1/endpoints/search.py",
+        "web_project/backend/app/api/v1/endpoints/stats.py",
+        "web_project/backend/app/api/v1/endpoints/users.py",
+        "web_project/backend/app/config.py",
+        "web_project/backend/app/core/auth.py",
+        "web_project/backend/app/core/security.py",
+        "web_project/backend/app/database.py",
+        "web_project/backend/app/main.py",
+        "web_project/backend/app/models.py",
+        "web_project/backend/app/schemas.py",
+        "web_project/backend/app/services/elasticsearch_service.py",
+        "web_project/backend/offline/config.py",
+        "web_project/backend/offline/feature/preprocess_ranking.py",
+        "web_project/backend/offline/feature/preprocess_retrieval.py",
+        "web_project/backend/offline/pipeline.py",
+        "web_project/backend/offline/storage/local_deploy.py",
+        "web_project/backend/offline/storage/redis_ingest.py",
+        "web_project/backend/offline/training/train_ranking.py",
+        "web_project/backend/offline/training/train_retrieval.py",
+        "web_project/backend/online/cold_start/base.py",
+        "web_project/backend/online/cold_start/detector.py",
+        "web_project/backend/online/cold_start/popular.py",
+        "web_project/backend/online/cold_start/preferred_genre.py",
+        "web_project/backend/online/cold_start/service.py",
+        "web_project/backend/online/cold_start/ucb_genre.py",
+        "web_project/backend/online/pipeline.py",
+        "web_project/backend/online/ranking/base.py",
+        "web_project/backend/online/ranking/deepfm.py",
+        "web_project/backend/online/ranking/resource_manager.py",
+        "web_project/backend/online/ranking/service.py",
+        "web_project/backend/online/recall/base.py",
+        "web_project/backend/online/recall/item_based.py",
+        "web_project/backend/online/recall/resource_manager.py",
+        "web_project/backend/online/recall/service.py",
+        "web_project/backend/online/recall/trending.py",
+        "web_project/backend/online/recall/youtubednn.py",
+        "web_project/backend/online/reranking/base.py",
+        "web_project/backend/online/reranking/dispersion.py",
+        "web_project/backend/online/reranking/service.py",
+        "web_project/backend/scripts/index_movies_elasticsearch.py",
+        "web_project/backend/scripts/ingest_data_to_database.py"
+      ]
+    }
+  ]
+}

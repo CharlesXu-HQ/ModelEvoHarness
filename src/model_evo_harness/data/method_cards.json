@@ -1,0 +1,385 @@
+{
+  "upstream_commit": "5f7bd84d4403b5f92b6bedbd31e3984ef00a4572",
+  "method_cards": [
+    {
+      "id": "afm",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/afm.py",
+      "mechanism": "Forms elementwise products for feature pairs, learns an attention weight for each pair, pools them, and adds an optional linear logit.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and fields, replace learned pair attention with uniform pair pooling while retaining the linear term and embedding width.",
+      "failure_signals": "No held-out gain over uniform pooling, or attention concentrates on unstable rare pairs.",
+      "implementation_boundary": "FunRec supplies a TensorFlow pointwise builder; the transferable idea is pair weighting, not its training code or a causal effect estimate."
+    },
+    {
+      "id": "apg",
+      "family_id": "multiscenario",
+      "source_model": "src/funrec/models/apg.py",
+      "mechanism": "Each APG layer uses a scene embedding to generate its central low-rank transformation while surrounding projections can be shared across scenes.",
+      "requires": ["tabular_features", "scenario_context", "observed_outcome_labels"],
+      "comparison": "On the same split, hold layer widths fixed and replace the scene-conditioned generated matrix with one shared matrix.",
+      "failure_signals": "No gain within sufficiently supported scenes, or gains vanish on held-out scene slices.",
+      "implementation_boundary": "FunRec implements an APGLayer-based ranker; using the idea elsewhere requires meaningful scene IDs and a new adapter."
+    },
+    {
+      "id": "autoint",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/autoint.py",
+      "mechanism": "Stacks multi-head self-attention over field embeddings so the representation of each field can depend on other fields before prediction.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and embeddings, remove the attention interaction stack and feed pooled fields to the same prediction head.",
+      "failure_signals": "No gain over pooled fields at matched parameter and latency budgets.",
+      "implementation_boundary": "FunRec provides a field-attention TensorFlow ranker; this card proposes a controlled interaction experiment, not source-code reuse."
+    },
+    {
+      "id": "biassvd",
+      "family_id": "collaborative_retrieval",
+      "source_model": "src/funrec/models/biassvd.py",
+      "mechanism": "Combines a user-factor/item-factor dot product with learned user, item, and global bias terms; the source then applies a sigmoid prediction head.",
+      "requires": ["user_item_interactions", "item_catalog", "labeled_user_item_pairs"],
+      "comparison": "On the same interaction split, remove only the three bias terms from the factor model while keeping factor dimension and classifier head fixed.",
+      "failure_signals": "Biases do not improve held-out ranking or merely encode popularity without cohort gains.",
+      "implementation_boundary": "FunRec's executable is a TensorFlow pair classifier with exportable towers; its latent-factor comparison does not imply calibrated rating prediction."
+    },
+    {
+      "id": "dcn",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/dcn.py",
+      "mechanism": "A cross network repeatedly combines the original input with the current state to form explicit bounded-degree crosses, alongside a deep MLP branch.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and fields, turn off only the cross branch while retaining the deep branch and linear features.",
+      "failure_signals": "No out-of-sample gain or the cross branch raises latency beyond the fixed budget.",
+      "implementation_boundary": "FunRec supplies its own DCN TensorFlow layer; transfer the cross-branch hypothesis, not a claim that every input cross is useful."
+    },
+    {
+      "id": "deepfm",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/deepfm.py",
+      "mechanism": "Adds an FM second-order embedding interaction logit to a DNN branch and an optional linear term using the same field inputs.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and shared embeddings, remove only the FM branch while keeping the DNN and linear term fixed.",
+      "failure_signals": "The explicit second-order branch brings no held-out lift after capacity is controlled.",
+      "implementation_boundary": "FunRec's executable ranker is task-specific; its transferable question is whether second-order crosses add value beyond the deep branch."
+    },
+    {
+      "id": "dien",
+      "family_id": "sequence_ranking",
+      "source_model": "src/funrec/models/dien.py",
+      "mechanism": "A GRU extracts behavior states, optionally learns from next-behavior positive/negative auxiliary pairs, then target-conditioned attention controls a second interest-evolution GRU.",
+      "requires": ["event_sequence", "target_item_features", "observed_outcome_labels", "negative_behavior_samples"],
+      "comparison": "On the same temporal split, disable only the auxiliary next-behavior loss while keeping the GRU evolution and target attention fixed.",
+      "failure_signals": "Auxiliary supervision yields no held-out gain or temporal leakage appears in sampled next behaviors.",
+      "implementation_boundary": "FunRec includes AIGRU, AGRU, and AUGRU variants; the comparison uses its optional auxiliary path and does not turn row aggregates into events."
+    },
+    {
+      "id": "din",
+      "family_id": "sequence_ranking",
+      "source_model": "src/funrec/models/din.py",
+      "mechanism": "Computes target-aware attention over a user's historical item embeddings and appends the weighted history representation to ordinary ranking features.",
+      "requires": ["event_sequence", "target_item_features", "observed_outcome_labels"],
+      "comparison": "On the same temporal split, replace target-aware history attention with a masked mean of the identical prior events.",
+      "failure_signals": "No gain versus history pooling or attention uses events after the candidate decision.",
+      "implementation_boundary": "FunRec implements a pointwise DIN builder with paired target/history feature columns; the target-conditioned mechanism requires real candidate items."
+    },
+    {
+      "id": "dsin",
+      "family_id": "sequence_ranking",
+      "source_model": "src/funrec/models/dsin.py",
+      "mechanism": "Encodes behavior within sessions using multi-head attention, models interactions among session summaries with a bidirectional LSTM, and activates both views against the target item.",
+      "requires": ["sessionized_event_sequence", "target_item_features", "observed_outcome_labels"],
+      "comparison": "On the same temporal split, remove only the inter-session LSTM while retaining session boundaries, intra-session attention, and target activation.",
+      "failure_signals": "No gain from session interaction or session boundaries cannot be defined before the decision time.",
+      "implementation_boundary": "FunRec expects explicit per-session feature slots; a transferable session hypothesis does not justify synthesizing sessions from aggregate rows."
+    },
+    {
+      "id": "dssm",
+      "family_id": "two_tower_matching",
+      "source_model": "src/funrec/models/dssm.py",
+      "mechanism": "Independent user and item MLP towers produce L2-normalized vectors, whose cosine similarity feeds a binary prediction layer.",
+      "requires": ["user_features", "item_catalog", "labeled_user_item_pairs"],
+      "comparison": "On the same user-item split, keep input fields and vector size fixed and replace the nonlinear towers with linear projections.",
+      "failure_signals": "No recall gain at a fixed candidate count, or serving/index cost exceeds the budget.",
+      "implementation_boundary": "FunRec exports both towers; adopting the representation requires an indexing and negative-sampling contract in the destination system."
+    },
+    {
+      "id": "eges",
+      "family_id": "item_representation",
+      "source_model": "src/funrec/models/eges.py",
+      "mechanism": "Learns an item vector as an item-specific weighted sum of ID and side-feature embeddings, then scores it against a context-item embedding; separate helpers form graph-walk context pairs.",
+      "requires": ["item_catalog", "item_side_attributes", "item_context_pairs"],
+      "comparison": "On the same context-pair split, replace item-specific attention weights with an unweighted mean while retaining embeddings and negatives.",
+      "failure_signals": "No cold-item or recall gain, or shuffled context pairs perform as well as true pairs.",
+      "implementation_boundary": "FunRec's builder consumes prepared context pairs and has separate graph utilities; it does not supply a general end-to-end graph pipeline."
+    },
+    {
+      "id": "esmm",
+      "family_id": "multiobjective",
+      "source_model": "src/funrec/models/esmm.py",
+      "mechanism": "Learns click probability and post-click conversion probability in separate towers, and constrains joint click-conversion probability to their product.",
+      "requires": ["impression_click_labels", "joint_click_conversion_labels", "tabular_features"],
+      "comparison": "On the same impression split and inputs, replace only the product-constrained joint head with an unconstrained direct joint head.",
+      "failure_signals": "The product constraint does not improve joint-outcome calibration or fails on low-click slices.",
+      "implementation_boundary": "FunRec outputs click and joint probabilities; interpreting its internal conversion tower requires observed click and joint labels, not an arbitrary second target."
+    },
+    {
+      "id": "fibinet",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/fibinet.py",
+      "mechanism": "A squeeze-excitation block reweights fields; bilinear pair interactions are computed on both original and reweighted embeddings before a DNN.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split, remove only the squeeze-excitation path while retaining the original bilinear interaction branch and DNN.",
+      "failure_signals": "Reweighting brings no held-out gain over original bilinear interactions at the same latency target.",
+      "implementation_boundary": "FunRec provides the particular SENet and bilinear layers; the transferable idea is testing field reweighting with a controlled interaction baseline."
+    },
+    {
+      "id": "fm",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/fm.py",
+      "mechanism": "Computes a factorization-machine second-order interaction over field embeddings and optionally adds first-order linear logits.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and fields, set the FM interaction contribution to zero while keeping the first-order term and loss fixed.",
+      "failure_signals": "Second-order interactions provide no held-out lift or rely on post-decision fields.",
+      "implementation_boundary": "FunRec wraps the FM term in a binary ranking head; its source is an executable example, not a reusable cross-scene evaluation harness."
+    },
+    {
+      "id": "fm_recall",
+      "family_id": "two_tower_matching",
+      "source_model": "src/funrec/models/fm_recall.py",
+      "mechanism": "Factorizes an FM-like matching score into a user vector of a constant plus summed user embeddings and an item vector of item linear/item-item interaction terms plus summed item embeddings.",
+      "requires": ["user_features", "item_catalog", "labeled_user_item_pairs"],
+      "comparison": "On the same user-item split, remove only the item-side FM interaction scalar while holding vector width and recall protocol fixed.",
+      "failure_signals": "No recall or coverage gain over the simpler dot-product towers, or item vectors cannot be indexed consistently.",
+      "implementation_boundary": "FunRec supplies explicit user/item towers for this decomposition; it is not a generic implementation of all FM cross terms."
+    },
+    {
+      "id": "funksvd",
+      "family_id": "collaborative_retrieval",
+      "source_model": "src/funrec/models/funksvd.py",
+      "mechanism": "Learns user and item latent ID vectors, takes their dot product, then uses a sigmoid classification head in the FunRec implementation.",
+      "requires": ["user_item_interactions", "item_catalog", "labeled_user_item_pairs"],
+      "comparison": "On the same interaction split, shuffle only training user IDs while keeping item IDs, labels, factor dimension, and evaluation users fixed.",
+      "failure_signals": "Latent factors do not improve held-out retrieval beyond popularity or collapse on sparse users.",
+      "implementation_boundary": "FunRec's executable is a pair classifier with separately exportable ID embeddings; the dot-product idea does not itself predict ratings."
+    },
+    {
+      "id": "hmoe",
+      "family_id": "multiscenario",
+      "source_model": "src/funrec/models/hmoe.py",
+      "mechanism": "Shared experts feed gated domain towers; a domain-weight network mixes their outputs with stop-gradient on cross-domain contributions before one binary prediction.",
+      "requires": ["scenario_context", "tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and domain slices, disable only cross-domain tower contributions while preserving the shared experts and own-domain tower.",
+      "failure_signals": "Transfer adds no gain in low-support domains or damages well-supported domains.",
+      "implementation_boundary": "This is a single-output multi-domain builder. Its nonshared-gate branch repeats each gate result while filling tower inputs, so indexed towers consume the first gate mixture; reimplement and verify the intended routing before transfer."
+    },
+    {
+      "id": "hstu",
+      "family_id": "scaling_architecture",
+      "source_model": "src/funrec/models/hstu.py",
+      "mechanism": "Runs causal sequence blocks with projected query/key/value interactions, optional relative-position or time-interval bias, gated output projection, and next-item sampled-negative training.",
+      "requires": ["event_sequence", "event_timestamps", "item_catalog", "compute_budget"],
+      "comparison": "On the same next-item split and sequence length, add only time-interval bias to the dot-product block while holding depth, negatives, and compute budget fixed.",
+      "failure_signals": "Time bias gives no quality gain or increases training/serving cost beyond the agreed budget.",
+      "implementation_boundary": "FunRec offers configurable HstuLayer modes; timestamps are needed for the time-bias ablation, and one run cannot establish a scaling law."
+    },
+    {
+      "id": "item2vec",
+      "family_id": "item_representation",
+      "source_model": "src/funrec/models/item2vec.py",
+      "mechanism": "Fits Gensim Word2Vec to ordered item histories using local context windows; the source forms a user vector by averaging the learned vectors of prior items.",
+      "requires": ["event_sequence", "item_catalog"],
+      "comparison": "On the same temporal split and corpus, change only the Word2Vec context window from one item to the planned width while keeping vector dimension fixed.",
+      "failure_signals": "Context vectors do not improve recall, or chronology-shuffled histories perform equally well.",
+      "implementation_boundary": "FunRec's class is a Word2Vec wrapper and mean-pooling helper, not a complete retrieval trainer or a guaranteed skip-gram configuration."
+    },
+    {
+      "id": "item_cf",
+      "family_id": "collaborative_retrieval",
+      "source_model": "src/funrec/models/item_cf.py",
+      "mechanism": "Builds item-item cosine similarity from positive co-interaction counts and sums neighbor similarity across a user's previously interacted items.",
+      "requires": ["user_item_interactions", "item_catalog", "positive_interaction_labels"],
+      "comparison": "On the same temporal split and neighbor count, replace cosine-normalized item co-occurrence with raw co-occurrence counts using identical history cutoffs.",
+      "failure_signals": "No recall gain over popularity or popularity-dominated neighbors reduce catalog coverage.",
+      "implementation_boundary": "FunRec supplies a standalone positive-only ItemCF class; absent exposures are not negative preferences or randomized controls."
+    },
+    {
+      "id": "m2m",
+      "family_id": "multiobjective",
+      "source_model": "src/funrec/models/m2m.py",
+      "mechanism": "Creates task, expert, and scenario views; a scenario-generated meta unit weights experts for each task and a scenario-conditioned meta tower produces each task output.",
+      "requires": ["multiple_outcomes", "scenario_context", "tabular_features"],
+      "comparison": "On the same split, replace only the scenario view supplied to meta attention and towers with a shared constant while keeping tasks and experts fixed.",
+      "failure_signals": "No gain across observed task-by-scenario cells or severe negative transfer in small cells.",
+      "implementation_boundary": "FunRec implements this multi-scenario multi-task builder; optional sequence input does not remove its need for real task labels and scenario context."
+    },
+    {
+      "id": "mind",
+      "family_id": "interest_retrieval",
+      "source_model": "src/funrec/models/mind.py",
+      "mechanism": "Dynamic-routing capsules turn one user history into several interest vectors; label-aware attention selects a target-relevant interest for sampled-softmax training.",
+      "requires": ["event_sequence", "item_catalog", "target_item_ids"],
+      "comparison": "On the same next-item split, restrict the capsule count to one while keeping embeddings, negatives, and candidate set fixed.",
+      "failure_signals": "Multiple interests do not improve recall or merely duplicate one another.",
+      "implementation_boundary": "FunRec exports several user interest vectors for retrieval; target-aware attention is used in training and does not provide a free target at retrieval time."
+    },
+    {
+      "id": "mmoe",
+      "family_id": "multiobjective",
+      "source_model": "src/funrec/models/mmoe.py",
+      "mechanism": "Several shared experts process the same features; each task has its own softmax gate over experts followed by a task-specific prediction tower.",
+      "requires": ["multiple_outcomes", "tabular_features"],
+      "comparison": "On the same split and task labels, replace only task-specific gates with one shared gate while keeping experts and towers fixed.",
+      "failure_signals": "No primary-task gain or one task degrades materially from negative transfer.",
+      "implementation_boundary": "FunRec's MMoE code expects observed labels per output; gate diversity is a hypothesis to test, not evidence of causal task dependence."
+    },
+    {
+      "id": "nfm",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/nfm.py",
+      "mechanism": "Bi-interaction pooling compresses second-order embedding products into a vector that a DNN maps to a prediction, with an optional linear term.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split, replace only bi-interaction pooling with summed embeddings before the same DNN.",
+      "failure_signals": "No gain beyond simple pooled embeddings at comparable model size.",
+      "implementation_boundary": "FunRec gives a pointwise NFM builder; the comparison concerns interaction representation rather than a different optimizer or target."
+    },
+    {
+      "id": "pepnet",
+      "family_id": "multiscenario",
+      "source_model": "src/funrec/models/pepnet.py",
+      "mechanism": "EPNet gates input embeddings using prior context, and PPNet gates intermediate layers separately for each output head using another context view.",
+      "requires": ["scenario_context", "tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split, replace only EPNet's context-conditioned embedding gate with an identity gate while keeping PPNet and heads fixed.",
+      "failure_signals": "No slice-level gain from embedding personalization or gates collapse to constants.",
+      "implementation_boundary": "FunRec's EPNet/PPNet builder can emit multiple heads; a destination must supply real prior context and any auxiliary head labels it enables."
+    },
+    {
+      "id": "ple",
+      "family_id": "multiobjective",
+      "source_model": "src/funrec/models/ple.py",
+      "mechanism": "Stacks extraction levels with both task-specific and shared experts; task gates mix their own and shared experts while a shared gate feeds the next level.",
+      "requires": ["multiple_outcomes", "tabular_features"],
+      "comparison": "On the same split and tasks, tie task-specific expert weights across tasks while retaining expert slots, gates, and task towers.",
+      "failure_signals": "Task-specific experts do not improve the primary outcome or harm a secondary task.",
+      "implementation_boundary": "FunRec implements a particular CGC stack; its complexity is transferable only when several valid outcomes are observed."
+    },
+    {
+      "id": "pnn",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/pnn.py",
+      "mechanism": "A product layer constructs inner and/or outer products between field embeddings before a DNN and optional linear term.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split, disable only the outer-product path while retaining inner products, the DNN, and the same fields.",
+      "failure_signals": "Outer products add no held-out gain relative to their compute and memory cost.",
+      "implementation_boundary": "FunRec exposes inner/outer switches in its PNN layer; the card asks which product path helps under a fixed data contract."
+    },
+    {
+      "id": "prm",
+      "family_id": "slate_reranking",
+      "source_model": "src/funrec/models/prm.py",
+      "mechanism": "Adds position embeddings to user and candidate-slate features, applies Transformer encoder blocks across positions, and softmax-normalizes position scores.",
+      "requires": ["candidate_slates", "positionwise_feedback", "user_features"],
+      "comparison": "On the same slate split and slate length, remove only cross-position Transformer attention while keeping position features and output normalization.",
+      "failure_signals": "No slate-metric gain over independent position scoring or benefits disappear after position-bias checks.",
+      "implementation_boundary": "FunRec implements a PRM scorer, not a diversity objective or a new candidate generator; candidate sets and labels must exist."
+    },
+    {
+      "id": "prs",
+      "family_id": "slate_reranking",
+      "source_model": "src/funrec/models/prs.py",
+      "mechanism": "Per-position CTR and continuation heads score a slate; FPSA beam search proposes permutations and a second pass selects the preferred ordering.",
+      "requires": ["candidate_slates", "positionwise_feedback", "continuation_feedback"],
+      "comparison": "On the same slate split, fixed head predictions, and objective weights, compare FPSA beam size one with a larger beam size.",
+      "failure_signals": "A wider search brings no slate reward gain or raises inference cost beyond the limit.",
+      "implementation_boundary": "FunRec defines heads and an inference helper; training both heads needs aligned labels, and its example config alone does not prove that contract."
+    },
+    {
+      "id": "sasrec",
+      "family_id": "interest_retrieval",
+      "source_model": "src/funrec/models/sasrec.py",
+      "mechanism": "Position-aware causal self-attention encodes each item-history prefix for next-item prediction with sampled negative items.",
+      "requires": ["event_sequence", "item_catalog", "next_item_targets"],
+      "comparison": "On the same temporal next-item split and negative sampler, replace only causal self-attention with a history mean at equal embedding width.",
+      "failure_signals": "Ordered attention does not outperform mean history or sequence shuffling leaves quality unchanged.",
+      "implementation_boundary": "FunRec supplies a sequence training graph and item-vector evaluator; it needs ordered histories rather than one aggregate row per user."
+    },
+    {
+      "id": "sdm",
+      "family_id": "interest_retrieval",
+      "source_model": "src/funrec/models/sdm.py",
+      "mechanism": "Builds short-term interest with LSTM, self-attention, and user attention; separately pools long-term behavior and gates both into a retrieval vector.",
+      "requires": ["short_and_long_event_histories", "item_catalog", "next_item_targets"],
+      "comparison": "On the same next-item split, replace only learned short/long gated fusion with a fixed mean while preserving both history encoders.",
+      "failure_signals": "Learned fusion gives no recall gain or the short-history window leaks the target event.",
+      "implementation_boundary": "FunRec's SDM builder uses distinct short and long history feature groups and sampled softmax; transfer needs those histories to be defined."
+    },
+    {
+      "id": "shared_bottom",
+      "family_id": "multiobjective",
+      "source_model": "src/funrec/models/shared_bottom.py",
+      "mechanism": "One shared MLP representation feeds a separate prediction tower for every observed task.",
+      "requires": ["multiple_outcomes", "tabular_features"],
+      "comparison": "On the same split and task labels, compare the shared representation with separate per-task MLPs at a matched parameter budget.",
+      "failure_signals": "Sharing does not improve the primary task or causes measurable negative transfer.",
+      "implementation_boundary": "FunRec provides a multi-output TensorFlow baseline; its outputs require distinct measured labels and fixed task definitions."
+    },
+    {
+      "id": "star",
+      "family_id": "multiscenario",
+      "source_model": "src/funrec/models/star.py",
+      "mechanism": "Domain-partitioned normalization and a star-topology FCN combine shared and domain-specific transformations; an auxiliary domain-aware branch also contributes to the logit.",
+      "requires": ["scenario_context", "tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and domains, replace domain-partitioned normalization with shared normalization while retaining the star FCN and auxiliary branch.",
+      "failure_signals": "No improvement on supported domains or small-domain calibration worsens.",
+      "implementation_boundary": "FunRec requires a discrete domain feature for this builder; anonymous columns do not establish valid scenario membership."
+    },
+    {
+      "id": "swing",
+      "family_id": "collaborative_retrieval",
+      "source_model": "src/funrec/models/swing.py",
+      "mechanism": "Scores item pairs through pairs of common users, downweighting active users and user pairs with many shared items before neighbor aggregation.",
+      "requires": ["user_item_interactions", "item_catalog", "positive_interaction_labels"],
+      "comparison": "On the same temporal split and neighbor count, remove only Swing's active-user downweighting while retaining its user-pair overlap denominator.",
+      "failure_signals": "No gain on held-out retrieval or sparse pairs make the similarity estimate unstable.",
+      "implementation_boundary": "FunRec's standalone Swing class uses positive interactions and at least two common users per scored pair; it does not infer counterfactual preference."
+    },
+    {
+      "id": "user_cf",
+      "family_id": "collaborative_retrieval",
+      "source_model": "src/funrec/models/user_cf.py",
+      "mechanism": "Builds user-user cosine similarity from positive shared-item counts, then recommends items interacted with by a user's nearest neighbors.",
+      "requires": ["user_item_interactions", "item_catalog", "positive_interaction_labels"],
+      "comparison": "On the same temporal split and neighbor count, replace cosine-normalized user co-occurrence with raw common-item counts using identical history cutoffs.",
+      "failure_signals": "No recall gain over popularity or neighbor coverage collapses for sparse users.",
+      "implementation_boundary": "FunRec provides a standalone positive-only UserCF class; lack of exposure cannot be interpreted as negative feedback."
+    },
+    {
+      "id": "wide_deep",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/wide_deep.py",
+      "mechanism": "Adds a linear wide term and configured explicit cross logits to a deep feature-embedding MLP before binary prediction.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split and deep branch, remove only configured explicit cross logits while retaining the linear wide term.",
+      "failure_signals": "Manual crosses provide no held-out lift or depend on unavailable/post-decision fields.",
+      "implementation_boundary": "FunRec executes configured crosses in a pointwise ranker; cross definitions must be redesigned for the destination schema."
+    },
+    {
+      "id": "xdeepfm",
+      "family_id": "feature_interactions",
+      "source_model": "src/funrec/models/xdeepfm.py",
+      "mechanism": "Combines a compressed interaction network that explicitly creates vector-wise high-order crosses with a DNN branch and optional linear term.",
+      "requires": ["tabular_features", "observed_outcome_labels"],
+      "comparison": "On the same split, remove only the CIN branch while keeping the DNN, linear term, and embedding inputs fixed.",
+      "failure_signals": "High-order crosses add no held-out gain or exceed the latency budget.",
+      "implementation_boundary": "FunRec's CIN implementation is an executable ranking component; the portable claim is a controlled high-order interaction test."
+    },
+    {
+      "id": "youtubednn",
+      "family_id": "two_tower_matching",
+      "source_model": "src/funrec/models/youtubednn.py",
+      "mechanism": "A DNN maps user features and optional pooled history to a normalized user vector; sampled softmax trains it against an item embedding table.",
+      "requires": ["user_features", "item_catalog", "positive_target_item_ids"],
+      "comparison": "On the same next-item split, remove only pooled history from the user tower while keeping item vectors, negatives, and retrieval K fixed.",
+      "failure_signals": "History adds no recall or gains vanish when targets are excluded from pre-cutoff history.",
+      "implementation_boundary": "FunRec exports user and item embeddings for evaluation; applying them needs a matched item index and sampled-softmax target contract."
+    }
+  ]
+}

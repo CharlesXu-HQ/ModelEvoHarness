@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "model-evo-harness"
+version = "0.1.0"
+description = "Agent-led offline model iteration for recommendation, search, ads, and marketing"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+model-evo-harness = "model_evo_harness.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+model_evo_harness = ["data/*.json"]
