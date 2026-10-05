@@ -165,12 +165,18 @@ def validate_model_design(design: object, snapshot: dict, sources: list[dict]) -
             entry["target_component_id"] = target_id
             if decision == "retain":
                 target = components[target_id]
-                same = (_text(previous.get("mechanism"), "source mechanism") == target["mechanism"] and
-                        previous.get("reference_method_id") == target.get("reference_method_id") and
-                        all(set(previous.get(key, [])) == set(target[key]) for key in
-                            ("code_sections", "input_fields", "required_capabilities")))
-                if not same:
-                    raise ValueError("retain must preserve mechanism, reference_method_id, code_sections, fields, and capabilities; use adapt/retest")
+                mismatches = []
+                if _text(previous.get("mechanism"), "source mechanism") != target["mechanism"]:
+                    mismatches.append("mechanism")
+                if previous.get("reference_method_id") != target.get("reference_method_id"):
+                    mismatches.append("reference_method_id")
+                mismatches.extend(key for key in ("code_sections", "input_fields", "required_capabilities")
+                                  if set(previous.get(key, [])) != set(target[key]))
+                if mismatches:
+                    raise ValueError(f"retain mismatch for source_trial_id={repr(pair[0])[:96]}, "
+                                     f"component_id={repr(pair[1])[:96]}, target_component_id={repr(target_id)[:96]}: "
+                                     f"{', '.join(mismatches)}. For retain, copy those source fields exactly; "
+                                     "intentional changes require adapt, uncertain reuse requires retest.")
         records.append(entry)
     if parent:
         expected = {(parent_id, component["id"]) for component in parent["components"]}

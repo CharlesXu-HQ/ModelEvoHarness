@@ -40,8 +40,15 @@ def cited_facts(ids: object, evidence: list[dict], *, nonempty: bool = True) -> 
             len(set(ids)) != len(ids)):
         raise ValueError("evidence_ids needs distinct nonempty IDs")
     facts = validate_host_evidence(evidence)
-    if any(identifier not in facts for identifier in ids):
-        raise ValueError("evidence_ids must cite host evidence")
+    unknown_ids = [identifier for identifier in ids if identifier not in facts]
+    if unknown_ids:
+        def preview(values: list[str]) -> str:
+            shown = ", ".join(repr(identifier)[:96] for identifier in values[:6])
+            return shown + (f" ... (+{len(values) - 6} more)" if len(values) > 6 else "")
+
+        raise ValueError(f"evidence_ids must cite host evidence; unknown IDs: [{preview(unknown_ids)}]; "
+                         f"available host IDs: [{preview(list(facts))}]. "
+                         "Copy existing evidence IDs exactly; do not invent or rename them.")
     return [facts[identifier] for identifier in ids]
 
 

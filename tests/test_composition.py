@@ -200,8 +200,16 @@ class CompositionTests(unittest.TestCase):
                            ("reference_method_id", "dcn")]:
             candidate = local()
             candidate["components"][0][key] = value
-            with self.assertRaisesRegex(ValueError, "retain"):
+            with self.assertRaisesRegex(ValueError, "retain") as caught:
                 validate_model_design(candidate, SNAPSHOT, [source()])
+            message = str(caught.exception)
+            self.assertIn("trial_001", message)
+            self.assertIn("cross", message)
+            self.assertIn(key, message)
+            self.assertIn("copy", message)
+            self.assertIn("adapt", message)
+            if key != "mechanism":
+                self.assertNotIn("mechanism", message)
 
     def test_other_harmful_component_does_not_invalidate_retained_component(self):
         parent = source(reflection={"technical_experience": {"component_assessments": [

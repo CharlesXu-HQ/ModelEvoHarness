@@ -104,8 +104,12 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "evidence_ids"):
             validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
         research["evidence_ids"] = ["invented-50k-columns"]
-        with self.assertRaisesRegex(ValueError, "host evidence"):
+        with self.assertRaisesRegex(ValueError, "host evidence") as caught:
             validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
+        self.assertIn("invented-50k-columns", str(caught.exception))
+        self.assertIn("encoding-width", str(caught.exception))
+        self.assertIn("timing", str(caught.exception))
+        self.assertNotIn("The encoded training matrix", str(caught.exception))
         research["evidence_ids"] = ["timing"]
         with self.assertRaisesRegex(ValueError, "observed"):
             validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
@@ -114,6 +118,15 @@ class CatalogTests(unittest.TestCase):
                                     evidence=evidence)
         self.assertEqual(checked["evidence_ids"], ["encoding-width"])
         self.assertEqual(checked["change_factors"], ["interaction layer"])
+
+        research["evidence_ids"] = [f"invented-{index}-" + "x" * 1000 for index in range(100)]
+        many_facts = [{**evidence[0], "id": f"available-{index}-" + "y" * 1000} for index in range(100)]
+        with self.assertRaises(ValueError) as caught:
+            validate_research({"research": research}, self.task, self.catalog, evidence=many_facts)
+        self.assertIn("invented-0-", str(caught.exception))
+        self.assertIn("available-0-", str(caught.exception))
+        self.assertIn("more", str(caught.exception))
+        self.assertLess(len(str(caught.exception)), 1600)
 
     def test_digest_tracks_catalog_content(self):
         original = catalog_digest(self.catalog)
