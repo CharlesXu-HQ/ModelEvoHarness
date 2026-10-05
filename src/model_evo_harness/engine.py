@@ -13,6 +13,9 @@ import os
 import tempfile
 from pathlib import Path
 
+from .evidence import (cited_facts, validate_audit_recommendations,
+                       validate_host_evidence)
+
 
 PACKAGE_VERSION = "0.2.0"
 
@@ -85,6 +88,10 @@ def _snapshot(task: object) -> dict:
                 not isinstance(protocol.get(key), str) or not protocol[key].strip()
                 for key in required):
             raise ValueError("evaluation_protocol needs nonempty " + ", ".join(required))
+    if "evidence" in snapshot:
+        for fact in validate_host_evidence(snapshot["evidence"]).values():
+            if fact["scope"] != "task":
+                raise ValueError("task snapshot evidence must have task scope")
     _json_bytes(snapshot)
     return snapshot
 
@@ -112,11 +119,56 @@ def _evaluation(value: object) -> dict:
         if observation["id"] in observed_ids:
             raise ValueError("duplicate business observation id")
         observed_ids.add(observation["id"])
+    if "evidence" in value:
+        validate_host_evidence(value["evidence"])
+    check = value.get("implementation_check")
+    if check is not None and (not isinstance(check, dict) or check.get("status") not in
+                              ("verified", "contradicted", "unverified")):
+        raise ValueError("implementation_check needs verified, contradicted, or unverified status")
+    audit = value.get("change_audit")
+    if audit is not None:
+        if not isinstance(audit, dict) or audit.get("status") not in ("verified", "unverified"):
+            raise ValueError("change_audit needs verified or unverified status")
+        factors = audit.get("changed_factors")
+        if audit["status"] == "verified" and (not isinstance(factors, list) or not factors or any(
+                not isinstance(factor, str) or not factor.strip() for factor in factors)):
+            raise ValueError("verified change_audit needs changed_factors")
     _json_bytes(value)
     return value
 
 
-def validate_data_request(request: dict, snapshot: dict, steps: list[dict]) -> dict:
+def _host_evidence(snapshot: dict, baseline: dict, steps: list[dict]) -> list[dict] | None:
+    """Collect only facts supplied by the task and evaluator, never by Agent proposals."""
+    sources = [snapshot, baseline]
+    sources.extend(step["evaluation"] for step in steps if step.get("status") == "evaluated")
+    if not any("evidence" in source for source in sources):
+        return None
+    evidence = [fact for source in sources for fact in source.get("evidence", [])]
+    validate_host_evidence(evidence)
+    for fact in baseline.get("evidence", []):
+        if fact["scope"] != "task":
+            raise ValueError("baseline evidence must have task scope")
+    for step in steps:
+        for fact in step.get("evaluation", {}).get("evidence", []):
+            if fact["scope"] == "trial" and fact["trial_id"] != step["id"]:
+                raise ValueError("trial evidence must match its evaluated trial")
+    return evidence
+
+
+def _trial_research(step: dict) -> dict:
+    return step.get("proposal", {}).get("research", step.get("research", {}))
+
+
+def _gap_trials(ids: object, evidence: list[dict], steps: list[dict]) -> set[str]:
+    facts = cited_facts(ids, evidence)
+    evaluated = {step["id"]: step for step in steps if step.get("status") == "evaluated"}
+    return {fact["trial_id"] for fact in facts if fact["scope"] == "trial" and
+            fact["status"] == "observed" and fact.get("data_gap_candidate") is True and
+            fact["trial_id"] in evaluated}
+
+
+def validate_data_request(request: dict, snapshot: dict, steps: list[dict], *,
+                          evidence: list[dict] | None = None) -> dict:
     """Require experimental evidence or an explicit host-supplied domain rule."""
     if not isinstance(request, dict) or any(
             not isinstance(request.get(key), str) or not request[key].strip()
@@ -147,18 +199,27 @@ def validate_data_request(request: dict, snapshot: dict, steps: list[dict]) -> d
         evaluated = {step["id"]: step for step in steps if step["status"] == "evaluated"}
         if any(trial_id not in evaluated for trial_id in trial_ids):
             raise ValueError("experimental data request must cite completed evaluated trials")
-        mechanisms = {evaluated[trial_id]["proposal"]["research"]["mechanism"]
+        mechanisms = {_trial_research(evaluated[trial_id])["mechanism"]
                       for trial_id in trial_ids}
         if len(mechanisms) < 2:
             raise ValueError("experimental data request needs two distinct tested mechanisms")
+        if evidence is not None:
+            gap_trials = _gap_trials(request.get("evidence_ids"), evidence, steps)
+            supported = gap_trials & set(trial_ids)
+            if len(supported) < 2 or len({_trial_research(evaluated[trial_id])["mechanism"]
+                                          for trial_id in supported}) < 2:
+                raise ValueError("experimental data request needs trial-specific measured gap evidence")
     else:
         raise ValueError("data request basis must be domain_requirement or experimental_evidence")
+    if basis == "domain_requirement" and evidence is not None and "evidence_ids" in request:
+        cited_facts(request["evidence_ids"], evidence)
     _json_bytes(request)
     return request
 
 
 def validate_reflection(reflection: dict, evaluation: dict | None,
-                        snapshot: dict, steps: list[dict]) -> dict:
+                        snapshot: dict, steps: list[dict], *,
+                        evidence: list[dict] | None = None) -> dict:
     """Keep technical and business lessons distinct and cite observed business data."""
     if not isinstance(reflection, dict):
         raise ValueError("agent.reflect() must return a dict")
@@ -167,6 +228,18 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
             not isinstance(technical.get(key), str) or not technical[key].strip()
             for key in ("lesson", "evidence", "uncertainty", "next_test")):
         raise ValueError("technical_experience needs lesson, evidence, uncertainty, next_test")
+    implementation = (evaluation or {}).get("implementation_check", {})
+    audit = (evaluation or {}).get("change_audit", {})
+    implementation_status = implementation.get("status", "unverified")
+    if technical.setdefault("implementation_status", implementation_status) != implementation_status:
+        raise ValueError("technical implementation_status must match the host check")
+    if implementation.get("status") == "verified" and audit.get("status") == "verified":
+        expected = "isolated" if len(audit["changed_factors"]) == 1 else "joint"
+    else:
+        expected = "unverified"
+    attribution = technical.setdefault("attribution", "unverified")
+    if attribution not in ("isolated", "joint", "unverified") or attribution != expected:
+        raise ValueError(f"technical attribution must be {expected} under the host change audit")
     business = reflection.get("business_experience")
     if not isinstance(business, dict) or business.get("status") not in (
             "observed", "not_observable"):
@@ -186,7 +259,7 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
                 for key in ("field", "source", "as_of", "evidence", "validation_plan"))
             for item in suggestions):
         raise ValueError("future_feature_suggestions need field, source, as_of, evidence, validation_plan")
-    tested_mechanisms = {step["proposal"]["research"]["mechanism"] for step in steps
+    tested_mechanisms = {_trial_research(step)["mechanism"] for step in steps
                          if step["status"] == "evaluated"}
     for suggestion in suggestions:
         if suggestion["field"] in snapshot["fields"]:
@@ -197,11 +270,20 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
                        for requirement in snapshot.get("domain_requirements", []))
         if not explicit and len(tested_mechanisms) < 2:
             raise ValueError("future feature suggestion needs two distinct tested mechanisms or a host domain requirement")
+        if evidence is not None and not explicit:
+            gap_trials = _gap_trials(suggestion.get("evidence_ids"), evidence, steps)
+            mechanisms = {_trial_research(step)["mechanism"] for step in steps
+                          if step.get("id") in gap_trials and step.get("status") == "evaluated"}
+            if len(mechanisms) < 2:
+                raise ValueError("future feature suggestion needs trial-specific measured gap evidence")
+    if "audit_recommendations" in reflection:
+        validate_audit_recommendations(reflection["audit_recommendations"], evidence=evidence)
     _json_bytes(reflection)
     return reflection
 
 
-def _proposal(value: object, snapshot: dict, catalog: dict) -> dict:
+def _proposal(value: object, snapshot: dict, catalog: dict, *,
+              evidence: list[dict] | None = None) -> dict:
     if not isinstance(value, dict):
         raise ValueError("agent.propose() must return a dict")
     if value.get("action") != "experiment":
@@ -219,7 +301,7 @@ def _proposal(value: object, snapshot: dict, catalog: dict) -> dict:
         raise ValueError(f"research.input_fields absent from task: {', '.join(map(str, missing))}")
     from .catalog import validate_research
 
-    checked_research = validate_research(value, snapshot, catalog)
+    checked_research = validate_research(value, snapshot, catalog, evidence=evidence)
     proposal = {"action": "experiment", "research": checked_research,
                 "candidate": value["candidate"]}
     if "reference_reads" in value:
@@ -241,10 +323,15 @@ def _reflect_pending(agent: object, snapshot: dict, state: dict,
         "best_id": state["best_id"],
         "remaining_steps": max(0, max_steps - len(state["steps"])),
     }
+    evidence = _host_evidence(snapshot, state["baseline"], state["steps"])
+    if evidence is not None:
+        observation["evidence"] = evidence
+    else:
+        observation["evidence_status"] = "not_supplied"
     reflection = agent.reflect(json.loads(_json_bytes(observation)))
     if structured:
         reflection = validate_reflection(reflection, step.get("evaluation"), snapshot,
-                                         state["steps"])
+                                         state["steps"], evidence=evidence)
     elif not isinstance(reflection, dict):
         raise ValueError("agent.reflect() must return a dict")
     else:
@@ -327,6 +414,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         _write_journal(journal_path, state)
 
     while len(state["steps"]) < max_steps:
+        evidence = _host_evidence(snapshot, state["baseline"], state["steps"])
         context = {
             "task": snapshot,
             "catalog": catalog,
@@ -341,6 +429,10 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "best_id": state["best_id"],
             "remaining_steps": max_steps - len(state["steps"]),
         }
+        if evidence is not None:
+            context["evidence"] = evidence
+        else:
+            context["evidence_status"] = "not_supplied"
         # The Agent may mutate its input; the journal must retain observed history.
         decision = agent.propose(json.loads(_json_bytes(context)))
         if not isinstance(decision, dict):
@@ -350,6 +442,9 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             reason = decision.get("reason")
             if not isinstance(reason, str) or not reason.strip():
                 raise ValueError("stop action needs a reason")
+            if "audit_recommendations" in decision:
+                state["audit_recommendations"] = validate_audit_recommendations(
+                    decision["audit_recommendations"], evidence=evidence)
             state["status"] = "stopped"
             state["stop_reason"] = reason
             _write_journal(journal_path, state)
@@ -359,7 +454,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             if not isinstance(request, dict) or not request:
                 raise ValueError("request_data action needs a concrete request")
             if structured:
-                validate_data_request(request, snapshot, state["steps"])
+                validate_data_request(request, snapshot, state["steps"], evidence=evidence)
             else:
                 _json_bytes(request)
             state["status"] = "needs_data"
@@ -369,7 +464,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         if action != "experiment":
             raise ValueError("action must be experiment, stop, or request_data")
 
-        proposal = _proposal(decision, snapshot, catalog)
+        proposal = _proposal(decision, snapshot, catalog, evidence=evidence)
         trial_id = f"trial_{len(state['steps']) + 1:03d}"
         trial_dir = output / trial_id
         trial_dir.mkdir(exist_ok=True)
@@ -383,12 +478,13 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         else:
             evaluation = _evaluation(raw_evaluation)
             step.update(status="evaluated", evaluation=evaluation)
+            _host_evidence(snapshot, state["baseline"], [*state["steps"], step])
             current_score = (state["baseline"]["score"] if state["best_id"] == "baseline" else
                              next(previous["evaluation"]["score"] for previous in state["steps"]
                                   if previous["id"] == state["best_id"]))
             better = (evaluation["score"] > current_score if snapshot["objective"]["direction"] == "max"
                       else evaluation["score"] < current_score)
-            if better:
+            if better and evaluation.get("implementation_check", {}).get("status") != "contradicted":
                 state["best_id"] = trial_id
         state["steps"].append(step)
         state["status"] = "running"

@@ -86,9 +86,21 @@ and method_id. Method cards describe controlled ablations, not installed models.
 Before changing model structure, connect a pattern's when_to_try to a measured bottleneck,
 name the required data evidence, and use its controlled comparison and reject_if signal.
 Do not choose a larger structure solely because it is available in the catalog.
+Prefer a cheap diagnostic or controlled ablation of available inputs when it can distinguish
+competing hypotheses before spending a trial on a new model name. If host evidence is supplied,
+cite its IDs for the observed bottleneck; treat declared metadata as uncertainty, not as a
+measured failure. If evidence_status says not_supplied, say what diagnostic is needed rather
+than inventing a bottleneck. Your intended change_factors are a plan, never proof that the
+executed code changed only those factors. The host's implementation_check and change_audit
+govern later attribution.
 Also consider loss, sampling, hard-example mining, optimization, regularization,
 calibration and decision rules when their measured symptom better explains the gap.
 Change one mechanism at a time and compare under the same protocol.
+When several components change, say it is a compound experiment and request an ablation
+before assigning a gain to one component. A confidence interval crossing zero does not show
+equivalence or lower treatment-effect variance. Identical scalar policy estimates can occur
+for different selected units; check host policy identities and paired contributions before
+calling an evaluation mismatch.
 Preserve the host's evaluation_protocol when supplied: unit, split, metric, candidate universe,
 label/negative provenance and time cutoff. Do not compare scores from different protocols.
 Distinguish prediction quality from a decision rule over predictions; test one mechanism at a time.
@@ -101,34 +113,50 @@ with distinct mechanisms, or when an explicit host domain requirement identifies
 Use request_data immediately only when task.domain_requirements contains an explicit
 host-supplied rule that names the missing field, source and timing. Otherwise a terminal
 request needs at least two completed experiments testing distinct mechanisms and measured
-evidence that the missing input blocks progress. Do not infer domain rules from column names.
+trial-specific data-gap diagnostics that the missing input blocks progress. Repeated task
+metadata or unverified timing alone belongs in a nonblocking audit recommendation, not a
+terminal data request. Do not infer domain rules from column names.
 Do not assign an unavailable family_id or method_id.
 For an experiment return {"action":"experiment","research":{"direction":"...",
 "mechanism":"...","why_now":"evidence from baseline/history","data_rationale":"...",
 "comparison":"control at the same task and evaluation","expected_result":"...",
 "falsification":"...","input_fields":["actual task field"],
+"evidence_ids":["host-observed fact ID when host evidence exists"],
+"change_factors":["intended changed component when host evidence exists"],
 "alternatives":[{"direction":"...","mechanism":"...","reason":"..."}],
 "family_id":"optional available family","method_id":"optional available method"},
 "candidate":{}}.
 Candidate must follow any host candidate contract in the task snapshot. The comparison must
 identify a control; the expected_result and falsification must be observable on this task.
-If no sound experiment is possible, return {"action":"stop","reason":"..."} or
+If no sound experiment is possible, return {"action":"stop","reason":"...",
+"audit_recommendations":[{"issue":"...","evidence_ids":["host fact ID"],
+"validation_plan":"..."}]} when a nonblocking data check remains, or
 {"action":"request_data","request":{"basis":"experimental_evidence or domain_requirement",
 "fields":["missing field"],"source":"...","as_of":"before the decision",
 "reason":"...","evidence":"...","validation_plan":"...",
 "trial_ids":["two evaluated IDs for experimental_evidence"],
+"evidence_ids":["measured trial-specific data-gap diagnostic IDs for experimental_evidence"],
 "alternatives_considered":"for experimental_evidence",
 "requirement_id":"host rule ID for domain_requirement"}}."""
 
 _REFLECT_INSTRUCTIONS = """Review one completed offline trial. Return one JSON object only
 with technical_experience {lesson, evidence, uncertainty, next_test} and
+attribution: isolated, joint, or unverified. The implementation_status must match the
+host's implementation_check; when absent use unverified. Use isolated only when a host-verified
+implementation_check and change_audit name exactly one changed factor; use joint when they
+verify multiple changed factors; otherwise use unverified. A contradicted implementation
+is not evidence that the intended mechanism worked.
 business_experience {status: observed or not_observable}. For observed business experience,
 cite an observation_id from trial.evaluation.business_observations and supply insight and
 limitations. If that list is absent or no valid business claim follows, use
 {status: not_observable, reason: ...}. Do not invent a cohort or cost definition.
 Optional future_feature_suggestions is a list of {field, source, as_of, evidence,
-validation_plan}; it records a human data idea after two distinct evaluated mechanisms,
+validation_plan, evidence_ids}; it records a human data idea after two distinct evaluated
+mechanisms with host-measured trial-specific gap diagnostics,
 or an explicit host domain requirement, without stopping current-data experiments.
+Optional audit_recommendations is a nonblocking list of {issue, evidence_ids,
+validation_plan}; it may cite declared host metadata without claiming an experiment found
+a missing model input. Do not turn a generic audit uncertainty into a terminal request.
 Use the task's fixed objective and the baseline, history, and trial in the user JSON.
 Distinguish measured outcomes from hypotheses; do not call a lift significant unless the
 observation includes uncertainty evidence. Do not infer unavailable field semantics or

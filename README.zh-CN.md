@@ -23,6 +23,8 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 3. 结合不确定性分析预测与决策指标，分别记录**技术经验**和**业务经验**。业务结论必须引用任务适配器提供的、带指标和不确定性的 `business_observations`；没有可观测证据时记为 `not_observable`。
 4. 继续、停止或请求人工完善数据集。`future_feature_suggestions` 要在两个机制不同的已评估实验之后记录；如果业务方在 `domain_requirements` 中明确声明缺失前提，也可立即记录。正式的 `request_data` 需引用实验和证据，或引用对应的业务前提。
 
+宿主可以在任务快照、基线和实验评估中提供 `evidence` 事实，每条事实包含 ID、内容、来源、`observed`/`declared` 状态和 `task`/`trial` 范围。提供事实后，实验提案须引用实际观测的瓶颈；Agent 自报的 `change_factors` 只是计划，只有独立的宿主 `implementation_check` 与 `change_audit` 才能支持单机制归因。实验型数据请求须引用两个不同机制实验的实测、特定于实验的 `data_gap_candidate` 诊断。仅有元数据声明时，可记录不阻断实验的 `audit_recommendations`。校验器保证引文来源和实验归属，不能证明 Agent 每一句解释都正确。
+
 任务适配器负责原始数据、训练、GPU、切分、目标、不确定性、最终留出集和行动约束。Harness 校验实验记录与适用条件；它不会根据字段名猜测业务语义，也不保证某个模型带来提升。具体接口见[任务适配文档](docs/adapter-contract.md)。
 
 ## 提高探索效率

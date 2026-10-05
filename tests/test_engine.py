@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from model_evo_harness.catalog import load_catalog
-from model_evo_harness.engine import run_search
+from model_evo_harness.engine import run_search, validate_reflection
 
 
 def experiment(direction="try a linear model", fields=None):
@@ -250,6 +250,200 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(task.evaluated), 2)
         self.assertIn("technical_experience", result["steps"][0]["reflection"])
         self.assertIn("business_experience", result["steps"][0]["reflection"])
+
+    def test_host_evidence_reaches_agent_and_rejects_uncited_bottleneck(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class EvidenceTask(Task):
+            def baseline(self, trial_dir):
+                return {"score": 0.4, "metrics": {"score": 0.4}, "evidence": [{
+                    "id": "baseline-width", "statement": "Encoded training input has 7 columns",
+                    "source": "preprocessing audit", "status": "observed", "scope": "task",
+                    "value": 7}]}
+
+        proposal = experiment()
+        proposal["research"]["evidence_ids"] = ["invented-50k-columns"]
+        proposal["research"]["change_factors"] = ["outcome model"]
+        agent = Agent([proposal])
+        with self.assertRaisesRegex(ValueError, "host evidence"):
+            run_search(EvidenceTask(), agent, output=self.output,
+                       catalog=self.catalog, max_steps=1)
+        self.assertEqual(agent.contexts[0]["evidence"][0]["value"], 7)
+        self.assertEqual(json.loads((self.output / "journal.json").read_text())["steps"], [])
+
+    def test_data_request_needs_trial_specific_gap_diagnostics(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class EvidenceTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "evidence": [{
+                    "id": "timing-declared", "statement": "Timing is declared only",
+                    "source": "manifest", "status": "declared", "scope": "task"}]}
+
+            def baseline(self, trial_dir):
+                return {"score": 0.4, "metrics": {"score": 0.4}, "evidence": [{
+                    "id": "baseline-score", "statement": "Baseline score is 0.4",
+                    "source": "fixed validation", "status": "observed", "scope": "task"}]}
+
+        class EvidenceAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection()
+
+        first, second = experiment(), experiment("try interactions")
+        for proposal in (first, second):
+            proposal["research"]["evidence_ids"] = ["baseline-score"]
+            proposal["research"]["change_factors"] = ["architecture"]
+        second["research"]["mechanism"] = "Use explicit interactions"
+        request = {"basis": "experimental_evidence", "fields": ["history"],
+                   "source": "event log", "as_of": "before decision",
+                   "reason": "Need history", "evidence": "Timing is declared only",
+                   "validation_plan": "Audit timestamps", "trial_ids": ["trial_001", "trial_002"],
+                   "alternatives_considered": "Two model structures tested",
+                   "evidence_ids": ["timing-declared"]}
+        with self.assertRaisesRegex(ValueError, "trial-specific"):
+            run_search(EvidenceTask(scores=(0.3, 0.35)),
+                       EvidenceAgent([first, second, {"action": "request_data", "request": request}]),
+                       output=self.output, catalog=self.catalog, max_steps=3)
+
+    def test_data_request_accepts_two_measured_gap_diagnostics(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class EvidenceTask(Task):
+            def baseline(self, trial_dir):
+                return {"score": 0.4, "metrics": {"score": 0.4}, "evidence": [{
+                    "id": "baseline-score", "statement": "Baseline score is 0.4",
+                    "source": "fixed validation", "status": "observed", "scope": "task"}]}
+
+            def evaluate(self, proposal, trial_dir):
+                result = super().evaluate(proposal, trial_dir)
+                trial_id = trial_dir.name
+                result["evidence"] = [{"id": f"{trial_id}-gap",
+                                       "statement": "Residual gap persists in the same slice",
+                                       "source": "held-out slice report", "status": "observed",
+                                       "scope": "trial", "trial_id": trial_id,
+                                       "data_gap_candidate": True}]
+                return result
+
+        class EvidenceAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection()
+
+        first, second = experiment(), experiment("try interactions")
+        for proposal in (first, second):
+            proposal["research"]["evidence_ids"] = ["baseline-score"]
+            proposal["research"]["change_factors"] = ["architecture"]
+        second["research"]["mechanism"] = "Use explicit interactions"
+        request = {"basis": "experimental_evidence", "fields": ["history"],
+                   "source": "event log", "as_of": "before decision", "reason": "Residual gap",
+                   "evidence": "Two trial-specific diagnostics retain the gap",
+                   "validation_plan": "Audit timing and coverage",
+                   "trial_ids": ["trial_001", "trial_002"],
+                   "alternatives_considered": "Available representations were tested",
+                   "evidence_ids": ["trial_001-gap", "trial_002-gap"]}
+        result = run_search(EvidenceTask(scores=(0.3, 0.35)),
+                            EvidenceAgent([first, second, {"action": "request_data", "request": request}]),
+                            output=self.output, catalog=self.catalog, max_steps=3)
+        self.assertEqual(result["status"], "needs_data")
+
+    def test_attribution_requires_verified_implementation_and_change_audit(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class AuditedTask(Task):
+            def evaluate(self, proposal, trial_dir):
+                result = super().evaluate(proposal, trial_dir)
+                result["implementation_check"] = {"status": "verified"}
+                result["change_audit"] = {"status": "verified", "changed_factors":
+                                          ["architecture", "loss"]}
+                return result
+
+        class IsolatedAgent(Agent):
+            def reflect(self, observation):
+                result = structured_reflection()
+                result["technical_experience"]["attribution"] = "isolated"
+                return result
+
+        with self.assertRaisesRegex(ValueError, "joint"):
+            run_search(AuditedTask(scores=(0.6,)), IsolatedAgent([experiment()]),
+                       output=self.output, catalog=self.catalog, max_steps=1)
+
+        class JointAgent(Agent):
+            def reflect(self, observation):
+                result = structured_reflection()
+                result["technical_experience"]["attribution"] = "joint"
+                return result
+
+        result = run_search(AuditedTask(), JointAgent([]), output=self.output,
+                            catalog=self.catalog, max_steps=1, resume=True)
+        self.assertEqual(result["steps"][0]["reflection"]["technical_experience"]
+                         ["attribution"], "joint")
+
+    def test_agent_intended_change_does_not_verify_attribution(self):
+        reflection = structured_reflection()
+        reflection["technical_experience"]["attribution"] = "isolated"
+        with self.assertRaisesRegex(ValueError, "unverified"):
+            validate_reflection(reflection, {"implementation_check": {"status": "verified"}},
+                                Task().snapshot(), [{"id": "trial_001", "status": "evaluated",
+                                "proposal": {"research": {"mechanism": "new model",
+                                                           "change_factors": ["architecture"]}}}])
+
+    def test_contradicted_implementation_cannot_be_champion_and_audit_is_nonblocking(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class AuditedTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "evidence": [{
+                    "id": "timing-declared", "statement": "Pre-decision timing is declared only",
+                    "source": "manifest", "status": "declared", "scope": "task"}]}
+
+            def baseline(self, trial_dir):
+                return {"score": 0.4, "metrics": {"score": 0.4}, "evidence": [{
+                    "id": "baseline-score", "statement": "Baseline score is 0.4",
+                    "source": "fixed validation", "status": "observed", "scope": "task"}]}
+
+            def evaluate(self, proposal, trial_dir):
+                result = super().evaluate(proposal, trial_dir)
+                result["implementation_check"] = {"status": "contradicted"}
+                return result
+
+        class AuditAgent(Agent):
+            def reflect(self, observation):
+                result = structured_reflection()
+                result["technical_experience"]["attribution"] = "unverified"
+                result["audit_recommendations"] = [{
+                    "issue": "Verify feature measurement time", "evidence_ids": ["timing-declared"],
+                    "validation_plan": "Compare record time with decision time"}]
+                return result
+
+        proposal = experiment()
+        proposal["research"]["evidence_ids"] = ["baseline-score"]
+        proposal["research"]["change_factors"] = ["architecture"]
+        result = run_search(AuditedTask(scores=(0.9,)), AuditAgent([proposal]),
+                            output=self.output, catalog=self.catalog, max_steps=1)
+        self.assertEqual(result["best_id"], "baseline")
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(result["steps"][0]["reflection"]["audit_recommendations"][0]
+                         ["evidence_ids"], ["timing-declared"])
+        self.assertEqual(result["steps"][0]["reflection"]["technical_experience"]
+                         ["implementation_status"], "contradicted")
+        self.assertEqual(result["steps"][0]["reflection"]["technical_experience"]
+                         ["attribution"], "unverified")
+        self.assertNotIn("data_request", result)
+
+    def test_stop_can_persist_audit_without_a_data_request(self):
+        class AuditTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "evidence": [{
+                    "id": "timing-declared", "statement": "Time cutoff is declared only",
+                    "source": "task contract", "status": "declared", "scope": "task"}]}
+
+        audit = {"issue": "Check event timing", "evidence_ids": ["timing-declared"],
+                 "validation_plan": "Compare event times with decision cutoff"}
+        result = run_search(AuditTask(), Agent([{"action": "stop", "reason": "Budget exhausted",
+                                                 "audit_recommendations": [audit]}]),
+                            output=self.output, catalog=self.catalog, max_steps=1)
+        self.assertEqual(result["status"], "stopped")
+        self.assertEqual(result["audit_recommendations"], [audit])
+        self.assertNotIn("data_request", result)
 
     def test_feature_request_rejects_one_trial_as_insufficient_evidence(self):
         self.catalog["experience_schema_version"] = 2

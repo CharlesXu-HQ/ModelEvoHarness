@@ -8,6 +8,8 @@ Record the decision stage, eligible population, target, training label provenanc
 
 Before proposing, read the baseline and prior trials for one supported symptom: loss curves, per-unit errors, user/item support, history length, popularity, calibration, cohort response, action rate, budget use, or latency. If that evidence is absent, request a **diagnostic report using existing data** from the host adapter; do not invent a cause or demand a new feature field. Preserve the host's pre-decision feature boundary.
 
+Spend trials for information: when an inexpensive check of input shape, label semantics, score meaning, policy overlap, or a one-component ablation can reject a hypothesis, do that before trying another architecture. Cite host-observed facts separately from declared metadata and the Agent's interpretation. A list of intended code changes cannot verify what the executed candidate changed; use the host's implementation check and change audit when recording mechanism experience.
+
 ## Diagnostic paths
 
 These are conditional examples, not an exhaustive or required sequence. `Reference` means the repository has a local model core for at least part of the mechanism; `design` means the idea is guidance until an adapter or independent implementation supplies it.
@@ -29,6 +31,8 @@ For retrieval, **exposed but unclicked** is an observed non-click, not automatic
 ## Close the loop without inventing certainty
 
 Write one falsifiable mechanism, an unchanged control, required data and a rejection signal. A failed experiment should narrow the next hypothesis; a metric improvement alone does not prove the mechanism or business cause. The journal's best validation score is an **exploratory champion**. Ask the host for paired uncertainty, guardrail checks and a separately protected final holdout before describing a candidate as independently validated. RecBole's [significance-test workflow](https://recbole.io/docs/user_guide/usage/significance_test.html) is a comparison example, not a substitute for the host's correct unit and estimator.
+
+A confidence interval that crosses zero does not establish equivalence, nor does a narrower policy-effect interval by itself show that a model's treatment-effect predictions have lower variance. Distinct policies can have the same aggregate estimate; inspect selected-unit identities and paired contributions before calling this an evaluation anomaly.
 
 If several distinct mechanisms fail and the same unsupported residual remains, propose a specific human feature request with its source, pre-decision timestamp and validation plan. An explicit host business requirement can justify that request immediately. Keep technical experience (what a mechanism did) separate from observed business experience (what a defined population did), and cite only host-supplied observations for the latter.
 

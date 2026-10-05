@@ -409,7 +409,8 @@ def training_applicability(snapshot: dict, catalog: dict) -> list[dict]:
     return result
 
 
-def validate_research(proposal: dict, snapshot: dict, catalog: dict) -> dict:
+def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
+                      evidence: list[dict] | None = None) -> dict:
     """Validate a falsifiable experiment without making families a whitelist."""
     research = proposal.get("research")
     fields = ("direction", "mechanism", "why_now", "data_rationale", "comparison",
@@ -428,6 +429,24 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict) -> dict:
                                              for key in ("direction", "mechanism", "reason"))
             for item in alternatives):
         raise ValueError("research.alternatives needs a direction, mechanism and reason")
+    evidence_ids = research.get("evidence_ids")
+    change_factors = research.get("change_factors")
+    if evidence is not None:
+        from .evidence import cited_facts
+
+        cited = cited_facts(evidence_ids, evidence)
+        if not any(fact["status"] == "observed" for fact in cited):
+            raise ValueError("research bottleneck needs observed host evidence")
+        if (not isinstance(change_factors, list) or not change_factors or
+                any(not isinstance(factor, str) or not factor.strip()
+                    for factor in change_factors)):
+            raise ValueError("research.change_factors needs intended changes")
+    elif evidence_ids is not None:
+        raise ValueError("research.evidence_ids needs host evidence")
+    if change_factors is not None and (not isinstance(change_factors, list) or
+                                       any(not isinstance(factor, str) or not factor.strip()
+                                           for factor in change_factors)):
+        raise ValueError("research.change_factors must be a list of nonempty strings")
     family_id = research.get("family_id")
     if family_id is not None:
         available_families = {entry["family_id"]: entry for entry in applicability(snapshot, catalog)}
@@ -448,5 +467,8 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict) -> dict:
             raise ValueError("method_id and family_id disagree")
     return {**{key: research[key].strip() for key in fields}, "input_fields": inputs,
             "alternatives": [{key: item[key].strip() for key in ("direction", "mechanism", "reason")}
-                             for item in alternatives], **({"family_id": family_id} if family_id else {}),
+                             for item in alternatives],
+            **({"evidence_ids": evidence_ids} if evidence_ids is not None else {}),
+            **({"change_factors": change_factors} if change_factors is not None else {}),
+            **({"family_id": family_id} if family_id else {}),
             **({"method_id": method_id} if method_id else {})}

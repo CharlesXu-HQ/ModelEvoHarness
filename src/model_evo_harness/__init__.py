@@ -5,6 +5,7 @@ from .catalog import (applicability, catalog_digest, coverage_report, decision_a
                       common_knowledge, read_references, model_api, method_applicability,
                       training_applicability, validate_research)
 from .engine import run_search, validate_data_request, validate_reflection
+from .evidence import validate_audit_recommendations, validate_host_evidence
 from .provider import REFERENCE_INSTRUCTIONS, propose_with_references
 
 __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_applicability",
@@ -12,4 +13,5 @@ __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_appli
            "common_knowledge", "read_references",
            "REFERENCE_INSTRUCTIONS", "propose_with_references",
            "training_applicability", "run_search", "validate_data_request",
-           "validate_reflection", "validate_research"]
+           "validate_reflection", "validate_research", "validate_host_evidence",
+           "validate_audit_recommendations"]

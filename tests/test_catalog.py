@@ -88,6 +88,33 @@ class CatalogTests(unittest.TestCase):
         self.task["capabilities"].append("observed_outcome_labels")
         self.assertEqual(validate_research(selected_method, self.task, self.catalog)["method_id"], "fm")
 
+    def test_research_bottleneck_cites_host_observed_fact(self):
+        evidence = [
+            {"id": "encoding-width", "statement": "The encoded training matrix has 7 columns",
+             "source": "preprocessing check", "status": "observed", "scope": "task", "value": 7},
+            {"id": "timing", "statement": "Feature timing is declared only",
+             "source": "dataset manifest", "status": "declared", "scope": "task"},
+        ]
+        research = {"direction": "try a cross", "mechanism": "Change the interaction layer",
+                    "why_now": "The measured representation is narrow", "data_rationale": "age exists",
+                    "comparison": "same fixed split", "expected_result": "score rises",
+                    "falsification": "score does not rise", "input_fields": ["age"],
+                    "alternatives": [{"direction": "keep baseline", "mechanism": "same model",
+                                      "reason": "control"}], "change_factors": ["interaction layer"]}
+        with self.assertRaisesRegex(ValueError, "evidence_ids"):
+            validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
+        research["evidence_ids"] = ["invented-50k-columns"]
+        with self.assertRaisesRegex(ValueError, "host evidence"):
+            validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
+        research["evidence_ids"] = ["timing"]
+        with self.assertRaisesRegex(ValueError, "observed"):
+            validate_research({"research": research}, self.task, self.catalog, evidence=evidence)
+        research["evidence_ids"] = ["encoding-width"]
+        checked = validate_research({"research": research}, self.task, self.catalog,
+                                    evidence=evidence)
+        self.assertEqual(checked["evidence_ids"], ["encoding-width"])
+        self.assertEqual(checked["change_factors"], ["interaction layer"])
+
     def test_digest_tracks_catalog_content(self):
         original = catalog_digest(self.catalog)
         changed = copy.deepcopy(self.catalog)

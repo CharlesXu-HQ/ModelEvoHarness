@@ -59,6 +59,16 @@ Each item requires a unique `id`, nonempty `fields`, `source` and `as_of`. The l
 
 `baseline()` or `evaluate()` may add a `business_observations` list. Each observation has a unique `id`, `population`, `metric`, finite numeric `estimate`, and a nonempty `uncertainty` description. The host defines the outcome, population, treatment/action, cost basis and estimator. For example, a host might report a randomized policy-value difference with its paired interval; the harness validates the record shape and reference identity, while the host remains responsible for causal and statistical validity. Without such an observation, the Agent cannot record an observed business insight.
 
+### Host evidence and implementation checks
+
+The host may add `evidence` lists to `snapshot()`, `baseline()`, and `evaluate()`. Each fact has a unique `id`, `statement`, `source`, `status` (`observed` or `declared`), and `scope` (`task` or `trial`). Trial facts also name `trial_id`; an optional JSON `value` carries a measured value. The engine combines only host facts into Agent context. When facts exist, research cites an observed fact with `evidence_ids` and lists intended `change_factors`.
+
+```json
+{"id":"train:encoded_width","statement":"Encoded input has 7 columns","source":"preprocessing check","status":"observed","scope":"task","value":7}
+```
+
+The host may attach `implementation_check` with status `verified`, `contradicted`, or `unverified`, plus a separate `change_audit` with status and `changed_factors`, to an evaluation. Agent-declared changes are not a host audit. Contradicted implementations stay in the journal but cannot become the validation champion.
+
 ## Agent context and proposal
 
 ```python
@@ -98,6 +108,8 @@ The Agent may instead return `{"action":"stop","reason":"..."}` or a terminal `r
 - `domain_requirement`: cite `requirement_id` matching a host snapshot item, including its fields, source and timing. This path needs no preceding experiment.
 - `experimental_evidence`: cite `trial_ids` for at least two **completed, evaluated** experiments with distinct `research.mechanism` values, plus `alternatives_considered`. The Agent explains why the missing input remains the likely blocker after those tests.
 
+When host evidence exists, experimental requests also cite `evidence_ids` for measured trial-specific diagnostics from two distinct mechanisms. The host must mark each supporting diagnostic `data_gap_candidate: true`. Repeated task metadata does not qualify. A `stop` action or reflection may instead include nonblocking `audit_recommendations` with `issue`, `evidence_ids`, and `validation_plan`.
+
 A request that passes the validator ends the run with `needs_data`. `future_feature_suggestions` also require two evaluated trials with distinct mechanisms or a matching explicit host domain requirement. They record a specific field idea while experiments continue on the current dataset.
 
 ## Reflection and experience
@@ -110,7 +122,8 @@ After a trial, `reflect()` returns separate records:
     "lesson": "What the comparison showed about the mechanism",
     "evidence": "Which trial metrics and control support that reading",
     "uncertainty": "Limits, interval or variance caveat",
-    "next_test": "A falsifiable follow-up"
+    "next_test": "A falsifiable follow-up",
+    "attribution": "unverified"
   },
   "business_experience": {"status": "not_observable", "reason": "No host business observation was supplied"},
   "future_feature_suggestions": []
@@ -118,6 +131,8 @@ After a trial, `reflect()` returns separate records:
 ```
 
 For `business_experience.status = "observed"`, include an `observation_id` present in that trial's `evaluation.business_observations`, plus nonempty `insight` and `limitations`. The technical lesson can concern structure, feature representation, loss, sampling, optimization, calibration or decision mapping. A business insight concerns a defined population and measured outcome; its wording must not outrun the observation's uncertainty or causal design. Both types remain bound to the task and dataset fingerprint.
+
+Technical experience records the host's `implementation_status`. Attribution is `isolated` only when verified implementation and a separate verified change audit name one changed factor; it is `joint` for multiple verified factors and `unverified` otherwise. These checks validate provenance, not every free-text sentence.
 
 The journal is stored in `output/journal.json` through an atomic replace. Failed `evaluate()` calls become failed trials with a bounded error type. Do not include API keys or raw user rows in snapshots, proposals, metrics or reflections. The final holdout is a separate host action after selecting a candidate.
 
