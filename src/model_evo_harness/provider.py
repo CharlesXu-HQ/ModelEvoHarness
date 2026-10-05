@@ -45,12 +45,18 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
             raise ValueError("Agent response must be a JSON object")
         research = answer.get("research")
         method = research.get("method_id") if isinstance(research, dict) else None
-        selected = next((entry for entry in catalog.get("model_implementations", [])
-                         if entry["id"] == method and entry["framework"] == framework), None)
-        if (answer.get("action", "experiment") == "experiment" and selected is not None and
-                selected["file"] not in material):
+        requested = [method] if isinstance(method, str) else []
+        design = research.get("model_design") if isinstance(research, dict) else None
+        if isinstance(design, dict) and isinstance(design.get("components"), list):
+            requested.extend(component["reference_method_id"] for component in design["components"]
+                             if isinstance(component, dict) and
+                             isinstance(component.get("reference_method_id"), str))
+        unread = [entry["id"] for entry in catalog.get("model_implementations", [])
+                  if entry["id"] in requested and entry["framework"] == framework and
+                  entry["file"] not in material]
+        if answer.get("action", "experiment") == "experiment" and unread:
             answer = {"action": "read_reference", "framework": framework,
-                      "method_ids": [method], "include_training": True}
+                      "method_ids": unread[:4], "include_training": True}
         if answer.get("action") != "read_reference":
             # Only host-observed reads count; never trust Agent-supplied hashes.
             answer = {key: value for key, value in answer.items() if key != "reference_reads"}
@@ -71,6 +77,51 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
         state["rounds"] += 1
     raise AssertionError("unreachable")
 
+
+
+COMPOSITION_INSTRUCTIONS = """Prefer evidence-driven improvements inside the current compatible backbone:
+read the local structure and training implementations, then edit/compose their actual code
+inside the candidate's encoder, interaction layers, heads, objectives or training loop.
+The estimator (e.g. a causal meta-learner) and the representation backbone are separate axes.
+A catalog name is a reference, not the unit of progress; custom modules and combinations
+are welcome. Few tabular fields do not prove that interaction or loss work is exhausted,
+and neither cardinality nor field count establishes sequence, item or semantic inputs.
+Do not impose a fixed number of local trials. Switch when evidence, data suitability or
+expected information per budget favors it, and explain why a local alternative is weaker.
+
+When task.model_design_required is true, every experiment needs research.model_design:
+{estimator, backbone, change_scope: initialize|local|switch, parent_trial_id,
+rationale, data_fit, comparison_plan, components: [{id, mechanism, code_sections:[actual
+candidate class/function names], input_fields:[task fields], required_capabilities:[task
+capabilities], reference_method_id:optional bundled method ID}], inheritance:[{
+source_trial_id, component_id, decision:retain|adapt|drop|retest, reason, compatibility,
+validation_plan, target_component_id:required unless drop}]}.
+Use initialize only before a tracked design exists (parent_trial_id may be null for an
+untracked seed); local keeps estimator/backbone IDs, switch changes at least one. IDs are
+open names, not a model whitelist. Describe the whole current recipe, including accumulated
+training and representation changes; code_sections must locate their implementation.
+For local or switch, account for every parent component, and cite any other donor by its
+host-supplied trial/component IDs. Read the donor code before claiming source reuse; metadata
+alone is not copied code. Keep compatible improvements, adapt interfaces/objectives when
+needed, drop incompatible or harmful parts with reasons, and retest uncertain or invalid
+ideas as new hypotheses. Reject invented data semantics and check shape, timing, output
+scale, objective, sampling and fitting/cross-fitting boundaries. Do not carry fitted weights
+or preprocessing state across splits. Transferring a design does not establish transfer gain.
+Compare the previous recipe, a plain new-backbone control, and the selectively composed
+candidate under the same protocol/budget when switching; if the budget cannot resolve all
+factors, state the limitation and choose the most informative comparison. Joint gains do
+not validate every component. Missing source/code evidence is uncertainty, not permission
+to label an inherited component proven. Do not erase prior refinements by restarting with
+initialize once tracked designs exist.
+
+When reflecting on a model_design, include technical_experience.component_assessments,
+one entry per current component: {component_id, outcome:promising|inconclusive|harmful|invalid,
+evidence, compatibility_limits, next_test, attribution:unverified|joint|isolated}.
+These are task/dataset-bound observations. Promising is exploratory. Attribution stays
+unverified unless supported by the host change audit; isolated additionally requires that
+the sole audited changed factor is that component ID. Failed/contradicted trials cannot
+supply promising or harmful mechanism claims. Separate what happened to the whole recipe
+from what has been established for any individual component."""
 
 _PROPOSE_INSTRUCTIONS = """You lead one offline model-research decision. Return one JSON object only.
 Use the task, local knowledge, catalog families, method_cards, structure_patterns,
@@ -178,6 +229,8 @@ claim success on an unseen final holdout."""
 
 
 class OpenAICompatibleAgent:
+    requires_model_design = True
+
     """Send task-level context to an OpenAI-compatible chat-completions endpoint."""
 
     def __init__(self, provider_url: str, api_key: str, model: str, *,
@@ -219,7 +272,7 @@ class OpenAICompatibleAgent:
 
     def propose(self, context: dict) -> dict:
         return propose_with_references(
-            lambda current: self._complete(_PROPOSE_INSTRUCTIONS + "\n" + REFERENCE_INSTRUCTIONS,
+            lambda current: self._complete(_PROPOSE_INSTRUCTIONS + "\n" + COMPOSITION_INSTRUCTIONS + "\n" + REFERENCE_INSTRUCTIONS,
                                            current, self.iteration_effort),
             context, catalog=context.get("catalog", {}),
             framework=context.get("task", {}).get("framework"))
@@ -227,7 +280,7 @@ class OpenAICompatibleAgent:
     def reflect(self, observation: dict) -> dict:
         review = observation.get("trial", {}).get("evaluation", {}).get("review_required") is True
         effort = self.review_effort if review else self.iteration_effort
-        return self._complete(_REFLECT_INSTRUCTIONS, observation, effort)
+        return self._complete(_REFLECT_INSTRUCTIONS + "\n" + COMPOSITION_INSTRUCTIONS, observation, effort)
 
     def _complete(self, instructions: str, context: dict, effort: str) -> dict:
         payload = {

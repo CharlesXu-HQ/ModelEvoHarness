@@ -4,13 +4,15 @@ from .catalog import (applicability, catalog_digest, coverage_report, decision_a
                       implementation_digest, load_catalog, load_guide,
                       common_knowledge, read_references, model_api, method_applicability,
                       training_applicability, validate_research)
+from .composition import composition_sources, validate_model_design
 from .engine import run_search, validate_data_request, validate_reflection
 from .evidence import validate_audit_recommendations, validate_host_evidence
-from .provider import REFERENCE_INSTRUCTIONS, propose_with_references
+from .provider import COMPOSITION_INSTRUCTIONS, REFERENCE_INSTRUCTIONS, propose_with_references
 
 __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_applicability",
            "implementation_digest", "load_catalog", "load_guide", "model_api", "method_applicability",
            "common_knowledge", "read_references",
+           "COMPOSITION_INSTRUCTIONS", "composition_sources", "validate_model_design",
            "REFERENCE_INSTRUCTIONS", "propose_with_references",
            "training_applicability", "run_search", "validate_data_request",
            "validate_reflection", "validate_research", "validate_host_evidence",

@@ -71,6 +71,8 @@ The host may attach `implementation_check` with status `verified`, `contradicted
 
 ## Agent context and proposal
 
+For backbone-local code changes and selective component migration, see the [composition contract](compositional-evolution.md). The built-in provider enables it automatically; custom adapters opt in with `snapshot.model_design_required=true`. Research then includes `model_design`, and reflection includes per-component assessments. The engine supplies compact `composition_sources` alongside full trial history.
+
 ```python
 class Agent:
     def propose(self, context: dict) -> dict: ...

@@ -410,7 +410,8 @@ def training_applicability(snapshot: dict, catalog: dict) -> list[dict]:
 
 
 def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
-                      evidence: list[dict] | None = None) -> dict:
+                      evidence: list[dict] | None = None,
+                      sources: list[dict] | None = None) -> dict:
     """Validate a falsifiable experiment without making families a whitelist."""
     research = proposal.get("research")
     fields = ("direction", "mechanism", "why_now", "data_rationale", "comparison",
@@ -465,7 +466,19 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
             raise ValueError(f"method {method_id} is {entry['status']}: {entry['reason']}")
         if family_id is not None and entry["family_id"] != family_id:
             raise ValueError("method_id and family_id disagree")
+    design = research.get("model_design")
+    if snapshot.get("model_design_required") or "model_design" in research:
+        from .composition import validate_model_design
+
+        design = validate_model_design(design, snapshot, sources or [])
+        references = {(entry["id"], entry["framework"])
+                      for entry in catalog.get("model_implementations", [])}
+        for component in design["components"]:
+            method = component.get("reference_method_id")
+            if method is not None and (method, snapshot.get("framework")) not in references:
+                raise ValueError("component reference_method_id must exist for the task framework")
     return {**{key: research[key].strip() for key in fields}, "input_fields": inputs,
+            **({"model_design": design} if design is not None else {}),
             "alternatives": [{key: item[key].strip() for key in ("direction", "mechanism", "reason")}
                              for item in alternatives],
             **({"evidence_ids": evidence_ids} if evidence_ids is not None else {}),

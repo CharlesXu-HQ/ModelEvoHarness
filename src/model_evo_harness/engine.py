@@ -13,6 +13,7 @@ import os
 import tempfile
 from pathlib import Path
 
+from .composition import composition_sources
 from .evidence import (cited_facts, validate_audit_recommendations,
                        validate_host_evidence)
 
@@ -240,6 +241,32 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
     attribution = technical.setdefault("attribution", "unverified")
     if attribution not in ("isolated", "joint", "unverified") or attribution != expected:
         raise ValueError(f"technical attribution must be {expected} under the host change audit")
+    design = (evaluation or {}).get("research", {}).get("model_design")
+    assessments = technical.get("component_assessments")
+    if design is not None or assessments is not None:
+        components = {item["id"] for item in (design or {}).get("components", [])}
+        if not isinstance(assessments, list) or any(not isinstance(item, dict) for item in assessments):
+            raise ValueError("component_assessments must cover the current model_design")
+        ids = [item.get("component_id") for item in assessments]
+        if any(not isinstance(identifier, str) for identifier in ids) or len(set(ids)) != len(ids) or set(ids) != components:
+            raise ValueError("component_assessments must name every current component exactly once")
+        invalid = (implementation_status == "contradicted" or
+                   (evaluation or {}).get("trial_status") == "failed")
+        for item in assessments:
+            if item.get("outcome") not in ("promising", "inconclusive", "harmful", "invalid") or any(
+                    not isinstance(item.get(key), str) or not item[key].strip()
+                    for key in ("evidence", "compatibility_limits", "next_test")):
+                raise ValueError("component_assessments need outcome, evidence, compatibility_limits, next_test")
+            if invalid and item["outcome"] not in ("invalid", "inconclusive"):
+                raise ValueError("invalid trials cannot establish component outcomes")
+            allowed = {"unverified"}
+            if expected == "joint":
+                allowed.add("joint")
+            if expected == "isolated" and audit.get("changed_factors") == [item["component_id"]]:
+                allowed.add("isolated")
+            if item.get("attribution", "unverified") not in allowed:
+                raise ValueError("component attribution exceeds the host change audit")
+            item.setdefault("attribution", "unverified")
     business = reflection.get("business_experience")
     if not isinstance(business, dict) or business.get("status") not in (
             "observed", "not_observable"):
@@ -283,7 +310,7 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
 
 
 def _proposal(value: object, snapshot: dict, catalog: dict, *,
-              evidence: list[dict] | None = None) -> dict:
+              evidence: list[dict] | None = None, sources: list[dict] | None = None) -> dict:
     if not isinstance(value, dict):
         raise ValueError("agent.propose() must return a dict")
     if value.get("action") != "experiment":
@@ -301,7 +328,7 @@ def _proposal(value: object, snapshot: dict, catalog: dict, *,
         raise ValueError(f"research.input_fields absent from task: {', '.join(map(str, missing))}")
     from .catalog import validate_research
 
-    checked_research = validate_research(value, snapshot, catalog, evidence=evidence)
+    checked_research = validate_research(value, snapshot, catalog, evidence=evidence, sources=sources)
     proposal = {"action": "experiment", "research": checked_research,
                 "candidate": value["candidate"]}
     if "reference_reads" in value:
@@ -330,7 +357,9 @@ def _reflect_pending(agent: object, snapshot: dict, state: dict,
         observation["evidence_status"] = "not_supplied"
     reflection = agent.reflect(json.loads(_json_bytes(observation)))
     if structured:
-        reflection = validate_reflection(reflection, step.get("evaluation"), snapshot,
+        evaluation = {**(step.get("evaluation") or {}), "research": step["proposal"]["research"],
+                      "trial_status": step["status"]}
+        reflection = validate_reflection(reflection, evaluation, snapshot,
                                          state["steps"], evidence=evidence)
     elif not isinstance(reflection, dict):
         raise ValueError("agent.reflect() must return a dict")
@@ -358,6 +387,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
                           training_applicability)
 
     snapshot = _snapshot(task)
+    if getattr(agent, "requires_model_design", False):
+        snapshot = {**snapshot, "model_design_required": True}
     applicability_report = applicability(snapshot, catalog)
     method_report = method_applicability(snapshot, catalog)
     decision_report = decision_applicability(snapshot, catalog)
@@ -428,6 +459,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "steps": state["steps"],
             "best_id": state["best_id"],
             "remaining_steps": max_steps - len(state["steps"]),
+            "composition_sources": composition_sources(state["steps"]),
         }
         if evidence is not None:
             context["evidence"] = evidence
@@ -464,7 +496,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         if action != "experiment":
             raise ValueError("action must be experiment, stop, or request_data")
 
-        proposal = _proposal(decision, snapshot, catalog, evidence=evidence)
+        proposal = _proposal(decision, snapshot, catalog, evidence=evidence,
+                             sources=composition_sources(state["steps"]))
         trial_id = f"trial_{len(state['steps']) + 1:03d}"
         trial_dir = output / trial_id
         trial_dir.mkdir(exist_ok=True)
