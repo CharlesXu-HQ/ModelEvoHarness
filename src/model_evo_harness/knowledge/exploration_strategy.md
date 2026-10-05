@@ -10,6 +10,8 @@ Before proposing, read the baseline and prior trials for one supported symptom: 
 
 Spend trials for information: when an inexpensive check of input shape, label semantics, score meaning, policy overlap, or a one-component ablation can reject a hypothesis, do that before trying another architecture. Cite host-observed facts separately from declared metadata and the Agent's interpretation. A list of intended code changes cannot verify what the executed candidate changed; use the host's implementation check and change audit when recording mechanism experience.
 
+Before claiming that a proposed structure adds expressive power, trace the parent code's prediction or score function and the candidate's function. Write the input-dependent term or interaction that is genuinely new **and reaches the score or action used by the fixed metric**. More parameters, another head, or a different class name do not establish this. If the code path cannot be derived from the available source and runtime facts, mark the claim unverified and ask for a small diagnostic. Keep a change to the metric-driving prediction or decision separate from a change that only adds output fields, logs, or diagnostics. For the latter, first check the output contract and shapes using an inexpensive adapter check; it is not an optimization-effect trial or a useful performance ablation while the score and action are unchanged.
+
 ## Diagnostic paths
 
 These are conditional examples, not an exhaustive or required sequence. `Reference` means the repository has a local model core for at least part of the mechanism; `design` means the idea is guidance until an adapter or independent implementation supplies it.
@@ -31,6 +33,8 @@ For retrieval, **exposed but unclicked** is an observed non-click, not automatic
 ## Close the loop without inventing certainty
 
 Write one falsifiable mechanism, an unchanged control, required data and a rejection signal. A failed experiment should narrow the next hypothesis; a metric improvement alone does not prove the mechanism or business cause. The journal's best validation score is an **exploratory champion**. Ask the host for paired uncertainty, guardrail checks and a separately protected final holdout before describing a candidate as independently validated. RecBole's [significance-test workflow](https://recbole.io/docs/user_guide/usage/significance_test.html) is a comparison example, not a substitute for the host's correct unit and estimator.
+
+In reflection, correct premises contradicted by parent-code algebra or observed execution before recording technical experience. State which terms actually feed the evaluated score, which changes only improve observability, and which parts remain unverified. Do not suggest a performance ablation that only toggles an extra reporting field; use a cheap contract check, then return to a hypothesis that could change the prediction or decision.
 
 A confidence interval that crosses zero does not establish equivalence, nor does a narrower policy-effect interval by itself show that a model's treatment-effect predictions have lower variance. Distinct policies can have the same aggregate estimate; inspect selected-unit identities and paired contributions before calling this an evaluation anomaly.
 

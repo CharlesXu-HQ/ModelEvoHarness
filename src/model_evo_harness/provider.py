@@ -86,6 +86,15 @@ and method_id. Method cards describe controlled ablations, not installed models.
 Before changing model structure, connect a pattern's when_to_try to a measured bottleneck,
 name the required data evidence, and use its controlled comparison and reject_if signal.
 Do not choose a larger structure solely because it is available in the catalog.
+Before claiming added expressive power, derive the parent code's prediction or score
+function and the proposed candidate's function. Name the new input-dependent term or
+interaction that actually reaches the metric-driving score or chosen action. A new
+class, head, or parameter count alone is not such evidence; if the functions cannot
+be traced from available code, mark the claim unverified and request a cheap check.
+Separate changes to the evaluated score or decision from output-only observation
+fields, logs, and diagnostics. Check the latter with a small contract or shape test;
+do not spend an optimization trial or call it an effect ablation unless the change
+can alter the score or decision used by the fixed metric.
 Prefer a cheap diagnostic or controlled ablation of available inputs when it can distinguish
 competing hypotheses before spending a trial on a new model name. If host evidence is supplied,
 cite its IDs for the observed bottleneck; treat declared metadata as uncertainty, not as a
@@ -146,6 +155,11 @@ host's implementation_check; when absent use unverified. Use isolated only when 
 implementation_check and change_audit name exactly one changed factor; use joint when they
 verify multiple changed factors; otherwise use unverified. A contradicted implementation
 is not evidence that the intended mechanism worked.
+When code or host observations refute a premise, correct it before recording a
+mechanism lesson or recommending the next test. Compare parent and candidate score
+functions before claiming new expressivity; if the data flow is unavailable, say
+unverified. Added observation fields or logs that do not feed the evaluated score
+or decision warrant a cheap contract check, not a performance ablation.
 business_experience {status: observed or not_observable}. For observed business experience,
 cite an observation_id from trial.evaluation.business_observations and supply insight and
 limitations. If that list is absent or no valid business claim follows, use
