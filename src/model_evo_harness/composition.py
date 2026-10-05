@@ -41,7 +41,7 @@ def _components(items: object, snapshot: dict) -> dict[str, dict]:
     for item in items:
         if not isinstance(item, dict):
             raise ValueError("component must be an object")
-        current = {key: _text(item.get(key), f"component.{key}") for key in ("id", "mechanism")}
+        current: dict = {key: _text(item.get(key), f"component.{key}") for key in ("id", "mechanism")}
         current.update({key: _strings(item.get(key), f"component.{key}", nonempty=key == "code_sections")
                         for key in ("code_sections", "input_fields", "required_capabilities")})
         if not set(current["input_fields"]).issubset(snapshot.get("fields", [])):
@@ -56,11 +56,11 @@ def _components(items: object, snapshot: dict) -> dict[str, dict]:
     return components
 
 
-def validate_model_design(design: dict, snapshot: dict, sources: list[dict]) -> dict:
+def validate_model_design(design: object, snapshot: dict, sources: list[dict]) -> dict:
     """Validate a local iteration or selective migration against recorded parents."""
     if not isinstance(design, dict):
         raise ValueError("model_design must be an object")
-    result = {key: _text(design.get(key), f"model_design.{key}")
+    result: dict = {key: _text(design.get(key), f"model_design.{key}")
               for key in ("estimator", "backbone", "rationale", "data_fit", "comparison_plan")}
     scope = design.get("change_scope")
     if scope not in ("initialize", "local", "switch"):
@@ -76,7 +76,7 @@ def validate_model_design(design: dict, snapshot: dict, sources: list[dict]) -> 
         parent_id = _text(parent_id, "parent_trial_id")
         if parent_id not in indexed:
             raise ValueError("parent_trial_id must reference a source")
-    parent = indexed.get(parent_id, {}).get("research", {}).get("model_design")
+    parent = indexed[parent_id]["research"].get("model_design") if parent_id is not None else None
     if scope == "initialize":
         if any(item["research"].get("model_design") for item in indexed.values()):
             raise ValueError("initialize cannot reset tracked model_design history")
@@ -94,7 +94,7 @@ def validate_model_design(design: dict, snapshot: dict, sources: list[dict]) -> 
     for item in inheritance:
         if not isinstance(item, dict):
             raise ValueError("inheritance entry must be an object")
-        entry = {key: _text(item.get(key), f"inheritance.{key}") for key in
+        entry: dict = {key: _text(item.get(key), f"inheritance.{key}") for key in
                  ("source_trial_id", "component_id", "reason", "compatibility", "validation_plan")}
         pair = (entry["source_trial_id"], entry["component_id"])
         if pair in seen:
@@ -115,7 +115,8 @@ def validate_model_design(design: dict, snapshot: dict, sources: list[dict]) -> 
             eligibility = eligibility.get("status")
         reflection = source["reflection"]
         assessments = reflection.get("technical_experience", {}).get("component_assessments", [])
-        invalid = (source.get("status") != "evaluated" or
+        reviewed = any(assessment.get("component_id") == pair[1] for assessment in assessments)
+        invalid = (not reviewed or source.get("status") != "evaluated" or
                    eligibility in ("failed", "contradicted") or
                    (isinstance(eligibility, str) and eligibility.startswith("blocked_")) or
                    source["implementation_check"].get("status") == "contradicted" or
@@ -123,7 +124,7 @@ def validate_model_design(design: dict, snapshot: dict, sources: list[dict]) -> 
                    any(assessment.get("component_id") == pair[1] and
                        assessment.get("outcome") in ("invalid", "harmful") for assessment in assessments))
         if invalid and decision in ("retain", "adapt"):
-            raise ValueError("invalid source components require drop or retest")
+            raise ValueError("invalid or unreviewed source components require drop or retest")
         entry["decision"] = decision
         target_id = item.get("target_component_id")
         if decision == "drop":

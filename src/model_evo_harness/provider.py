@@ -104,7 +104,8 @@ For local or switch, account for every parent component, and cite any other dono
 host-supplied trial/component IDs. Read the donor code before claiming source reuse; metadata
 alone is not copied code. Keep compatible improvements, adapt interfaces/objectives when
 needed, drop incompatible or harmful parts with reasons, and retest uncertain or invalid
-ideas as new hypotheses. Reject invented data semantics and check shape, timing, output
+ideas as new hypotheses. A source without a matching component assessment may only be
+dropped or retested; an inconclusive assessment never becomes proven by reuse. Reject invented data semantics and check shape, timing, output
 scale, objective, sampling and fitting/cross-fitting boundaries. Do not carry fitted weights
 or preprocessing state across splits. Transferring a design does not establish transfer gain.
 Compare the previous recipe, a plain new-backbone control, and the selectively composed
@@ -229,9 +230,9 @@ claim success on an unseen final holdout."""
 
 
 class OpenAICompatibleAgent:
-    requires_model_design = True
-
     """Send task-level context to an OpenAI-compatible chat-completions endpoint."""
+
+    requires_model_design = True
 
     def __init__(self, provider_url: str, api_key: str, model: str, *,
                  thinking: str = "omit", iteration_effort: str = "high",

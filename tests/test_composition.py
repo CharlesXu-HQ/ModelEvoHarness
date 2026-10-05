@@ -21,8 +21,16 @@ def design():
             "inheritance": []}
 
 
+def assessment(identifier="cross", outcome="inconclusive"):
+    return {"component_id": identifier, "outcome": outcome, "attribution": "unverified",
+            "evidence": "The evaluated joint change did not isolate this component",
+            "compatibility_limits": "Aggregate tabular fields with unchanged output semantics",
+            "next_test": "Run a component ablation with the fixed evaluation protocol"}
+
+
 def source(identifier="trial_001", **extra):
-    return {"id": identifier, "status": "evaluated", "research": {"model_design": design()}, **extra}
+    return {"id": identifier, "status": "evaluated", "research": {"model_design": design()},
+            "reflection": {"technical_experience": {"component_assessments": [assessment()]}}, **extra}
 
 
 def inherit(identifier="cross", decision="retain", source_id="trial_001"):
@@ -84,6 +92,8 @@ class CompositionTests(unittest.TestCase):
     def test_selective_transfer_keeps_adapts_drops_and_borrows(self):
         parent = source()
         parent["research"]["model_design"]["components"] += [component("loss"), component("sequence")]
+        parent["reflection"]["technical_experience"]["component_assessments"] += [
+            assessment("loss"), assessment("sequence")]
         parent["research"]["model_design"]["components"][2]["required_capabilities"] = ["sequence"]
         borrowed = source("trial_002")
         borrowed["research"]["model_design"]["components"] = [component("regularizer")]
@@ -113,6 +123,32 @@ class CompositionTests(unittest.TestCase):
                     validate_model_design(candidate, SNAPSHOT, [source(**metadata)])
             candidate["inheritance"] = [inherit(decision="retest")]
             self.assertEqual(validate_model_design(candidate, SNAPSHOT, [source(**metadata)])["inheritance"][0]["decision"], "retest")
+
+    def test_missing_component_review_requires_drop_or_retest(self):
+        for reflection in [{}, {"technical_experience": {}},
+                           {"technical_experience": {"component_assessments": []}},
+                           {"technical_experience": {"component_assessments": [assessment("other")]}}]:
+            parent = source(reflection=reflection)
+            for decision in ("retain", "adapt"):
+                candidate = local()
+                candidate["inheritance"] = [inherit(decision=decision)]
+                with self.assertRaisesRegex(ValueError, "retest"):
+                    validate_model_design(candidate, SNAPSHOT, [parent])
+            for decision in ("drop", "retest"):
+                candidate["inheritance"] = [inherit(decision=decision)]
+                checked = validate_model_design(candidate, SNAPSHOT, [parent])
+                self.assertEqual(checked["inheritance"][0]["decision"], decision)
+            self.assertEqual(parent["reflection"], reflection)
+
+    def test_inconclusive_review_can_be_retained_without_inventing_evidence(self):
+        parent = source()
+        original = copy.deepcopy(parent)
+        checked = validate_model_design(local(), SNAPSHOT, [parent])
+        self.assertEqual(checked["inheritance"][0]["decision"], "retain")
+        self.assertEqual(parent, original)
+        recorded = composition_sources([parent])[0]["reflection"]["technical_experience"]["component_assessments"][0]
+        self.assertEqual(recorded["outcome"], "inconclusive")
+        self.assertEqual(recorded["attribution"], "unverified")
 
     def test_retain_cannot_silently_change_component(self):
         for key, value in [("mechanism", "Different interaction"), ("code_sections", ["Other.forward"]),

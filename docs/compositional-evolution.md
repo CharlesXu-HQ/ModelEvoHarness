@@ -68,7 +68,7 @@ The four decisions mean:
 | drop | Exclude the source component with a reason; no target component mapping. |
 | retest | Revisit an uncertain, failed or invalid idea as a new hypothesis; no inherited claim of success. |
 
-Invalid, unevaluated, blocked or harmful source components can only be dropped or retested. Plans referencing invented source/component IDs, unavailable fields/capabilities, missing parent dispositions, or a switch disguised as a local change fail validation. This checks declarations and lineage; it does not statically prove that the code followed the plan. The host must compare donor/candidate source, actual prediction paths and runtime contracts.
+Invalid, unevaluated, blocked or harmful source components, and components without a recorded assessment, can only be dropped or retested. An assessed but inconclusive component may be carried as an explicit hypothesis with its uncertainty; this does not establish a gain. Plans referencing invented source/component IDs, unavailable fields/capabilities, missing parent dispositions, or a switch disguised as a local change fail validation. This checks declarations and lineage; it does not statically prove that the code followed the plan. The host must compare donor/candidate source, actual prediction paths and runtime contracts.
 
 ## Reflection and evidence
 
