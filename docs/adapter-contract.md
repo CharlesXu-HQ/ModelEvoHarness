@@ -1,6 +1,8 @@
 # Task and Agent adapter contract
 
-ModelEvoHarness coordinates offline experiments and does not read your training rows. A task adapter exposes three methods. An Agent exposes two. Both can be plain Python objects available as `module:symbol`; the CLI calls a zero-argument symbol if it is a factory.
+ModelEvoHarness coordinates offline experiments; the host keeps the training rows and evaluator. A task adapter provides `snapshot()`, `baseline()` and `evaluate()`. An Agent provides `propose()` and `reflect()`. Both may be plain Python objects exported as `module:symbol`; the CLI calls a zero-argument symbol if it is a factory.
+
+## Task snapshot and evaluation
 
 ```python
 from pathlib import Path
@@ -9,10 +11,11 @@ class Task:
     def snapshot(self) -> dict:
         return {
             "task_id": "my-ranking-task-v1",
-            "dataset_digest": "sha256-of-frozen-dataset-and-split",
-            "stage": "ranking",  # e.g. retrieval, ranking, reranking, generation, policy
-            "fields": ["user_age", "item_category"],  # actual decision-time inputs
-            "capabilities": ["tabular_features", "observed_outcome_labels", "item_catalog"],
+            "dataset_digest": "sha256-of-frozen-data-and-split",
+            "stage": "ranking",  # e.g. retrieval, ranking, reranking, policy
+            "framework": "pytorch",  # or tensorflow; selects model API examples for the Agent
+            "fields": ["user_age", "item_category"],
+            "capabilities": ["tabular_features", "observed_outcome_labels"],
             "objective": {"name": "ndcg_at_10", "direction": "max"},
             "constraints": {"max_training_minutes": 30},
             "evaluation_protocol": {
@@ -23,20 +26,40 @@ class Task:
         }
 
     def baseline(self, trial_dir: Path) -> dict:
-        # Train/evaluate the fixed baseline on your validation split.
+        # Train/evaluate the fixed baseline using the host's validation split.
         return {"score": 0.0, "metrics": {"ndcg_at_10": 0.0}}
 
     def evaluate(self, proposal: dict, trial_dir: Path) -> dict:
-        # Interpret proposal["candidate"], train in your sandbox, evaluate on
-        # the same validation definition, and return the same score shape.
+        # Train proposal["candidate"] in the host sandbox and use the same evaluator.
         return {"score": 0.0, "metrics": {"ndcg_at_10": 0.0}}
 ```
 
-The numeric examples above describe the **return shape**, not a bundled dataset or benchmark result. Use the real evaluator and full eligible dataset for actual experiments. `score` must be finite. The task owns the target metric, direction, constraints, uncertainty estimates, execution environment and final holdout. Put any paired interval or guardrail outcomes in `metrics`; the harness uses `score` only to track the current best by the declared direction.
+The numeric returns illustrate the **shape**, not bundled data or benchmark scores. `score` must be finite and `metrics` must be a dictionary. The host owns the primary metric, uncertainty calculation, compute environment, action constraints and final holdout. Put paired intervals and guardrails in `metrics`; the harness uses `score` only to track the best validation candidate in the declared direction.
 
-`fields` lists raw inputs the Agent may name. `capabilities` is an open set of data contracts established by the host, such as `tabular_features`, `observed_outcome_labels`, `event_sequence`, `interaction_graph`, `item_catalog`, `candidate_slates`, `multiple_outcomes`, `scenario_context`, `assignment_or_exposure_propensity`, or `generative_targets`. Do not infer a capability from a column dtype or invented business meaning. Freeze `snapshot()` for a run; changing the snapshot, dataset digest, package version or catalog digest prevents resume.
+`fields` lists actual inputs available before the decision. `capabilities` declares verified data contracts, such as `tabular_features`, `event_sequence`, `item_catalog`, `candidate_slates`, `multiple_outcomes`, `assignment_or_exposure_propensity`, `implicit_feedback`, `negative_sampler_definition`, or `calibration_split`. The harness does not derive those facts from column names or dtypes. A `feature_schema` may describe categorical, dense or sequence fields, cardinality and decision-time availability. Freeze the snapshot for one run; task, data, catalog, protocol or package implementation changes prevent resume.
 
-`evaluation_protocol` is optional for older adapters and recommended for comparable experiments. When present it needs nonempty `unit`, `split` and `metric`; retrieval and reranking also need `candidate_universe`, and an `implicit_feedback` task needs `negative_source`. Declare full versus sampled evaluation, cutoff/order, label provenance, preprocessing, K and sampler identity wherever relevant. The harness fingerprints the entire protocol and refuses resume if it changes. It does not infer these facts from data or make full-catalog and sampled-negative metrics comparable. The host still enforces the actual split and evaluator. A host can also supply a `feature_schema` in the snapshot and declare `typed_feature_schema` or `categorical_field_identities` only after verifying categorical/dense/sequence semantics and decision-time availability.
+`evaluation_protocol` is optional for older adapters but recommended. When present, `unit`, `split` and `metric` are required; retrieval and reranking also require `candidate_universe`, and declared implicit feedback requires `negative_source`. Record full versus sampled evaluation, cutoff/order, label provenance, preprocessing, K and sampler identity where relevant. The harness fingerprints the protocol; the host must enforce it and keep final holdout separate.
+
+### Explicit domain prerequisites
+
+If business expertise establishes an essential missing input before model experiments, the host can put a requirement in the frozen snapshot:
+
+```python
+snapshot["domain_requirements"] = [{
+    "id": "known-availability-contract",
+    "fields": ["item_availability"],
+    "source": "inventory eligibility contract",
+    "as_of": "available before the ranking request",
+}]
+```
+
+Each item requires a unique `id`, nonempty `fields`, `source` and `as_of`. The listed fields must be absent from `snapshot.fields` for a corresponding data request. The Agent may cite this exact host item and request the data immediately; it cannot invent a business requirement from a weak metric or a suggestive field name.
+
+### Measured business observations
+
+`baseline()` or `evaluate()` may add a `business_observations` list. Each observation has a unique `id`, `population`, `metric`, finite numeric `estimate`, and a nonempty `uncertainty` description. The host defines the outcome, population, treatment/action, cost basis and estimator. For example, a host might report a randomized policy-value difference with its paired interval; the harness validates the record shape and reference identity, while the host remains responsible for causal and statistical validity. Without such an observation, the Agent cannot record an observed business insight.
+
+## Agent context and proposal
 
 ```python
 class Agent:
@@ -44,30 +67,56 @@ class Agent:
     def reflect(self, observation: dict) -> dict: ...
 ```
 
-`context` includes the task snapshot, catalog, per-family and per-method applicability, decision-check applicability, baseline, completed trials, best ID and remaining step count. The catalog also contains structural patterns: each describes the change in computation, measured symptom that would justify trying it, needed evidence, control and rejection signal. `observation` includes the new trial and its evaluation status so the Agent can compare the outcome with its prediction or react to a failed candidate evaluation. The provider included in this package implements the same two methods; a host can supply its own Agent.
+`context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides, ready `model_api` signatures, baseline, completed trials, best ID and remaining steps. The catalog includes 22 research families, 44 method cards, structural patterns, training patterns and a model implementation manifest. `method_applicability.frameworks` reports direct PyTorch/TensorFlow code for each card. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both. The generic `two_tower` example is in the implementation manifest but is not one of the 44 method cards. A `ready` method means its inputs are declared; it does not prove that the method helps.
 
-An experiment proposal uses this JSON shape:
+A proposal has this shape:
 
 ```json
 {
   "action": "experiment",
-  "candidate": {"artifact": "host-defined candidate configuration or source"},
+  "candidate": {"artifact": "host-defined configuration or source"},
   "research": {
     "family_id": "feature_interactions",
     "method_id": "fm",
-    "direction": "Test explicit pair interactions",
-    "mechanism": "Add a low-rank interaction term",
-    "why_now": "Previous validation shows an underfit subgroup with sufficient support",
-    "data_rationale": "The declared raw fields are available before the decision",
+    "direction": "Test supported pair interactions",
+    "mechanism": "Add a low-rank pair term",
+    "why_now": "A previous validation slice has repeatable residuals and enough support",
+    "data_rationale": "The named fields are available before the decision",
     "input_fields": ["user_age", "item_category"],
-    "comparison": "Same data, training budget and evaluator without the interaction term",
-    "expected_result": "Validation NDCG@10 increases under the fixed split",
-    "falsification": "No improvement or unstable gain across paired evaluation",
-    "alternatives": [{"direction": "More depth", "mechanism": "Add MLP layers", "reason": "Does not isolate the proposed interaction"}]
+    "comparison": "Same rows, budget and evaluator without the pair term",
+    "expected_result": "The fixed validation metric improves",
+    "falsification": "No gain or a gain unstable across paired evaluation",
+    "alternatives": [{"direction": "More depth", "mechanism": "Add MLP layers", "reason": "Does not isolate the proposed pair effect"}]
   }
 }
 ```
 
-`family_id` and `method_id` are optional. Known family IDs and method IDs are screened against task stage and capabilities; omit them for a new direction outside the catalog. If both are present, the method must belong to the family. `input_fields` may be empty when the experiment changes only a policy over existing predictions or needs no covariates. Alternatives are considered options, not completed trials. The Agent may return `{"action":"request_data","request":{...}}` to record a specific missing-input request, or `{"action":"stop","reason":"..."}` when it has no justified next experiment or the budget is exhausted.
+`family_id` and `method_id` are optional; omit them for a justified new direction. Known IDs are checked against stage and capabilities, and a method must belong to its named family. `input_fields` names only fields in the snapshot; it may be empty for a decision-rule experiment over existing predictions. Training changes such as focal loss or hard-negative mining are first-class [training patterns](../src/model_evo_harness/data/training_patterns.json); the proposal still names one mechanism and a controlled comparison. Alternatives are considered options, not completed trials.
 
-The harness stores journal data in `output/journal.json`, writing through an atomic replace. A failed `evaluate()` call becomes a failed trial with a bounded error type so resume does not silently repeat the same candidate. Do not include API credentials or raw user rows in `snapshot()`, proposals, metrics or reflections; these are intended for review and can be committed selectively. Reserve final holdout evaluation for a separate host step after selecting a candidate.
+The Agent may instead return `{"action":"stop","reason":"..."}` or a terminal `request_data`. A data request names absent `fields`, `source`, `as_of`, `reason`, `evidence` and `validation_plan`, then uses one of two `basis` values:
+
+- `domain_requirement`: cite `requirement_id` matching a host snapshot item, including its fields, source and timing. This path needs no preceding experiment.
+- `experimental_evidence`: cite `trial_ids` for at least two **completed, evaluated** experiments with distinct `research.mechanism` values, plus `alternatives_considered`. The Agent explains why the missing input remains the likely blocker after those tests.
+
+A request that passes the validator ends the run with `needs_data`. `future_feature_suggestions` also require two evaluated trials with distinct mechanisms or a matching explicit host domain requirement. They record a specific field idea while experiments continue on the current dataset.
+
+## Reflection and experience
+
+After a trial, `reflect()` returns separate records:
+
+```json
+{
+  "technical_experience": {
+    "lesson": "What the comparison showed about the mechanism",
+    "evidence": "Which trial metrics and control support that reading",
+    "uncertainty": "Limits, interval or variance caveat",
+    "next_test": "A falsifiable follow-up"
+  },
+  "business_experience": {"status": "not_observable", "reason": "No host business observation was supplied"},
+  "future_feature_suggestions": []
+}
+```
+
+For `business_experience.status = "observed"`, include an `observation_id` present in that trial's `evaluation.business_observations`, plus nonempty `insight` and `limitations`. The technical lesson can concern structure, feature representation, loss, sampling, optimization, calibration or decision mapping. A business insight concerns a defined population and measured outcome; its wording must not outrun the observation's uncertainty or causal design. Both types remain bound to the task and dataset fingerprint.
+
+The journal is stored in `output/journal.json` through an atomic replace. Failed `evaluate()` calls become failed trials with a bounded error type. Do not include API keys or raw user rows in snapshots, proposals, metrics or reflections. The final holdout is a separate host action after selecting a candidate.

@@ -1,0 +1,544 @@
+{
+  "model_implementations": [
+    {
+      "id": "afm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:AFM",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "afm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:AFM",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "aitm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:AITM",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "aitm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:AITM",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "apg",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:APG",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "apg",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:APG",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "autoint",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:AutoInt",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "autoint",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:AutoInt",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "biassvd",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:BiasSVD",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "biassvd",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:BiasSVD",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "dcn",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:DCN",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "dcn",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:DCN",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "dcn_v2",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:DCNv2",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "dcn_v2",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:DCNv2",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "deepfm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:DeepFM",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "deepfm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:DeepFM",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "dien",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:DIEN",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "dien",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:DIEN",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "din",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:DIN",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "din",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:DIN",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "dsin",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:DSIN",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "dsin",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:DSIN",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "dssm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:DSSM",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "dssm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:DSSM",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "eges",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:EGES",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "eges",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:EGES",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "esmm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:ESMM",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "esmm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:ESMM",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "fibinet",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:FiBiNET",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "fibinet",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:FiBiNET",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "fm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:FM",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "fm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:FM",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "fm_recall",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:FMRecall",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "fm_recall",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:FMRecall",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "funksvd",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:FunkSVD",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "funksvd",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:FunkSVD",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "fwfm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:FwFM",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "fwfm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:FwFM",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "hmoe",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:HMoE",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "hmoe",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:HMoE",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "hstu",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:HSTU",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "hstu",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:HSTU",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "item2vec",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:Item2Vec",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "item2vec",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:Item2Vec",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "item_cf",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:ItemCF",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "item_cf",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:ItemCF",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "m2m",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:M2M",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "m2m",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:M2M",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "mind",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:MIND",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "mind",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:MIND",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "mlr",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.segmentation:MLR",
+      "file": "models/pytorch/segmentation.py"
+    },
+    {
+      "id": "mlr",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.segmentation:MLR",
+      "file": "models/tensorflow/segmentation.py"
+    },
+    {
+      "id": "mmoe",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:MMoE",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "mmoe",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:MMoE",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "narm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:NARM",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "narm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:NARM",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "nfm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:NFM",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "nfm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:NFM",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "pepnet",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:PEPNet",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "pepnet",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:PEPNet",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "ple",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:PLE",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "ple",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:PLE",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "pnn",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:PNN",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "pnn",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:PNN",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "prm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:PRM",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "prm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:PRM",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "prs",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:PRS",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "prs",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:PRS",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "sasrec",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:SASRec",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "sasrec",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:SASRec",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "sdm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence:SDM",
+      "file": "models/pytorch/sequence.py"
+    },
+    {
+      "id": "sdm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence:SDM",
+      "file": "models/tensorflow/sequence.py"
+    },
+    {
+      "id": "shared_bottom",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:SharedBottom",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "shared_bottom",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:SharedBottom",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "star",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multitask:STAR",
+      "file": "models/pytorch/multitask.py"
+    },
+    {
+      "id": "star",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multitask:STAR",
+      "file": "models/tensorflow/multitask.py"
+    },
+    {
+      "id": "swing",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:Swing",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "swing",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:Swing",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "two_tower",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.architectures:TwoTower",
+      "file": "models/pytorch/architectures.py"
+    },
+    {
+      "id": "two_tower",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.architectures:TwoTower",
+      "file": "models/tensorflow/architectures.py"
+    },
+    {
+      "id": "user_cf",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:UserCF",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "user_cf",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:UserCF",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "wide_deep",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:WideDeep",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "wide_deep",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:WideDeep",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "xdeepfm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interactions:XDeepFM",
+      "file": "models/pytorch/interactions.py"
+    },
+    {
+      "id": "xdeepfm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interactions:XDeepFM",
+      "file": "models/tensorflow/interactions.py"
+    },
+    {
+      "id": "youtube_sbc",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:YouTubeSBC",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "youtube_sbc",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:YouTubeSBC",
+      "file": "models/tensorflow/retrieval.py"
+    },
+    {
+      "id": "youtubednn",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.retrieval:YouTubeDNN",
+      "file": "models/pytorch/retrieval.py"
+    },
+    {
+      "id": "youtubednn",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.retrieval:YouTubeDNN",
+      "file": "models/tensorflow/retrieval.py"
+    }
+  ]
+}

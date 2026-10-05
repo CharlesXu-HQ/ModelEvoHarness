@@ -1,36 +1,43 @@
 # ModelEvoHarness
 
-[中文](README.zh-CN.md) · [Model-structure guide](docs/multi-source-guidance.md) · [Research coverage](docs/source-coverage.md) · [Adapter contract](docs/adapter-contract.md)
+[中文](README.zh-CN.md) · [Local technical knowledge](docs/knowledge/README.md) · [Model references](docs/models.md) · [Task adapter](docs/adapter-contract.md)
 
-ModelEvoHarness runs **Agent-led, falsifiable offline model experiments** across recommendation, search, advertising, and marketing. An Agent reads the fixed task and previous results, chooses a mechanism, states a control and predicted result, submits a candidate, then reflects on the measured outcome. The harness checks data prerequisites and records the experiment. Your task adapter trains the candidate and evaluates it under your own split, metrics and execution rules.
+ModelEvoHarness is an **Agent-led offline experiment harness** for recommendation, search, advertising, and marketing. The Agent sees a frozen task, prior trials, and local technical knowledge; it proposes a falsifiable change, runs it through the host's evaluator, then records what the result supports. Model selection is only one direction. Losses, sampling, hard-example mining, optimization, calibration, feature representations, and decision rules can be tested under the same fixed protocol.
 
-The original research map traces 55 FunRec chapter pages, 38 model modules, 54 supporting modules and 50 production backend modules into 19 families. Each model module has a method card describing its mechanism, required data contracts, controlled comparison, failure signals and implementation boundary. A separate review of DeepCTR, Torch-RecHub, RecBole and Wang Shusen's recommendation materials adds six method cards, three conditional families, structural-change patterns and experiment decision checks. The Agent can choose a ready family or method card, or propose a direction outside the catalog. These are research references, not bundled model implementations.
+## What an algorithm engineer gets
 
-## Why this exists
-
-A model name is not an experiment. To tell whether a new architecture helps, the Agent must identify the bottleneck it expects to fix, compare against a stable control, use fields that exist before the decision, and name a result that would reject the hypothesis. ModelEvoHarness makes those steps part of the executable loop. It distinguishes a considered alternative from a completed trial and binds lessons to the exact task and dataset version.
-
-The [model-structure guide](docs/multi-source-guidance.md) answers **when to try a structure**: explicit or field-aware crosses for a measured interaction gap, session intent for ordered in-session events, ordered-task transfer for a real multi-step label funnel, and other data-conditional choices. Each pattern records the expected mechanism, prerequisite evidence, controlled ablation and rejection signal. Architecture changes compete with simpler explanations, including feature semantics, sampling, evaluation protocol and the rule that maps predictions to actions.
-
-| Boundary | Owner |
+| Component | Purpose |
 | --- | --- |
-| Research coverage, family and method applicability checks, experiment design, Agent loop, journal and run-scoped task history | ModelEvoHarness |
-| Dataset semantics, train/validation/test split, candidate execution, GPU use, objective and uncertainty calculation | Task adapter |
-| Hypothesis, candidate artifact, data request and reflection | Agent |
+| [22 local technical guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads the applicable guide from the installed package without fetching another repository. |
+| 44 method cards and [structure patterns](docs/multi-source-guidance.md) | State *when* a method may address a measured bottleneck. A `ready` data contract is not a recommendation or an implementation claim. |
+| [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
+| [44 direct-framework model cores](docs/models.md) | Every method card has independently written PyTorch and TensorFlow code, with generic TwoTower as one additional structure. The [manifest](src/model_evo_harness/data/model_implementations.json) gives exact class paths. Outputs include logits, retrieval scores, probabilities and representations; the host supplies the appropriate loss and evaluator. No model wrapper is required. |
+| Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 
-## Use it
+The [source attribution](docs/research/source-attribution.md) records the upstream work that informed the research map. The explanations and model code in this repository are original; upstream prose and code are not mirrored here. Coverage is explained in [research source coverage](docs/source-coverage.md).
 
-Requires Python 3.12 or newer. Install from the repository:
+## The experiment loop
+
+1. Read the task's available fields, objective, evaluation protocol, and previous trials. Diagnose the current failure using measured evidence and the applicable local guides.
+2. Propose one mechanism, a stable control, an expected result, and a rejection condition. The host adapter trains the candidate and evaluates it on the same validation definition.
+3. Compare prediction and decision metrics with uncertainty, then record **technical experience** separately from **business experience**. A business claim must cite a measured `business_observations` entry supplied by the host; otherwise it is `not_observable`.
+4. Continue, stop, or request a human dataset change. The Agent records `future_feature_suggestions` after two distinct evaluated mechanisms, or immediately when the host declares an explicit business prerequisite. A terminal data request cites the completed trials and evidence, or the matching `domain_requirements` item.
+
+The task adapter owns raw data, model training, GPU selection, splits, objective, uncertainty calculation, final holdout, and action constraints. The harness validates the experiment record and applicability; it does not infer business semantics from column names or assert a model gain. See the [adapter contract](docs/adapter-contract.md).
+
+## Integrate a task
+
+Requires Python 3.12 or newer. Install the package and inspect its catalog:
 
 ```bash
 pip install git+https://github.com/CharlesXu-HQ/ModelEvoHarness.git
 model-evo-harness catalog-check
 ```
 
-Implement the small [task adapter](docs/adapter-contract.md), then run the loop with an importable task and an OpenAI-compatible provider:
+Implement `snapshot()`, `baseline()` and `evaluate()` in your task adapter, then provide an Agent with `propose()` and `reflect()` or use the included OpenAI-compatible provider:
 
 ```bash
-export MODEL_AGENT_API_KEY=...  # set in your shell; do not put it in config or the repository
+export MODEL_AGENT_API_KEY=...  # keep credentials out of repository files
 model-evo-harness run \
   --task my_project.experiments:task \
   --agent-config agent.json \
@@ -38,16 +45,10 @@ model-evo-harness run \
   --max-steps 4
 ```
 
-`agent.json` specifies `provider_url`, `model`, `api_key_env`, `iteration_effort` (`high`) and `review_effort` (`max`). A local Agent object can be supplied with `--agent module:symbol` instead. Python applications can call `run_search(task, agent, output=..., catalog=load_catalog(), max_steps=4)` directly. The library has no dependency on a specific model framework, provider, recommender dataset or CouponEvo.
+`agent.json` defines `provider_url`, `model`, `api_key_env`, `iteration_effort` (`high`), and `review_effort` (`max`). Python hosts can call `run_search(task, agent, output=..., catalog=load_catalog(), max_steps=4)`. The framework does not require a particular model provider or training framework; the optional model references require PyTorch or TensorFlow only when imported.
 
-Each task snapshot declares a stage, available capabilities and actual input fields. The catalog labels every family and method card `ready`, `needs_data` or `other_stage`, with a reason, and passes applicable decision checks to the Agent. For example, a tabular coupon trial can test some feature interaction methods while sequence ranking requires time-safe event histories. `ready` establishes input availability; it does not claim that a model implementation exists or will improve a metric. An optional host-supplied `evaluation_protocol` records the unit, fixed split and metric plus candidate and sampling conditions where relevant; a changed protocol cannot resume the same run.
+[CouponEvo](https://github.com/CharlesXu-HQ/CouponEvo) is the first host integration. It supplies a randomized coupon task, candidate execution, and policy evaluation. The shared harness gives it an experiment protocol and technical knowledge. Adding this harness or its reference models does not itself demonstrate uplift or net-value improvement.
 
-The journal records baseline and trial scores, research designs, evaluation failures, reflections, selected best candidate, catalog digest and task identity. Resume fails if the dataset, objective, package implementation or catalog changes. History is scoped to the same run identity and dataset fingerprint. Keep final holdout data inside the task adapter; use validation results for iteration and reserve final evaluation for the selected candidate.
+## License
 
-## First integration
-
-[CouponEvo](https://github.com/CharlesXu-HQ/CouponEvo) is the first consumer. It supplies a randomized coupon task, PyTorch candidate sandbox and paired policy evaluation. ModelEvoHarness supplies the independent research catalog and design checks. The two projects are released and tested separately; CouponEvo's before/after results are reported as an integration benchmark, not as a guarantee of improvement.
-
-## Source and license
-
-The initial [research coverage](docs/source-coverage.md) is mapped to a pinned tree of [FunRec](https://github.com/datawhalechina/fun-rec). The [additional source comparison](docs/multi-source-guidance.md) records pinned revisions and accepted or deferred ideas from four other projects. FunRec's work is marked [CC BY-NC-SA 4.0](https://github.com/datawhalechina/fun-rec/blob/master/pyproject.toml). ModelEvoHarness independently writes its guidance, method cards and code under [Apache-2.0](LICENSE), with no upstream source code copied.
+ModelEvoHarness is [Apache-2.0](LICENSE). [Source attribution and reuse boundaries](docs/research/source-attribution.md) explain how its original material relates to FunRec, DeepCTR, Torch-RecHub, RecBole, and other research sources.

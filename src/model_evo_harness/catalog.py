@@ -1,11 +1,8 @@
-"""Research catalog and task-aware experiment checks.
-
-The bundled inventory records what was reviewed upstream. The catalog is
-original guidance; upstream source code is never imported or redistributed.
-"""
+"""Local research knowledge and task-aware experiment checks."""
 
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 from importlib.resources import files
@@ -18,10 +15,15 @@ def _bundled(name: str) -> dict:
 def load_catalog(*, extra_families: list[dict] | None = None) -> dict:
     catalog = _bundled("catalog.json")
     catalog["families"].extend(_bundled("supplemental_families.json")["families"])
+    for family in catalog["families"]:
+        family["local_guide"] = f"knowledge/{family['id']}.md"
     catalog["method_cards"] = _bundled("method_cards.json")["method_cards"]
     catalog["method_cards"].extend(_bundled("supplemental_method_cards.json")["method_cards"])
     catalog["decision_checks"] = _bundled("decision_checks.json")["decision_checks"]
     catalog["structure_patterns"] = _bundled("structure_patterns.json")["structure_patterns"]
+    catalog["training_patterns"] = _bundled("training_patterns.json")["training_patterns"]
+    catalog["model_implementations"] = _bundled("model_implementations.json")["model_implementations"]
+    catalog["experience_schema_version"] = 2
     if extra_families:
         catalog["families"].extend(extra_families)
     validate_catalog(catalog)
@@ -32,6 +34,43 @@ def load_inventory() -> dict:
     return _bundled("upstream_inventory.json")
 
 
+def load_guide(family_id: str) -> str:
+    """Read a bundled, original technical guide by catalog family ID."""
+    if not isinstance(family_id, str) or not family_id.replace("_", "").isalnum():
+        raise ValueError("family_id must contain only letters, digits, and underscores")
+    return files("model_evo_harness").joinpath("knowledge", f"{family_id}.md").read_text(
+        encoding="utf-8")
+
+
+def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
+    """Expose local model constructors and public operations without importing a DL runtime."""
+    if framework not in ("pytorch", "tensorflow"):
+        raise ValueError("framework must be pytorch or tensorflow")
+    package = files("model_evo_harness")
+    result = {}
+    for entry in catalog.get("model_implementations", []):
+        if entry["framework"] != framework or entry["id"] not in method_ids:
+            continue
+        name = entry["symbol"].split(":", 1)[1]
+        tree = ast.parse(package.joinpath(entry["file"]).read_text(encoding="utf-8"))
+        model = next((node for node in tree.body if isinstance(node, ast.ClassDef)
+                      and node.name == name), None)
+        if model is None:
+            raise ValueError(f"model symbol missing: {entry['symbol']}")
+        public = {node.name: f"{node.name}({ast.unparse(node.args)})"
+                  for node in model.body if isinstance(node, (ast.FunctionDef,
+                                                                 ast.AsyncFunctionDef))
+                  and (not node.name.startswith("_") or node.name == "__init__")}
+        result[entry["id"]] = {
+            "symbol": entry["symbol"], "file": entry["file"],
+            "description": ast.get_docstring(model) or "",
+            "inherits": [ast.unparse(base) for base in model.bases],
+            "constructor": public.pop("__init__", "inherited"),
+            "methods": public,
+        }
+    return result
+
+
 def catalog_digest(catalog: dict) -> str:
     validate_catalog(catalog)
     payload = json.dumps(catalog, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
@@ -39,16 +78,21 @@ def catalog_digest(catalog: dict) -> str:
 
 
 def implementation_digest() -> str:
-    """Identify installed decision logic as well as its bundled catalog."""
+    """Identify installed decision logic, local knowledge, and model examples."""
     package = files("model_evo_harness")
     digest = hashlib.sha256()
-    for name in ("__init__.py", "catalog.py", "engine.py", "provider.py", "data/catalog.json",
-                 "data/supplemental_families.json", "data/method_cards.json",
-                 "data/supplemental_method_cards.json",
-                 "data/decision_checks.json", "data/structure_patterns.json",
-                 "data/upstream_inventory.json"):
-        digest.update(name.encode())
-        digest.update(package.joinpath(name).read_bytes())
+
+    def visit(directory, prefix: str = "") -> None:
+        for item in sorted(directory.iterdir(), key=lambda entry: entry.name):
+            name = f"{prefix}{item.name}"
+            if item.is_dir():
+                if item.name != "__pycache__":
+                    visit(item, name + "/")
+            elif item.suffix in {".py", ".json", ".md"}:
+                digest.update(name.encode())
+                digest.update(item.read_bytes())
+
+    visit(package)
     return digest.hexdigest()
 
 
@@ -145,6 +189,39 @@ def validate_catalog(catalog: dict) -> None:
         if linked_methods.intersection(method_ids) or len(set(method_ids)) != len(method_ids):
             raise ValueError("a method cannot belong to duplicate structure patterns")
         linked_methods.update(method_ids)
+    training = catalog.get("training_patterns", [])
+    if not isinstance(training, list):
+        raise ValueError("training_patterns must be a list")
+    training_ids = set()
+    for pattern in training:
+        if not isinstance(pattern, dict):
+            raise ValueError("training pattern must be an object")
+        for key in ("id", "category", "mechanism", "when_to_try", "required_evidence",
+                    "controlled_comparison", "reject_if"):
+            if not isinstance(pattern.get(key), str) or not pattern[key].strip():
+                raise ValueError(f"training pattern needs nonempty {key}")
+        if pattern["id"] in training_ids:
+            raise ValueError(f"duplicate training pattern id: {pattern['id']}")
+        training_ids.add(pattern["id"])
+        for key in ("stages", "requires"):
+            if not isinstance(pattern.get(key), list) or any(
+                    not isinstance(value, str) or not value for value in pattern[key]):
+                raise ValueError(f"training pattern {pattern['id']} needs string list {key}")
+    implementations = catalog.get("model_implementations", [])
+    if not isinstance(implementations, list):
+        raise ValueError("model_implementations must be a list")
+    implementation_keys = set()
+    for entry in implementations:
+        if not isinstance(entry, dict) or any(
+                not isinstance(entry.get(key), str) or not entry[key].strip()
+                for key in ("id", "framework", "symbol", "file")):
+            raise ValueError("model implementation needs id, framework, symbol, file")
+        if entry["framework"] not in ("pytorch", "tensorflow"):
+            raise ValueError("model implementation framework must be pytorch or tensorflow")
+        key = (entry["id"], entry["framework"])
+        if key in implementation_keys:
+            raise ValueError("duplicate model implementation")
+        implementation_keys.add(key)
 
 
 def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
@@ -163,6 +240,7 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
     method_paths = [card["source_model"] for card in funrec_cards]
     family_models = {family["id"]: set(family["source_models"])
                      for family in funrec_families}
+    package = files("model_evo_harness")
     return {
         "source_commit_sha": inventory["commit_sha"],
         "source_tree_sha": inventory["tree_sha"],
@@ -189,6 +267,20 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
         "unmapped_project": sorted(set(inventory["production_project_modules"]) - set(project)),
         "unknown_project": sorted(set(project) - set(inventory["production_project_modules"])),
         "duplicate_project": sorted({path for path in project if project.count(path) > 1}),
+        "missing_local_guides": sorted(family["id"] for family in catalog["families"]
+                                       if family.get("local_guide") and not package.joinpath(
+                                           family["local_guide"]).is_file()),
+        "missing_implementation_files": sorted({entry["file"] for entry in
+                                                catalog.get("model_implementations", [])
+                                                if not package.joinpath(entry["file"]).is_file()}),
+        "missing_card_implementations": sorted(
+            f"{card['id']}:{framework}"
+            for card in catalog["method_cards"]
+            for framework in ("pytorch", "tensorflow")
+            if (card["id"], framework) not in {
+                (entry["id"], entry["framework"])
+                for entry in catalog.get("model_implementations", [])
+            }),
     }
 
 
@@ -214,6 +306,9 @@ def method_applicability(snapshot: dict, catalog: dict) -> list[dict]:
     """Screen model-specific experiments against stage and declared data contracts."""
     family_status = {item["family_id"]: item for item in applicability(snapshot, catalog)}
     capabilities = set(snapshot.get("capabilities", []))
+    implemented = {}
+    for item in catalog.get("model_implementations", []):
+        implemented.setdefault(item["id"], []).append(item["framework"])
     result = []
     for card in catalog.get("method_cards", []):
         family = family_status[card["family_id"]]
@@ -223,6 +318,7 @@ def method_applicability(snapshot: dict, catalog: dict) -> list[dict]:
         missing = sorted(set(missing) | set(family["missing_capabilities"])) if status == "needs_data" else []
         result.append({"method_id": card["id"], "family_id": card["family_id"],
                        "status": status, "missing_capabilities": missing,
+                       "frameworks": sorted(implemented.get(card["id"], [])),
                        "reason": family["reason"] if status == "other_stage" else
                                  f"requires {', '.join(missing)}" if missing else "requirements available"})
     return result
@@ -240,6 +336,25 @@ def decision_applicability(snapshot: dict, catalog: dict) -> list[dict]:
                   "not_triggered" if missing else "ready")
         result.append({"check_id": check["id"], "status": status,
                        "missing_capabilities": missing if status == "not_triggered" else []})
+    return result
+
+
+def training_applicability(snapshot: dict, catalog: dict) -> list[dict]:
+    """Screen loss, sampling and optimization experiments against task contracts."""
+    validate_catalog(catalog)
+    stage = snapshot.get("stage")
+    capabilities = set(snapshot.get("capabilities", []))
+    result = []
+    for pattern in catalog.get("training_patterns", []):
+        missing = sorted(set(pattern["requires"]) - capabilities)
+        status = ("other_stage" if pattern["stages"] and stage not in pattern["stages"] else
+                  "needs_data" if missing else "ready")
+        result.append({"pattern_id": pattern["id"], "status": status,
+                       "missing_capabilities": missing if status == "needs_data" else [],
+                       "reason": (f"task stage {stage!r} is outside {pattern['stages']}"
+                                  if status == "other_stage" else
+                                  f"requires {', '.join(missing)}" if missing else
+                                  "requirements available")})
     return result
 
 

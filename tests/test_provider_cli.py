@@ -58,7 +58,12 @@ class ProviderTests(unittest.TestCase):
         self.assertIn('"score": 0.2', second_body["messages"][1]["content"])
         self.assertIn("falsification", first_body["messages"][0]["content"])
         self.assertIn("not a closed", first_body["messages"][0]["content"])
+        self.assertIn("training_patterns", first_body["messages"][0]["content"])
+        self.assertIn("experimental_evidence", first_body["messages"][0]["content"])
+        self.assertIn("domain_requirement", first_body["messages"][0]["content"])
         self.assertIn("measured", second_body["messages"][0]["content"])
+        self.assertIn("technical_experience", second_body["messages"][0]["content"])
+        self.assertIn("business_experience", second_body["messages"][0]["content"])
 
     def test_rejects_invalid_url_and_invalid_json_without_exposing_key(self):
         with self.assertRaises(ValueError):
@@ -99,7 +104,9 @@ class CliTests(unittest.TestCase):
             def snapshot(self):
                 return {"task_id": "cli", "dataset_digest": "dataset-1", "stage": "ranking",
                         "objective": {"metric": "score", "direction": "max"},
-                        "fields": ["age"], "capabilities": ["tabular_features"]}
+                        "fields": ["age"], "capabilities": ["tabular_features"],
+                        "domain_requirements": [{"id": "ordered_history", "fields": ["sequence"],
+                                                 "source": "event log", "as_of": "before decision"}]}
 
             def baseline(self, trial_dir):
                 return {"score": 0.1, "metrics": {"score": 0.1}}
@@ -149,8 +156,11 @@ class CliTests(unittest.TestCase):
             body = json.loads(request.data)
             self.assertEqual(request.get_header("Authorization"), "Bearer key-from-env")
             self.assertEqual(body["reasoning_effort"], "high")
-            answer = {"action": "request_data", "request": {"fields": ["sequence"],
-                                                         "reason": "Need event order"}}
+            answer = {"action": "request_data", "request": {
+                "basis": "domain_requirement", "requirement_id": "ordered_history",
+                "fields": ["sequence"], "source": "event log", "as_of": "before decision",
+                "reason": "Need event order", "evidence": "Host requires ordered history",
+                "validation_plan": "Check timing and coverage"}}
             return io.BytesIO(json.dumps({"choices": [{"message": {
                 "content": json.dumps(answer)}}]}).encode())
 

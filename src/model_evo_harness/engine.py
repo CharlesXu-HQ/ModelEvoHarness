@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 
 
-PACKAGE_VERSION = "0.1.0"
+PACKAGE_VERSION = "0.2.0"
 
 
 def _json_bytes(value: object) -> bytes:
@@ -57,6 +57,23 @@ def _snapshot(task: object) -> dict:
     if not isinstance(snapshot.get("capabilities"), list) or any(
             not isinstance(capability, str) or not capability for capability in snapshot["capabilities"]):
         raise ValueError("task snapshot needs a list of capabilities")
+    if "framework" in snapshot and snapshot["framework"] not in ("pytorch", "tensorflow"):
+        raise ValueError("framework must be pytorch or tensorflow")
+    requirements = snapshot.get("domain_requirements", [])
+    if not isinstance(requirements, list):
+        raise ValueError("domain_requirements must be a list")
+    requirement_ids = set()
+    for requirement in requirements:
+        if not isinstance(requirement, dict) or any(
+                not isinstance(requirement.get(key), str) or not requirement[key].strip()
+                for key in ("id", "source", "as_of")) or not isinstance(
+                    requirement.get("fields"), list) or not requirement["fields"] or any(
+                    not isinstance(field, str) or not field.strip()
+                    for field in requirement["fields"]):
+            raise ValueError("domain requirement needs id, source, as_of, and fields")
+        if requirement["id"] in requirement_ids:
+            raise ValueError("duplicate domain requirement id")
+        requirement_ids.add(requirement["id"])
     protocol = snapshot.get("evaluation_protocol")
     if "evaluation_protocol" in snapshot:
         required = ["unit", "split", "metric"]
@@ -80,8 +97,108 @@ def _evaluation(value: object) -> dict:
         raise ValueError("evaluation needs a finite numeric score")
     if not isinstance(value.get("metrics"), dict):
         raise ValueError("evaluation needs a metrics dict")
+    observations = value.get("business_observations", [])
+    if not isinstance(observations, list):
+        raise ValueError("business_observations must be a list")
+    observed_ids = set()
+    for observation in observations:
+        if not isinstance(observation, dict) or any(
+                not isinstance(observation.get(key), str) or not observation[key].strip()
+                for key in ("id", "population", "metric", "uncertainty")) or isinstance(
+                    observation.get("estimate"), bool) or not isinstance(
+                    observation.get("estimate"), (int, float)) or not math.isfinite(
+                    observation["estimate"]):
+            raise ValueError("business observation needs id, population, metric, estimate, uncertainty")
+        if observation["id"] in observed_ids:
+            raise ValueError("duplicate business observation id")
+        observed_ids.add(observation["id"])
     _json_bytes(value)
     return value
+
+
+def validate_data_request(request: dict, snapshot: dict, steps: list[dict]) -> dict:
+    """Require experimental evidence or an explicit host-supplied domain rule."""
+    if not isinstance(request, dict) or any(
+            not isinstance(request.get(key), str) or not request[key].strip()
+            for key in ("source", "as_of", "reason", "evidence", "validation_plan")):
+        raise ValueError("data request needs source, as_of, reason, evidence, validation_plan")
+    fields = request.get("fields")
+    if not isinstance(fields, list) or not fields or any(
+            not isinstance(field, str) or not field.strip() for field in fields):
+        raise ValueError("data request needs nonempty fields")
+    if set(fields) & set(snapshot["fields"]):
+        raise ValueError("data request fields must be absent from the frozen dataset")
+    basis = request.get("basis")
+    if basis == "domain_requirement":
+        requirement = next((item for item in snapshot.get("domain_requirements", [])
+                            if item["id"] == request.get("requirement_id")), None)
+        if (requirement is None or not set(fields) <= set(requirement["fields"]) or
+                request["source"] != requirement["source"] or
+                request["as_of"] != requirement["as_of"]):
+            raise ValueError("data request needs a matching host domain requirement")
+    elif basis == "experimental_evidence":
+        trial_ids = request.get("trial_ids")
+        if (not isinstance(trial_ids, list) or
+                any(not isinstance(item, str) for item in trial_ids) or
+                len(set(trial_ids)) < 2 or
+                not isinstance(request.get("alternatives_considered"), str) or
+                not request["alternatives_considered"].strip()):
+            raise ValueError("experimental data request needs two distinct trials and alternatives")
+        evaluated = {step["id"]: step for step in steps if step["status"] == "evaluated"}
+        if any(trial_id not in evaluated for trial_id in trial_ids):
+            raise ValueError("experimental data request must cite completed evaluated trials")
+        mechanisms = {evaluated[trial_id]["proposal"]["research"]["mechanism"]
+                      for trial_id in trial_ids}
+        if len(mechanisms) < 2:
+            raise ValueError("experimental data request needs two distinct tested mechanisms")
+    else:
+        raise ValueError("data request basis must be domain_requirement or experimental_evidence")
+    _json_bytes(request)
+    return request
+
+
+def validate_reflection(reflection: dict, evaluation: dict | None,
+                        snapshot: dict, steps: list[dict]) -> dict:
+    """Keep technical and business lessons distinct and cite observed business data."""
+    if not isinstance(reflection, dict):
+        raise ValueError("agent.reflect() must return a dict")
+    technical = reflection.get("technical_experience")
+    if not isinstance(technical, dict) or any(
+            not isinstance(technical.get(key), str) or not technical[key].strip()
+            for key in ("lesson", "evidence", "uncertainty", "next_test")):
+        raise ValueError("technical_experience needs lesson, evidence, uncertainty, next_test")
+    business = reflection.get("business_experience")
+    if not isinstance(business, dict) or business.get("status") not in (
+            "observed", "not_observable"):
+        raise ValueError("business_experience needs observed or not_observable status")
+    if business["status"] == "observed":
+        known_ids = {item["id"] for item in (evaluation or {}).get("business_observations", [])}
+        if (business.get("observation_id") not in known_ids or any(
+                not isinstance(business.get(key), str) or not business[key].strip()
+                for key in ("insight", "limitations"))):
+            raise ValueError("observed business experience needs a measured business observation")
+    elif not isinstance(business.get("reason"), str) or not business["reason"].strip():
+        raise ValueError("not_observable business experience needs a reason")
+    suggestions = reflection.get("future_feature_suggestions", [])
+    if not isinstance(suggestions, list) or any(
+            not isinstance(item, dict) or any(
+                not isinstance(item.get(key), str) or not item[key].strip()
+                for key in ("field", "source", "as_of", "evidence", "validation_plan"))
+            for item in suggestions):
+        raise ValueError("future_feature_suggestions need field, source, as_of, evidence, validation_plan")
+    tested_mechanisms = {step["proposal"]["research"]["mechanism"] for step in steps
+                         if step["status"] == "evaluated"}
+    for suggestion in suggestions:
+        if suggestion["field"] in snapshot["fields"]:
+            raise ValueError("suggested feature is already in the frozen dataset")
+        explicit = any(suggestion["field"] in requirement["fields"] and
+                       suggestion["source"] == requirement["source"] and
+                       suggestion["as_of"] == requirement["as_of"]
+                       for requirement in snapshot.get("domain_requirements", []))
+        if not explicit and len(tested_mechanisms) < 2:
+            raise ValueError("future feature suggestion needs two distinct tested mechanisms or a host domain requirement")
+    _json_bytes(reflection)
+    return reflection
 
 
 def _proposal(value: object, snapshot: dict, catalog: dict) -> dict:
@@ -110,7 +227,7 @@ def _proposal(value: object, snapshot: dict, catalog: dict) -> dict:
 
 
 def _reflect_pending(agent: object, snapshot: dict, state: dict,
-                     max_steps: int, journal_path: Path) -> None:
+                     max_steps: int, journal_path: Path, *, structured: bool) -> None:
     step = state["steps"][-1]
     if "reflection" in step:
         return
@@ -123,9 +240,13 @@ def _reflect_pending(agent: object, snapshot: dict, state: dict,
         "remaining_steps": max(0, max_steps - len(state["steps"])),
     }
     reflection = agent.reflect(json.loads(_json_bytes(observation)))
-    if not isinstance(reflection, dict):
+    if structured:
+        reflection = validate_reflection(reflection, step.get("evaluation"), snapshot,
+                                         state["steps"])
+    elif not isinstance(reflection, dict):
         raise ValueError("agent.reflect() must return a dict")
-    _json_bytes(reflection)
+    else:
+        _json_bytes(reflection)
     step["reflection"] = reflection
     _write_journal(journal_path, state)
 
@@ -144,12 +265,25 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         raise ValueError("catalog must be a dict")
 
     from .catalog import (applicability, catalog_digest, decision_applicability,
-                          implementation_digest, method_applicability)
+                          implementation_digest, load_guide, model_api, method_applicability,
+                          training_applicability)
 
     snapshot = _snapshot(task)
     applicability_report = applicability(snapshot, catalog)
     method_report = method_applicability(snapshot, catalog)
     decision_report = decision_applicability(snapshot, catalog)
+    training_report = training_applicability(snapshot, catalog)
+    knowledge = {item["family_id"]: load_guide(item["family_id"])
+                 for item in applicability_report if item["status"] == "ready" and
+                 any(family["id"] == item["family_id"] and family.get("local_guide")
+                     for family in catalog["families"])}
+    ready_methods = {item["method_id"] for item in method_report if item["status"] == "ready"}
+    frameworks = ((snapshot["framework"],) if "framework" in snapshot else
+                  ("pytorch", "tensorflow"))
+    model_apis = {framework: model_api(catalog, framework=framework,
+                                      method_ids=ready_methods)
+                  for framework in frameworks}
+    structured = catalog.get("experience_schema_version") == 2
     identity = {
         "task_id": snapshot["task_id"],
         "dataset_digest": snapshot["dataset_digest"],
@@ -176,7 +310,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         if state["status"] in ("stopped", "needs_data"):
             return state
         if state["steps"] and "reflection" not in state["steps"][-1]:
-            _reflect_pending(agent, snapshot, state, max_steps, journal_path)
+            _reflect_pending(agent, snapshot, state, max_steps, journal_path,
+                             structured=structured)
     else:
         if journal_path.exists():
             raise FileExistsError(f"journal already exists: {journal_path}; use resume=True")
@@ -194,6 +329,9 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "applicability": applicability_report,
             "method_applicability": method_report,
             "decision_applicability": decision_report,
+            "training_applicability": training_report,
+            "knowledge": knowledge,
+            "model_api": model_apis,
             "baseline": state["baseline"],
             "steps": state["steps"],
             "best_id": state["best_id"],
@@ -216,7 +354,10 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             request = decision.get("request")
             if not isinstance(request, dict) or not request:
                 raise ValueError("request_data action needs a concrete request")
-            _json_bytes(request)
+            if structured:
+                validate_data_request(request, snapshot, state["steps"])
+            else:
+                _json_bytes(request)
             state["status"] = "needs_data"
             state["data_request"] = request
             _write_journal(journal_path, state)
@@ -248,7 +389,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         state["steps"].append(step)
         state["status"] = "running"
         _write_journal(journal_path, state)
-        _reflect_pending(agent, snapshot, state, max_steps, journal_path)
+        _reflect_pending(agent, snapshot, state, max_steps, journal_path,
+                         structured=structured)
 
     state["status"] = "completed"
     _write_journal(journal_path, state)

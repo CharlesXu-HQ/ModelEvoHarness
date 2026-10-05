@@ -1,0 +1,121 @@
+{
+  "training_patterns": [
+    {
+      "id": "focal_loss", "category": "loss", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["observed_outcome_labels"],
+      "mechanism": "Downweight already well-classified examples in a binary outcome loss.",
+      "when_to_try": "A rare outcome is underfit on supported slices while plain binary cross-entropy is dominated by easy examples.",
+      "required_evidence": "Outcome prevalence, per-class and calibration metrics, and the same observed label definition.",
+      "controlled_comparison": "Keep model, rows, optimizer budget and threshold rule fixed; compare binary cross-entropy with focal loss across gamma values chosen only on training/validation.",
+      "reject_if": "Held-out primary metric or calibration degrades, or gain vanishes when class weighting is controlled."
+    },
+    {
+      "id": "pairwise_ranking_loss", "category": "loss", "stages": ["retrieval", "ranking"],
+      "requires": ["implicit_feedback", "negative_sampler_definition"],
+      "mechanism": "Train positive scores above sampled negative scores rather than fit each sampled label independently.",
+      "when_to_try": "Pointwise training improves sampled classification but fixed-universe top-K ranking remains weak.",
+      "required_evidence": "User-positive pairs, negative-sampling provenance, candidate universe and full or declared evaluation protocol.",
+      "controlled_comparison": "Use identical model, positives, negatives and compute budget; change only pointwise versus pairwise loss.",
+      "reject_if": "Full-universe top-K gain is absent or depends on an incompatible negative sampler."
+    },
+    {
+      "id": "listwise_ranking_loss", "category": "loss", "stages": ["ranking", "reranking"],
+      "requires": ["candidate_slates", "observed_outcome_labels"],
+      "mechanism": "Optimize a normalized distribution over a query or slate instead of independent item labels.",
+      "when_to_try": "Per-item calibration is adequate but query-level ordering or slate utility is poor.",
+      "required_evidence": "Complete candidate groups, group-level labels, exposure rules and a fixed group metric.",
+      "controlled_comparison": "Keep candidate groups, backbone, labels and training budget fixed; compare pointwise and listwise objectives.",
+      "reject_if": "Group metric does not improve or missing candidates make the normalization misleading."
+    },
+    {
+      "id": "multi_task_loss_balance", "category": "loss", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["multiple_outcomes"],
+      "mechanism": "Change relative task-loss weights while keeping shared architecture fixed.",
+      "when_to_try": "One outcome improves while the declared primary outcome or guardrail regresses.",
+      "required_evidence": "Task label coverage, scale and missingness, primary metric and guardrails.",
+      "controlled_comparison": "Freeze inputs, task heads and split; compare fixed equal weights with one prespecified weighting rule.",
+      "reject_if": "Primary objective or required guardrail regresses, or weights exploit label missingness."
+    },
+    {
+      "id": "hard_negative_mining", "category": "sampling", "stages": ["retrieval"],
+      "requires": ["implicit_feedback", "negative_sampler_definition", "item_catalog", "exposure_logs"],
+      "mechanism": "Mine confusable exposed non-clicked items while mixing random negatives and guarding against unobserved positives.",
+      "when_to_try": "Random negatives are trivially separated but recall on exposed, similar items remains low.",
+      "required_evidence": "Time-safe exposure logs, item catalog, sampler probabilities and false-negative risk by popularity slice.",
+      "controlled_comparison": "Keep tower, positive events, batch size, total negatives and evaluation universe fixed; vary only hard-negative share.",
+      "reject_if": "Full-catalog recall or coverage falls, false-negative contamination grows, or mining uses future interactions."
+    },
+    {
+      "id": "hard_example_weighting", "category": "sampling", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["observed_outcome_labels"],
+      "mechanism": "Increase weight of difficult training rows using out-of-fold or lagged predictions rather than current-row label leakage.",
+      "when_to_try": "Stable, sufficiently supported residual slices remain underfit after simpler architecture and loss tests.",
+      "required_evidence": "Out-of-fold difficulty scores, slice support, outcome noise audit and effective sample-size report.",
+      "controlled_comparison": "Fix model, rows and compute; compare uniform weights with capped hard-example weights under the same evaluator.",
+      "reject_if": "Weighted fit overfits noisy labels, shrinks effective sample size excessively or worsens held-out slices."
+    },
+    {
+      "id": "class_balanced_sampling", "category": "sampling", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["observed_outcome_labels"],
+      "mechanism": "Rebalance training minibatches while accounting for changed class priors during calibration.",
+      "when_to_try": "Rare-label recall is poor and each class has enough independent examples for resampling.",
+      "required_evidence": "True label prevalence, unit-level duplication and calibration under the original validation distribution.",
+      "controlled_comparison": "Keep examples, architecture and steps fixed; compare natural and rebalanced minibatches with the same original-distribution validation.",
+      "reject_if": "Original-distribution utility or calibration degrades, or resampling duplicates units across splits."
+    },
+    {
+      "id": "learning_rate_schedule", "category": "optimization", "stages": [],
+      "requires": [],
+      "mechanism": "Change learning-rate trajectory without changing the model or objective.",
+      "when_to_try": "Training curves indicate oscillation, premature plateau or sensitivity to a fixed learning rate.",
+      "required_evidence": "Train and validation curves, optimizer state, matched updates and total compute budget.",
+      "controlled_comparison": "Keep model, loss, seed set and update count fixed; compare constant rate with one prespecified schedule.",
+      "reject_if": "Any apparent gain disappears at matched updates or increases run-to-run variance."
+    },
+    {
+      "id": "gradient_clipping", "category": "optimization", "stages": [],
+      "requires": [],
+      "mechanism": "Bound gradient norms to stabilize updates without changing features or network structure.",
+      "when_to_try": "Recorded gradient norms spike alongside loss divergence or unstable seed outcomes.",
+      "required_evidence": "Gradient-norm and loss traces plus a threshold chosen without final-holdout feedback.",
+      "controlled_comparison": "Keep all settings fixed and compare clipped versus unclipped updates at matched steps.",
+      "reject_if": "Training stability and held-out metric fail to improve, or clipping stalls learning."
+    },
+    {
+      "id": "weight_decay", "category": "regularization", "stages": [],
+      "requires": [],
+      "mechanism": "Penalize parameter magnitude while excluding parameters whose shrinkage would distort normalization or bias.",
+      "when_to_try": "Training metric rises while validation metric and calibration worsen with model capacity.",
+      "required_evidence": "Train-validation gap, parameter groups and fixed training budget.",
+      "controlled_comparison": "Use same architecture and updates; compare zero weight decay with one tuned on validation only.",
+      "reject_if": "Both training and held-out utility fall or small cohorts degrade beyond guardrails."
+    },
+    {
+      "id": "feature_dropout", "category": "regularization", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["tabular_features"],
+      "mechanism": "Randomly mask selected training inputs to reduce reliance on brittle fields.",
+      "when_to_try": "One pre-decision feature group dominates predictions and its coverage or stability is uncertain.",
+      "required_evidence": "Field-level attribution or ablation, missingness and serving-time availability.",
+      "controlled_comparison": "Keep fields and model fixed; vary only training-time mask rate and evaluate original validation inputs.",
+      "reject_if": "Primary metric drops or masking hides a genuine required signal."
+    },
+    {
+      "id": "temperature_calibration", "category": "calibration", "stages": ["ranking", "policy", "advertising"],
+      "requires": ["observed_outcome_labels", "calibration_split"],
+      "mechanism": "Fit a scalar temperature on a separate calibration split while freezing model logits.",
+      "when_to_try": "Ranking is adequate but probability estimates or action thresholds are systematically miscalibrated.",
+      "required_evidence": "Untouched calibration split, reliability curve, proper scoring rule and the fixed decision objective.",
+      "controlled_comparison": "Freeze the trained predictor and compare raw versus temperature-scaled probabilities before any action-rule change.",
+      "reject_if": "Calibration or downstream policy utility does not improve on validation, or calibration rows overlap model fitting."
+    },
+    {
+      "id": "time_safe_augmentation", "category": "augmentation", "stages": ["retrieval", "ranking", "policy"],
+      "requires": ["event_sequence"],
+      "mechanism": "Create training-only history views by masking or truncating pre-decision events without changing labels.",
+      "when_to_try": "Sequence models overfit sparse histories and valid shorter prefixes are common at serving time.",
+      "required_evidence": "Event timestamps, decision cutoff, sequence-length distribution and a no-future-event audit.",
+      "controlled_comparison": "Keep architecture, rows and evaluation prefixes fixed; compare unaugmented and one time-safe augmentation rule.",
+      "reject_if": "Prefix consistency or held-out utility worsens, or augmentation exposes future events."
+    }
+  ]
+}

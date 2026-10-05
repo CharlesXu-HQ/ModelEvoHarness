@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from model_evo_harness.catalog import load_catalog
 from model_evo_harness.engine import run_search
 
 
@@ -72,6 +73,20 @@ class Agent:
         return {"lesson": "Keep the strongest measured candidate"}
 
 
+def structured_reflection(*, observed=False, observation_id="policy_net"):
+    business = ({"status": "observed", "observation_id": observation_id,
+                 "insight": "The validation policy has measured net value",
+                 "limitations": "Only this randomized validation population"}
+                if observed else {"status": "not_observable",
+                                  "reason": "No semantically defined business observation"})
+    return {"technical_experience": {
+                "lesson": "The tested mechanism did not establish a gain",
+                "evidence": "The same validation split gives a lower score",
+                "uncertainty": "The host supplied no interval",
+                "next_test": "Try a different loss at the same inputs"},
+            "business_experience": business}
+
+
 class EngineTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -101,6 +116,22 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(result["steps"]), 2)  # An alternative is not an evaluated trial.
         self.assertEqual(json.loads((self.output / "journal.json").read_text()), result)
         self.assertEqual(task.baseline_calls, 1)
+
+    def test_agent_sees_eligible_local_model_api_for_selected_framework(self):
+        class ModelTask(Task):
+            def snapshot(self):
+                snapshot = super().snapshot()
+                snapshot.update(framework="pytorch", capabilities=[
+                    "tabular_features", "categorical_field_identities",
+                    "observed_outcome_labels"])
+                return snapshot
+
+        agent = Agent([{"action": "stop", "reason": "Inspect available structures"}])
+        run_search(ModelTask(), agent, output=self.output, catalog=load_catalog(), max_steps=1)
+        api = agent.contexts[0]["model_api"]
+        self.assertIn("fm", api["pytorch"])
+        self.assertNotIn("tensorflow", api)
+        self.assertIn("cardinalities", api["pytorch"]["fm"]["constructor"])
 
     def test_unknown_field_is_rejected_before_evaluation(self):
         task = Task()
@@ -194,6 +225,168 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(result["data_request"], request)
         self.assertEqual(result["steps"], [])
         self.assertEqual(task.evaluated, [])
+
+    def test_feature_request_needs_two_distinct_evaluated_mechanisms(self):
+        self.catalog["experience_schema_version"] = 2
+        request = {"basis": "experimental_evidence", "fields": ["prior_use"],
+                   "source": "pre-assignment event log", "as_of": "before assignment",
+                   "reason": "Residual gap remains", "evidence": "Two controlled trials retain the gap",
+                   "validation_plan": "Audit timestamps and coverage before publishing a new dataset",
+                   "trial_ids": ["trial_001", "trial_002"],
+                   "alternatives_considered": "Other available pre-treatment fields were tested"}
+
+        class StructuredAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection()
+
+        task = Task(scores=(0.3, 0.35))
+        second = experiment("change architecture")
+        second["research"]["mechanism"] = "Add explicit field-cross network"
+        agent = StructuredAgent([experiment("cross existing fields"), second,
+                                 {"action": "request_data", "request": request}])
+        result = run_search(task, agent, output=self.output, catalog=self.catalog, max_steps=3)
+        self.assertEqual(result["status"], "needs_data")
+        self.assertEqual(result["data_request"], request)
+        self.assertEqual(len(task.evaluated), 2)
+        self.assertIn("technical_experience", result["steps"][0]["reflection"])
+        self.assertIn("business_experience", result["steps"][0]["reflection"])
+
+    def test_feature_request_rejects_one_trial_as_insufficient_evidence(self):
+        self.catalog["experience_schema_version"] = 2
+        request = {"basis": "experimental_evidence", "fields": ["prior_use"],
+                   "source": "pre-assignment event log", "as_of": "before assignment",
+                   "reason": "Residual gap remains", "evidence": "One trial retains the gap",
+                   "validation_plan": "Audit timestamps and coverage",
+                   "trial_ids": ["trial_001"],
+                   "alternatives_considered": "No other available method tried"}
+
+        class StructuredAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection()
+
+        with self.assertRaisesRegex(ValueError, "two distinct"):
+            run_search(Task(scores=(0.3,)), StructuredAgent([experiment(),
+                {"action": "request_data", "request": request}]), output=self.output,
+                catalog=self.catalog, max_steps=2)
+
+    def test_feature_request_without_trials_needs_host_domain_requirement(self):
+        self.catalog["experience_schema_version"] = 2
+        request = {"basis": "domain_requirement", "requirement_id": "coupon_history",
+                   "fields": ["prior_use"], "source": "coupon event log",
+                   "as_of": "before assignment", "reason": "Eligibility requires prior use",
+                   "evidence": "Documented coupon eligibility rule",
+                   "validation_plan": "Audit join cutoff and coverage"}
+        task = Task()
+        with self.assertRaisesRegex(ValueError, "domain requirement"):
+            run_search(task, Agent([{"action": "request_data", "request": request}]),
+                       output=self.output, catalog=self.catalog, max_steps=1)
+        self.assertEqual(task.evaluated, [])
+
+    def test_host_domain_requirement_allows_immediate_feature_request(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class ExpertTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "domain_requirements": [{
+                    "id": "coupon_history", "source": "coupon event log",
+                    "fields": ["prior_use"], "as_of": "before assignment"}]}
+
+        request = {"basis": "domain_requirement", "requirement_id": "coupon_history",
+                   "fields": ["prior_use"], "source": "coupon event log",
+                   "as_of": "before assignment", "reason": "Eligibility requires prior use",
+                   "evidence": "Documented coupon eligibility rule",
+                   "validation_plan": "Audit join cutoff and coverage"}
+        task = ExpertTask()
+        result = run_search(task, Agent([{"action": "request_data", "request": request}]),
+                            output=self.output, catalog=self.catalog, max_steps=1)
+        self.assertEqual(result["status"], "needs_data")
+        self.assertEqual(task.evaluated, [])
+
+    def test_business_experience_must_cite_measured_host_observation(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class BusinessTask(Task):
+            def evaluate(self, proposal, trial_dir):
+                return {"score": 0.5, "metrics": {"score": 0.5},
+                        "business_observations": [{"id": "policy_net", "population": "validation users",
+                                                   "metric": "net_value", "estimate": 0.5,
+                                                   "uncertainty": "paired interval unavailable"}]}
+
+        class BusinessAgent(Agent):
+            def reflect(self, observation):
+                self.observations.append(observation)
+                return structured_reflection(observed=True)
+
+        agent = BusinessAgent([experiment()])
+        result = run_search(BusinessTask(), agent, output=self.output,
+                            catalog=self.catalog, max_steps=1)
+        self.assertEqual(result["steps"][0]["reflection"]["business_experience"]
+                         ["observation_id"], "policy_net")
+        self.assertEqual(agent.observations[0]["trial"]["evaluation"]
+                         ["business_observations"][0]["metric"], "net_value")
+
+    def test_future_feature_suggestion_waits_for_distinct_experiments(self):
+        self.catalog["experience_schema_version"] = 2
+        idea = {"field": "prior_use", "source": "coupon event log",
+                "as_of": "before assignment", "evidence": "Residual gap after tests",
+                "validation_plan": "Audit timestamp and coverage"}
+
+        class EarlyAgent(Agent):
+            def reflect(self, observation):
+                return {**structured_reflection(), "future_feature_suggestions": [idea]}
+
+        with self.assertRaisesRegex(ValueError, "two distinct"):
+            run_search(Task(scores=(0.3,)), EarlyAgent([experiment()]),
+                       output=self.output, catalog=self.catalog, max_steps=1)
+
+    def test_future_feature_suggestion_accepts_experiments_or_explicit_domain_rule(self):
+        self.catalog["experience_schema_version"] = 2
+        idea = {"field": "prior_use", "source": "coupon event log",
+                "as_of": "before assignment", "evidence": "Residual gap after tests",
+                "validation_plan": "Audit timestamp and coverage"}
+
+        class LaterAgent(Agent):
+            def reflect(self, observation):
+                result = structured_reflection()
+                if observation["trial"]["id"] == "trial_002":
+                    result["future_feature_suggestions"] = [idea]
+                return result
+
+        second = experiment("try explicit crosses")
+        second["research"]["mechanism"] = "Use explicit field interactions"
+        result = run_search(Task(scores=(0.3, 0.35)),
+                            LaterAgent([experiment(), second]), output=self.output,
+                            catalog=self.catalog, max_steps=2)
+        self.assertEqual(result["steps"][1]["reflection"]["future_feature_suggestions"],
+                         [idea])
+
+        class ExpertTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "domain_requirements": [{
+                    "id": "coupon_history", "source": "coupon event log",
+                    "fields": ["prior_use"], "as_of": "before assignment"}]}
+
+        class ExpertAgent(Agent):
+            def reflect(self, observation):
+                return {**structured_reflection(), "future_feature_suggestions": [idea]}
+
+        expert_dir = self.output / "expert"
+        result = run_search(ExpertTask(scores=(0.3,)),
+                            ExpertAgent([experiment()]), output=expert_dir,
+                            catalog=self.catalog, max_steps=1)
+        self.assertEqual(result["steps"][0]["reflection"]["future_feature_suggestions"],
+                         [idea])
+
+    def test_business_experience_rejects_unmeasured_observation(self):
+        self.catalog["experience_schema_version"] = 2
+
+        class UnsupportedAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection(observed=True, observation_id="invented_cohort")
+
+        with self.assertRaisesRegex(ValueError, "business observation"):
+            run_search(Task(scores=(0.3,)), UnsupportedAgent([experiment()]),
+                       output=self.output, catalog=self.catalog, max_steps=1)
 
     def test_stop_stops_without_evaluation(self):
         task = Task()

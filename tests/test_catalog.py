@@ -3,7 +3,8 @@ import unittest
 
 from model_evo_harness.catalog import (applicability, catalog_digest, coverage_report,
                                        decision_applicability, implementation_digest, load_catalog,
-                                       load_inventory, method_applicability,
+                                       load_inventory, load_guide, model_api, method_applicability,
+                                       training_applicability,
                                        validate_research)
 
 
@@ -28,6 +29,9 @@ class CatalogTests(unittest.TestCase):
         for key in ("unmapped_method_models", "unknown_method_models",
                     "duplicate_method_models", "misassigned_method_models"):
             self.assertEqual(report[key], [])
+        self.assertEqual(report["missing_local_guides"], [])
+        self.assertEqual(report["missing_implementation_files"], [])
+        self.assertEqual(report["missing_card_implementations"], [])
         self.assertEqual(sum(card.get("source_repo", "funrec") == "funrec"
                              for card in self.catalog["method_cards"]), 38)
         self.assertGreater(len(self.catalog["method_cards"]), 38)
@@ -45,6 +49,8 @@ class CatalogTests(unittest.TestCase):
         methods = {entry["method_id"]: entry for entry in method_applicability(self.task, self.catalog)}
         self.assertEqual(methods["fm"]["status"], "needs_data")
         self.assertIn("observed_outcome_labels", methods["fm"]["missing_capabilities"])
+        self.assertEqual(methods["fm"]["frameworks"], ["pytorch", "tensorflow"])
+        self.assertEqual(methods["hstu"]["frameworks"], ["pytorch", "tensorflow"])
         self.assertEqual(methods["din"]["status"], "needs_data")
         self.assertEqual(methods["dcn_v2"]["status"], "needs_data")
         self.assertIn("typed_feature_schema", methods["dcn_v2"]["missing_capabilities"])
@@ -88,6 +94,57 @@ class CatalogTests(unittest.TestCase):
         changed["families"][0]["question"] += " more"
         self.assertNotEqual(original, catalog_digest(changed))
         self.assertEqual(len(implementation_digest()), 64)
+
+    def test_all_families_have_substantive_local_guides(self):
+        for family in self.catalog["families"]:
+            with self.subTest(family=family["id"]):
+                guide = load_guide(family["id"])
+                self.assertGreater(len(guide.split()), 150)
+                self.assertIn("##", guide)
+                self.assertIn("## Research lineage", guide)
+
+    def test_training_methods_screen_actual_data_contracts(self):
+        patterns = self.catalog["training_patterns"]
+        self.assertTrue({"loss", "sampling", "optimization", "regularization", "calibration"}
+                        <= {item["category"] for item in patterns})
+        self.assertTrue(any(item["id"] == "hard_negative_mining" for item in patterns))
+        screen = {item["pattern_id"]: item for item in
+                  training_applicability(self.task, self.catalog)}
+        self.assertEqual(screen["hard_negative_mining"]["status"], "other_stage")
+        self.assertEqual(screen["focal_loss"]["status"], "needs_data")
+        self.task["capabilities"].append("observed_outcome_labels")
+        screen = {item["pattern_id"]: item for item in
+                  training_applicability(self.task, self.catalog)}
+        self.assertEqual(screen["focal_loss"]["status"], "ready")
+
+    def test_model_manifest_distinguishes_code_from_guidance(self):
+        implementations = self.catalog["model_implementations"]
+        card_ids = {card["id"] for card in self.catalog["method_cards"]}
+        self.assertEqual(len(card_ids), 44)
+        self.assertEqual(len(implementations), 2 * (len(card_ids) + 1))
+        self.assertEqual({item["id"] for item in implementations}, card_ids | {"two_tower"})
+        for method_id in card_ids:
+            with self.subTest(method=method_id):
+                self.assertEqual({item["framework"] for item in implementations
+                                  if item["id"] == method_id}, {"pytorch", "tensorflow"})
+        for framework in ("pytorch", "tensorflow"):
+            with self.subTest(framework=framework):
+                self.assertEqual(set(model_api(self.catalog, framework=framework,
+                                               method_ids=card_ids | {"two_tower"})),
+                                 card_ids | {"two_tower"})
+
+    def test_agent_can_read_local_model_api_without_importing_frameworks(self):
+        pytorch = model_api(self.catalog, framework="pytorch",
+                            method_ids={"fm", "mlr", "biassvd"})
+        self.assertEqual(set(pytorch), {"fm", "mlr", "biassvd"})
+        self.assertIn("cardinalities", pytorch["fm"]["constructor"])
+        self.assertIn("forward", pytorch["fm"]["methods"])
+        self.assertIn("num_users", pytorch["biassvd"]["constructor"])
+        self.assertIn("forward", pytorch["biassvd"]["methods"])
+        self.assertEqual(pytorch["mlr"]["symbol"],
+                         "model_evo_harness.models.pytorch.segmentation:MLR")
+        tensorflow = model_api(self.catalog, framework="tensorflow", method_ids={"mlr"})
+        self.assertIn("call", tensorflow["mlr"]["methods"])
 
     def test_external_method_preserves_funrec_inventory_checks(self):
         external = copy.deepcopy(next(card for card in self.catalog["method_cards"]

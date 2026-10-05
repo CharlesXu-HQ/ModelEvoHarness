@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
         report = coverage_report(load_catalog())
         print(json.dumps(report, indent=2, ensure_ascii=False))
         issue_keys = tuple(key for key in report if key.startswith(
-            ("unmapped_", "unknown_", "duplicate_", "misassigned_")))
+            ("unmapped_", "unknown_", "duplicate_", "misassigned_", "missing_")))
         return int(any(report[key] for key in issue_keys))
 
     try:
