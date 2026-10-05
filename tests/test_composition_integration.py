@@ -9,7 +9,8 @@ from model_evo_harness.provider import propose_with_references
 
 
 def design():
-    return {'estimator': 'supervised', 'backbone': 'mlp', 'change_scope': 'initialize',
+    return {'estimator_id': 'supervised', 'backbone_id': 'mlp',
+            'estimator': 'supervised', 'backbone': 'mlp', 'change_scope': 'initialize',
             'parent_trial_id': None, 'rationale': 'Start a tracked baseline',
             'data_fit': 'Use observed tabular fields', 'comparison_plan': 'Fixed split control',
             'components': [{'id': 'cross', 'mechanism': 'Field interactions before the head',
@@ -90,6 +91,7 @@ class CompositionIntegrationTests(unittest.TestCase):
                                    parent_trial_id=f"trial_{index:03d}")
                     if index == 2:
                         current["backbone"] = "shared_encoder"
+                        current["backbone_id"] = "shared_encoder"
                     current["inheritance"] = [
                         {"source_trial_id": f"trial_{index:03d}", "component_id": item["id"],
                          "decision": "retain", "target_component_id": item["id"],

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+
 
 def _text(value: object, name: str) -> str:
     if not isinstance(value, str) or not value.strip():
@@ -18,11 +20,28 @@ def _strings(value: object, name: str, *, nonempty: bool = False) -> list[str]:
     return result
 
 
+def model_design_identity(design: dict) -> dict[str, str]:
+    """Read stable IDs, deriving deterministic IDs for older description-only records."""
+    identity = {}
+    for axis in ("estimator", "backbone"):
+        key = f"{axis}_id"
+        if key in design:
+            identity[key] = _text(design[key], f"model_design.{key}")
+        else:
+            description = _text(design.get(axis), f"model_design.{axis}")
+            digest = hashlib.sha256(description.encode()).hexdigest()[:16]
+            identity[key] = f"{axis}-{digest}"
+    return identity
+
+
 def composition_sources(steps: list[dict]) -> list[dict]:
     """Expose compact lineage from core proposals or host-native trial records."""
     sources = []
     for step in steps:
         research = step.get("research") or step.get("proposal", {}).get("research", {})
+        design = research.get("model_design")
+        if design:
+            research = {**research, "model_design": {**design, **model_design_identity(design)}}
         evaluation = step.get("evaluation") or {}
         analysis = step.get("analysis") or {}
         review = analysis.get("max") or analysis.get("high") or analysis
@@ -77,15 +96,24 @@ def validate_model_design(design: object, snapshot: dict, sources: list[dict]) -
         if parent_id not in indexed:
             raise ValueError("parent_trial_id must reference a source")
     parent = indexed[parent_id]["research"].get("model_design") if parent_id is not None else None
+    identity = model_design_identity(design)
+    if parent:
+        parent_identity = model_design_identity(parent)
+        for axis in ("estimator", "backbone"):
+            key = f"{axis}_id"
+            if key not in design and (scope == "local" or result[axis] == parent.get(axis)):
+                identity[key] = parent_identity[key]
+    result.update(identity)
     if scope == "initialize":
         if any(item["research"].get("model_design") for item in indexed.values()):
             raise ValueError("initialize cannot reset tracked model_design history")
     else:
         if not parent:
             raise ValueError("local/switch needs a parent source with model_design")
-        same = all(result[key] == parent.get(key) for key in ("estimator", "backbone"))
+        same = identity == model_design_identity(parent)
         if (scope == "local" and not same) or (scope == "switch" and same):
-            raise ValueError("local preserves estimator/backbone; switch must change at least one")
+            raise ValueError("local preserves estimator_id/backbone_id (omit them to inherit the parent IDs); "
+                             "switch must change at least one ID. Edit estimator/backbone descriptions freely.")
     components = _components(design.get("components"), snapshot)
     inheritance = design.get("inheritance")
     if not isinstance(inheritance, list):

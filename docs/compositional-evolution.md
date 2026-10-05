@@ -20,8 +20,10 @@ Add `research.model_design` alongside the existing falsifiable research fields:
 
 ```json
 {
-  "estimator": "t_learner",
-  "backbone": "tabular_mlp",
+  "estimator_id": "t_learner",
+  "backbone_id": "tabular_mlp",
+  "estimator": "Two independent outcome models",
+  "backbone": "Tabular MLP with an interaction branch",
   "change_scope": "initialize",
   "parent_trial_id": null,
   "rationale": "Begin a tracked recipe after inspecting the untracked seed",
@@ -43,7 +45,9 @@ Add `research.model_design` alongside the existing falsifiable research fields:
 
 This is a schema example, not an evaluated recipe. Actual `input_fields`, capabilities and code locations must come from the task and candidate. Training-only components may have empty input/capability lists. `reference_method_id` is optional for original code; when present it must name a bundled implementation for the host framework, and triggers bounded source reading even without a top-level `method_id`. Reading an entire reference module does not make its full-model prerequisites optional.
 
-`initialize` registers a recipe only when no prior tracked design exists. `local` keeps estimator/backbone IDs; `switch` changes at least one. These IDs are open strings; host code review must detect a misleading rename or an undeclared structural change.
+`estimator_id` and `backbone_id` are stable identifiers. `estimator` and `backbone` describe the current recipe and may change when a branch is ablated, a loss changes, or a component is adapted. For `local`, omit IDs to inherit them from the parent, or supply the exact parent IDs. Description edits do not change identity; explicitly different IDs are rejected for a local edit. Existing records without IDs get deterministic IDs when read, without rewriting the original journal. New canonical records store the IDs, so subsequent description changes cannot alter them.
+
+`initialize` registers a recipe only when no prior tracked design exists. `local` keeps the two IDs; `switch` changes at least one. IDs are declarations, not proof of the actual computation; host code review must still detect a misleading rename or an undeclared structural change. For an older switch proposal without IDs, unchanged descriptions preserve the corresponding parent ID and changed descriptions receive deterministic IDs.
 
 Each local/switch proposal names its `parent_trial_id` and accounts for **every parent component**. Extra donors may be cited from the same host-supplied history. An inheritance item is:
 

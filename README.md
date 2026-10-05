@@ -41,7 +41,7 @@ The default research unit is a change inside a compatible backbone: read local r
 
 Every tracked recipe names its components and code locations. On the next iteration, the Agent accounts for each parent component as **retain, adapt, drop, or retest**, with source trial, compatibility and a validation plan. A new backbone therefore starts with an explicit review of accumulated improvements. References attached to components trigger the same bounded source-reading loop as whole-model selections. Joint gains keep their attribution limits; a transferred component does not become proven by reuse.
 
-Data contracts still decide what is possible. Few tabular fields can support crosses or training changes, while sequence/target-aware designs require real declared inputs. This is a preference for informative within-backbone experiments, not a ban on switching. See the [composition contract and example](docs/compositional-evolution.md). The built-in provider enables it; custom adapters may opt in with `model_design_required=true`.
+Data contracts still decide what is possible. Few tabular fields can support crosses or training changes, while sequence/target-aware designs require real declared inputs. This is a preference for informative within-backbone experiments, not a ban on switching. Stable `estimator_id` / `backbone_id` are separate from editable structure descriptions; local changes inherit parent IDs when omitted. See the [composition contract and example](docs/compositional-evolution.md). The built-in provider enables it; custom adapters may opt in with `model_design_required=true`.
 
 ## Integrate a task
 

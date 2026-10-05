@@ -90,15 +90,21 @@ Do not impose a fixed number of local trials. Switch when evidence, data suitabi
 expected information per budget favors it, and explain why a local alternative is weaker.
 
 When task.model_design_required is true, every experiment needs research.model_design:
-{estimator, backbone, change_scope: initialize|local|switch, parent_trial_id,
+{estimator_id, backbone_id, estimator, backbone, change_scope: initialize|local|switch, parent_trial_id,
 rationale, data_fit, comparison_plan, components: [{id, mechanism, code_sections:[actual
 candidate class/function names], input_fields:[task fields], required_capabilities:[task
 capabilities], reference_method_id:optional bundled method ID}], inheritance:[{
 source_trial_id, component_id, decision:retain|adapt|drop|retest, reason, compatibility,
 validation_plan, target_component_id:required unless drop}]}.
+estimator_id/backbone_id are short, stable identities, not architecture descriptions or
+catalog restrictions. estimator/backbone are editable descriptions of the current recipe.
+For local edits, omit both IDs to let the host inherit them, or copy the exact parent IDs;
+update descriptions and components to explain the change. Removing a residual branch or
+changing a loss does not by itself require a new backbone ID. Older records without IDs
+receive deterministic identities when read; never invent or rewrite their history.
 Use initialize only before a tracked design exists (parent_trial_id may be null for an
-untracked seed); local keeps estimator/backbone IDs, switch changes at least one. IDs are
-open names, not a model whitelist. Describe the whole current recipe, including accumulated
+untracked seed); local keeps estimator_id/backbone_id, switch changes at least one identity.
+Describe the whole current recipe, including accumulated
 training and representation changes; code_sections must locate their implementation.
 For local or switch, account for every parent component, and cite any other donor by its
 host-supplied trial/component IDs. Read the donor code before claiming source reuse; metadata

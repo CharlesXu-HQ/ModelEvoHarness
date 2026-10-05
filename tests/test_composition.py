@@ -55,6 +55,49 @@ class CompositionTests(unittest.TestCase):
         self.assertEqual(canonical["backbone"], "MLP")
         self.assertEqual(canonical["components"][0]["reference_method_id"], "fm")
 
+    def test_local_description_changes_inherit_identity_from_legacy_parent(self):
+        parent = source()
+        original = copy.deepcopy(parent)
+        candidate = local()
+        candidate.update(estimator="Two independent treatment arm estimators",
+                         backbone="MLP with the residual branch ablated")
+        initialized = validate_model_design(parent["research"]["model_design"], SNAPSHOT, [])
+        current = validate_model_design(candidate, SNAPSHOT, [parent])
+        self.assertEqual(current["backbone"], candidate["backbone"])
+        for key in ("estimator_id", "backbone_id"):
+            self.assertEqual(current[key], initialized[key])
+        self.assertEqual(parent, original)
+        parent["research"]["model_design"] = current
+        candidate["backbone"] = "Same backbone, changed regularization"
+        following = validate_model_design(candidate, SNAPSHOT, [parent])
+        self.assertEqual(following["backbone_id"], current["backbone_id"])
+
+    def test_local_explicit_ids_are_checked_independently_of_descriptions(self):
+        parent = source()
+        parent["research"]["model_design"].update(estimator_id="t_learner", backbone_id="arm_net")
+        candidate = local()
+        candidate.update(estimator_id="t_learner", backbone_id="arm_net", backbone="Ablated ArmNet")
+        current = validate_model_design(candidate, SNAPSHOT, [parent])
+        self.assertEqual(current["backbone_id"], "arm_net")
+        candidate["backbone_id"] = "other_network"
+        with self.assertRaisesRegex(ValueError, "backbone_id"):
+            validate_model_design(candidate, SNAPSHOT, [parent])
+
+    def test_invalid_explicit_ids_are_not_silently_inherited(self):
+        for value in (None, " ", [], 3):
+            candidate = local()
+            candidate["backbone_id"] = value
+            with self.assertRaisesRegex(ValueError, "backbone_id"):
+                validate_model_design(candidate, SNAPSHOT, [source()])
+
+    def test_normalized_sources_expose_identity_without_rewriting_history(self):
+        parent = source()
+        original = copy.deepcopy(parent)
+        normalized = composition_sources([parent])[0]["research"]["model_design"]
+        canonical = validate_model_design(parent["research"]["model_design"], SNAPSHOT, [])
+        self.assertEqual(normalized["backbone_id"], canonical["backbone_id"])
+        self.assertEqual(parent, original)
+
     def test_parent_components_cannot_disappear(self):
         value = local()
         value["inheritance"] = []
@@ -71,6 +114,7 @@ class CompositionTests(unittest.TestCase):
     def test_switch_cannot_be_disguised_as_local(self):
         candidate = local()
         candidate["estimator"] = "DR-learner"
+        candidate["estimator_id"] = "dr_learner"
         with self.assertRaisesRegex(ValueError, "local"):
             validate_model_design(candidate, SNAPSHOT, [source()])
         candidate["change_scope"] = "switch"
