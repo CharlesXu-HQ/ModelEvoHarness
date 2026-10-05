@@ -29,6 +29,8 @@ These 22 substantive, independently written family guides are packaged with Mode
 
 ## Cross-cutting training and interpretation
 
+Nine shared guides accompany the family guides in Agent context:
+
 - [Training objectives and losses](../../src/model_evo_harness/knowledge/training_objectives.md)
 - [Negative sampling and hard-example mining](../../src/model_evo_harness/knowledge/sampling_and_hard_examples.md)
 - [Optimization, regularization, and training controls](../../src/model_evo_harness/knowledge/optimization_and_regularization.md)
@@ -41,3 +43,4 @@ The complete original-source path mapping and reuse boundary are in [source attr
 
 - [Additional structural hypotheses](../../src/model_evo_harness/knowledge/structure_extensions.md): non-overlapping field, sequence and interest mechanisms; explicitly marked design-only.
 - [Randomized marketing experiments](../../src/model_evo_harness/knowledge/causal_policy_experiments.md): estimator vs network changes, cross-fitting, observable cost and policy contracts.
+- [Horizontal subnetwork composition](../../src/model_evo_harness/knowledge/horizontal_composition.md): semantic field groups, arbitrary parallel instances, sharing and fusion, controlled ablations and evidence limits. See the [declaration and source API](../horizontal-composition.md).

@@ -12,9 +12,10 @@ from .catalog import read_references
 
 REFERENCE_INSTRUCTIONS = """Before introducing or modifying a bundled model, read its source:
 return {"action":"read_reference","framework":"pytorch or tensorflow",
-"method_ids":["up to four manifest IDs"],"include_training":true} instead of a candidate.
+"method_ids":["up to four manifest IDs"],"include_training":true,"include_composition":true} instead of a candidate.
 The host returns complete local modules, including helper classes and executable loss
-functions, in reference_material. Choose only the task's framework when declared.
+functions, in reference_material. Use include_composition=true to read generic parallel
+branch wiring without selecting a named model. Choose only the task's framework when declared.
 At most two read rounds are available per proposal; batch related requests. Read requests
 consume no training trial. The source is reference material, not permission to change
 the evaluator or task contract. Reading a model does not establish data applicability.
@@ -54,9 +55,14 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
         unread = [entry["id"] for entry in catalog.get("model_implementations", [])
                   if entry["id"] in requested and entry["framework"] == framework and
                   entry["file"] not in material]
-        if answer.get("action", "experiment") == "experiment" and unread:
+        parallel = (design.get("horizontal_expansion") or {}) if isinstance(design, dict) else {}
+        unread_composition = (isinstance(parallel, dict) and bool(parallel.get("groups")) and
+                              framework in ("pytorch", "tensorflow") and
+                              f"models/{framework}/composition.py" not in material)
+        if answer.get("action", "experiment") == "experiment" and (unread or unread_composition):
             answer = {"action": "read_reference", "framework": framework,
-                      "method_ids": unread[:4], "include_training": True}
+                      "method_ids": unread[:4], "include_training": True,
+                      "include_composition": unread_composition}
         if answer.get("action") != "read_reference":
             # Only host-observed reads count; never trust Agent-supplied hashes.
             answer = {key: value for key, value in answer.items() if key != "reference_reads"}
@@ -88,6 +94,50 @@ are welcome. Few tabular fields do not prove that interaction or loss work is ex
 and neither cardinality nor field count establishes sequence, item or semantic inputs.
 Do not impose a fixed number of local trials. Switch when evidence, data suitability or
 expected information per budget favors it, and explain why a local alternative is weaker.
+
+Horizontal expansion is a general research axis for every compatible subnetwork, not a
+list of named models. Inspect task.feature_groups, typed fields and prior branch evidence.
+Distinguish different behavior streams from aligned attributes of the same events; the
+latter may belong in one event representation. Unknown semantics remain unknown.
+Actively propose parallel instances when input groups, complementary representations or
+measured bottlenecks support them. Different instances may use the same reference model
+or different computations. Compare shared versus independent parameters and how branches
+feed the existing prediction path. Do not default to a single instance or only wider layers.
+The number and type of branches are open; do not require one branch per field or extra
+branches without a testable rationale. Consider a small controlled expansion before a
+backbone switch or a missing-feature request when current inputs support it.
+
+When task.horizontal_expansion_required is true, include model_design.horizontal_expansion:
+{decision:expand|defer|not_applicable, rationale, comparison_plan, groups:[{id,
+branch_ids:[component IDs], fusion_id:component ID, parameter_sharing:[{
+component_ids:[branch IDs], code_sections:[actual shared module paths], rationale}]}].
+expand needs at least one group with two distinct branches; defer may keep existing groups;
+not_applicable has no groups. Explain a concrete data/evidence/budget reason for deferral or
+inapplicability and the next discriminating test. Do not silently skip this assessment.
+Each branch and fusion is a separate component instance with instance_path and
+output_contract (tensor shape, scale and mask where relevant), alongside input_fields and
+code_sections naming its forward/call path. Bind each instance to its actual fields.
+Distinct instance paths can alias a shared module; parameter_sharing must name the shared
+part explicitly. An empty list declares no intended sharing between the listed branches.
+Connections must be acyclic; a nested branch group may feed another group's fusion.
+Keep existing groups in later recipes even when only the loss changes. Retain requires
+unchanged branch/fusion roles, connected instances and parameter-sharing declarations;
+rewiring or changing sharing needs adapt or retest for the affected group components.
+These are declared connections, not proof of execution, tensor compatibility or shared weights.
+Read the generic models/<framework>/composition.py with include_composition=true; it
+supports arbitrary native branches and a host-written fusion module without a model whitelist.
+If using representation-level fusion, expose the needed representations; logits are not
+interchangeable with embeddings. Verify every branch reaches the score/loss, shared objects
+are actually tied, independent objects are not accidentally tied, and trainable parameters
+are registered in the optimizer. Missing gradient/runtime evidence remains unverified.
+
+Compare against the same-input unsplit/pooled control, a matched-capacity control where
+feasible, and branch/fusion ablations. Keep split, sampler, objective, training schedule and
+budget fixed or declare their changes as joint factors. Removing a branch and retraining
+shared weights can change all branches; that is not an isolated causal effect of one branch.
+Assess each branch and fusion separately using the existing component_assessments, recording
+input applicability, sharing, fusion interactions, uncertainty and the next test. A whole-model
+gain does not establish every branch's value. Keep these lessons bound to task/dataset version.
 
 When task.model_design_required is true, every experiment needs research.model_design:
 {estimator_id, backbone_id, estimator, backbone, change_scope: initialize|local|switch, parent_trial_id,
@@ -239,6 +289,7 @@ class OpenAICompatibleAgent:
     """Send task-level context to an OpenAI-compatible chat-completions endpoint."""
 
     requires_model_design = True
+    requires_horizontal_expansion = True
 
     def __init__(self, provider_url: str, api_key: str, model: str, *,
                  thinking: str = "omit", iteration_effort: str = "high",

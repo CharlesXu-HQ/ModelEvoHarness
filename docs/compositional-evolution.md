@@ -14,7 +14,7 @@ T/S/DR learner names do not, by themselves, specify the network inside them. Sim
 
 ## Proposal contract
 
-The built-in `OpenAICompatibleAgent` advertises `requires_model_design=True`; the engine activates `task.model_design_required` for its searches. Custom adapters can declare that snapshot field to use the same contract. Older adapters without the flag may omit `model_design`; any design they do supply is validated. Enabling the contract changes the frozen run identity, so old runs are not silently resumed under a new protocol.
+The built-in `OpenAICompatibleAgent` advertises `requires_model_design=True`; the engine activates `task.model_design_required` and `task.horizontal_expansion_required` for its searches. Custom adapters can declare these snapshot fields to use the same contract. Older snapshots without the flags may omit the corresponding declarations; supplied designs are still validated. Enabling the contract changes the frozen run identity, so old runs are not silently resumed under a new protocol.
 
 Add `research.model_design` alongside the existing falsifiable research fields:
 
@@ -23,12 +23,18 @@ Add `research.model_design` alongside the existing falsifiable research fields:
   "estimator_id": "t_learner",
   "backbone_id": "tabular_mlp",
   "estimator": "Two independent outcome models",
-  "backbone": "Tabular MLP with an interaction branch",
+  "backbone": "Tabular MLP with explicit interaction terms",
   "change_scope": "initialize",
   "parent_trial_id": null,
   "rationale": "Begin a tracked recipe after inspecting the untracked seed",
   "data_fit": "The host declares existing pre-decision tabular fields; no sequence is assumed",
   "comparison_plan": "Same split, objective and compute budget as the seed",
+  "horizontal_expansion": {
+    "decision": "defer",
+    "rationale": "This candidate first isolates the explicit pair term within one encoder",
+    "comparison_plan": "Next compare separate complementary encoders against this unsplit representation at matched capacity",
+    "groups": []
+  },
   "components": [
     {
       "id": "pair_encoder",
@@ -43,7 +49,9 @@ Add `research.model_design` alongside the existing falsifiable research fields:
 }
 ```
 
-This is a schema example, not an evaluated recipe. Actual `input_fields`, capabilities and code locations must come from the task and candidate. Training-only components may have empty input/capability lists. `reference_method_id` is optional for original code; when present it must name a bundled implementation for the host framework, and triggers bounded source reading even without a top-level `method_id`. Reading an entire reference module does not make its full-model prerequisites optional.
+This is a complete `research.model_design` schema example, not an evaluated recipe or a complete proposal. Actual `input_fields`, capabilities and code locations must come from the task and candidate. Training-only components may have empty input/capability lists. `reference_method_id` is optional for original code; when present it must name a bundled implementation for the host framework, and triggers bounded source reading even without a top-level `method_id`. Reading an entire reference module does not make its full-model prerequisites optional.
+
+Every enabled proposal assesses horizontal expansion using actual field semantics and a measurable bottleneck. Any suitable subnetwork can have multiple instances, including several references to the same method; fusion remains candidate-defined. `expand` records at least one group, `defer` records a specific reason and next comparison while keeping existing groups, and `not_applicable` has no groups. A later loss-only change must still describe the current branches. Optional `feature_groups` express semantic field subsets without granting sequence or alignment capabilities. See the [complete horizontal contract, source API and example](horizontal-composition.md).
 
 `estimator_id` and `backbone_id` are stable identifiers. `estimator` and `backbone` describe the current recipe and may change when a branch is ablated, a loss changes, or a component is adapted. For `local`, omit IDs to inherit them from the parent, or supply the exact parent IDs. Description edits do not change identity; explicitly different IDs are rejected for a local edit. Existing records without IDs get deterministic IDs when read, without rewriting the original journal. New canonical records store the IDs, so subsequent description changes cannot alter them.
 
@@ -67,12 +75,14 @@ The four decisions mean:
 
 | Decision | Required interpretation |
 | --- | --- |
-| retain | Same declared mechanism, code locations, input fields, required capabilities and reference; the source must be eligible for reuse. Actual execution still needs checking. |
+| retain | Same declared mechanism, code locations, input fields, required capabilities, reference, instance path and output contract when present; the source must be eligible for reuse. Actual execution still needs checking. |
 | adapt | Reuse an idea with explicitly changed interfaces or training semantics; provide compatible target declarations and a test. |
 | drop | Exclude the source component with a reason; no target component mapping. |
 | retest | Revisit an uncertain, failed or invalid idea as a new hypothesis; no inherited claim of success. |
 
 Invalid, unevaluated, blocked or harmful source components, and components without a recorded assessment, can only be dropped or retested. An assessed but inconclusive component may be carried as an explicit hypothesis with its uncertainty; this does not establish a gain. Plans referencing invented source/component IDs, unavailable fields/capabilities, missing parent dispositions, or a switch disguised as a local change fail validation. This checks declarations and lineage; it does not statically prove that the code followed the plan. The host must compare donor/candidate source, actual prediction paths and runtime contracts.
+
+For a parallel component, `retain` also preserves its branch/fusion role, peer branch paths, fusion path, and shared members/source locations. These relationships are compared by instance path, so component/group renames and rationale edits alone do not count as rewiring. Changing connections or sharing, or removing a group while keeping its components, requires `adapt` or `retest` for affected surviving components. Every branch and fusion has a distinct path, including aliases that point to one shared object.
 
 ## Reflection and evidence
 
@@ -90,6 +100,8 @@ A tracked recipe requires `technical_experience.component_assessments`, one entr
 ```
 
 Outcomes are `promising`, `inconclusive`, `harmful` or `invalid`. Promising is exploratory. `unverified` attribution is always allowed. `joint` requires a verified multi-factor host change audit. `isolated` additionally requires the sole audited factor to equal this component ID. Merely winning as a combined candidate cannot upgrade all components to individually effective. Failed or contradicted implementations cannot supply a promising/harmful mechanism conclusion.
+
+Assessments include every parallel branch and fusion, with tested input conditions, sharing dependencies and the next discriminating control. Shared-weight retraining after a branch ablation can change the remaining branches; a one-branch source edit alone cannot establish an isolated effect. The host's audit must account for that coupling. Check actual instance routing, forward/call paths, fusion, parameter registration and gradients when observed. The graph and component metadata do not prove execution or benefit.
 
 For custom host calls to `validate_reflection`, include the current research and `trial_status` in the evaluation view. The native engine supplies these; the host retains ownership of independent evidence.
 

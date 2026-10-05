@@ -8,7 +8,7 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 | 内容 | 作用 |
 | --- | --- |
-| [22 篇方向指南与 8 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索指南，无需联网获取上游仓库。 |
+| [22 篇方向指南与 9 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
 | 44 张 method card 和[结构选择模式](docs/multi-source-guidance.md) | 根据实际观察到的问题判断何时值得试某种方法。数据条件为 `ready` 只表示具备输入，不代表已有实现或预计收益。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
 | [44 种直接基于框架的模型核心实现](docs/models.md) | 每张 method card 都有独立编写的 PyTorch 和 TensorFlow 代码，另附通用 TwoTower。 [实现清单](src/model_evo_harness/data/model_implementations.json)给出准确类路径。输出可能是 logit、检索分数、概率或表示向量；对应 loss 与评估器由业务方提供。不依赖其他模型包装库。 |
@@ -41,7 +41,9 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 每个模型组合记录组件及代码位置。下一轮必须对父版本的各个组件逐项选择**保留、适配、放弃或重新验证**，写清来源试验、兼容性和验证方法。因此切换 backbone 时会审查已有局部成果。组件引用与整体模型引用一样触发有次数上限的源码读取；联合实验的收益保留归因限制，组件被迁移并不意味着已经证明有效。
 
-数据条件仍是前提：统计特征可以支持交叉或训练改进；序列、目标感知结构需要真实声明的输入。内部迭代优先不妨碍有依据的切换。稳定的 `estimator_id` / `backbone_id` 与可更新的结构描述分开；局部修改省略 ID 时由宿主继承父记录。详见[组件化迭代协议与示例](docs/compositional-evolution.md)。内置 provider 默认启用；自定义 adapter 可通过 `model_design_required=true` 启用严格校验。
+数据条件仍是前提：统计特征可以支持交叉或训练改进；序列、目标感知结构需要真实声明的输入。稳定的 `estimator_id` / `backbone_id` 与可更新的结构描述分开；局部修改省略 ID 时由宿主继承父记录。详见[组件化迭代协议与示例](docs/compositional-evolution.md)。
+
+启用协议后，每轮还评估[横向子网组合](docs/horizontal-composition.md)：依据字段语义和可检验瓶颈，组合任意适用模块的并行实例，明确参数共享与融合。`feature_groups` 声明不赋予序列能力，延期扩展时仍记录已有分支组。通过 `include_composition=true` 可读取原生 PyTorch、TensorFlow 的 `ParallelBranches` 源码，分支类型与候选自写的融合方式均不封闭枚举。内置 provider 默认启用 `model_design_required` 和 `horizontal_expansion_required`，自定义 adapter 可显式启用；旧记录仍按原快照读取。
 
 ## 接入
 

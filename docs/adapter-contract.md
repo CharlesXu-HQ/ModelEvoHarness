@@ -38,6 +38,8 @@ The numeric returns illustrate the **shape**, not bundled data or benchmark scor
 
 `fields` lists actual inputs available before the decision. `capabilities` declares verified data contracts, such as `tabular_features`, `event_sequence`, `item_catalog`, `candidate_slates`, `multiple_outcomes`, `assignment_or_exposure_propensity`, `implicit_feedback`, `negative_sampler_definition`, or `calibration_split`. The harness does not derive those facts from column names or dtypes. A `feature_schema` may describe categorical, dense or sequence fields, cardinality and decision-time availability. Freeze the snapshot for one run; task, data, catalog, protocol or package implementation changes prevent resume.
 
+Optional `feature_groups` is a list of objects with a unique nonempty `id`, nonempty `fields` drawn from the snapshot's actual fields, and a nonempty `rationale`. For example, the snapshot above could add `{"id":"user_profile","fields":["user_age"],"rationale":"Existing user profile input"}` as one group. `validate_feature_groups(groups, fields)` normalizes the declarations. The engine includes them in the frozen snapshot; they do not establish sequence order, same-event alignment, feature timing or additional capabilities. Use the [horizontal composition contract](horizontal-composition.md) to connect declared field semantics to candidate branches.
+
 `evaluation_protocol` is optional for older adapters but recommended. When present, `unit`, `split` and `metric` are required; retrieval and reranking also require `candidate_universe`, and declared implicit feedback requires `negative_source`. Record full versus sampled evaluation, cutoff/order, label provenance, preprocessing, K and sampler identity where relevant. The harness fingerprints the protocol; the host must enforce it and keep final holdout separate.
 
 ### Explicit domain prerequisites
@@ -71,7 +73,7 @@ The host may attach `implementation_check` with status `verified`, `contradicted
 
 ## Agent context and proposal
 
-For backbone-local code changes and selective component migration, see the [composition contract](compositional-evolution.md). The built-in provider enables it automatically; custom adapters opt in with `snapshot.model_design_required=true`. Research then includes `model_design`, and reflection includes per-component assessments. The engine supplies compact `composition_sources` alongside full trial history.
+For backbone-local code changes and selective component migration, see the [composition contract](compositional-evolution.md). The built-in provider enables `snapshot.model_design_required=true` and `snapshot.horizontal_expansion_required=true`; custom adapters can opt in with those flags. Research then includes `model_design` and a horizontal-expansion decision, and reflection includes per-component assessments. A `defer` decision still records existing groups; branch and fusion components declare their instance paths, input fields, forward/call locations and output contracts. The engine supplies compact `composition_sources` alongside full trial history. Older snapshots without these flags remain valid under their original requirements; enabling a new contract changes the frozen identity.
 
 ```python
 class Agent:
@@ -81,7 +83,7 @@ class Agent:
 
 `context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. The catalog includes 22 research families, 44 method cards, structural patterns, training patterns and a model implementation manifest. `method_applicability.frameworks` reports direct PyTorch/TensorFlow code for each card. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both. The generic `two_tower` example is in the implementation manifest but is not one of the 44 method cards. A `ready` method means its inputs are declared; it does not prove that the method helps.
 
-A proposal has this shape:
+A base proposal has the following shape. This fragment omits `research.model_design`, which is required when either design flag is enabled, and evidence fields required when the host supplies facts. Combine it with the [complete design example](horizontal-composition.md#complete-model-design-example) and the relevant host evidence; it is not a complete built-in-provider proposal on its own.
 
 ```json
 {
@@ -116,7 +118,7 @@ A request that passes the validator ends the run with `needs_data`. `future_feat
 
 ## Reflection and experience
 
-After a trial, `reflect()` returns separate records:
+After a trial, `reflect()` returns separate records. This base fragment omits `technical_experience.component_assessments`; a tracked design additionally requires one assessment for every current component, including every parallel branch and fusion:
 
 ```json
 {
@@ -136,6 +138,8 @@ For `business_experience.status = "observed"`, include an `observation_id` prese
 
 Technical experience records the host's `implementation_status`. Attribution is `isolated` only when verified implementation and a separate verified change audit name one changed factor; it is `joint` for multiple verified factors and `unverified` otherwise. These checks validate provenance, not every free-text sentence.
 
+For parallel groups, the host reviews actual instance inputs and forward/call paths, output fusion, shared objects, optimizer registration and gradients when measured. Graph declarations cannot establish those facts. Preserve training conditions or report joint changes; shared-weight retraining can couple branch ablations. Component experience records these conditions and keeps unobserved behavior unverified.
+
 The journal is stored in `output/journal.json` through an atomic replace. Failed `evaluate()` calls become failed trials with a bounded error type. Do not include API keys or raw user rows in snapshots, proposals, metrics or reflections. The final holdout is a separate host action after selecting a candidate.
 
 
@@ -144,9 +148,11 @@ The journal is stored in `output/journal.json` through an atomic replace. Failed
 The built-in API provider understands a preparatory JSON action:
 
 ```json
-{"action":"read_reference","framework":"pytorch","method_ids":["fm","deepfm"],"include_training":true}
+{"action":"read_reference","framework":"pytorch","method_ids":["fm","deepfm"],"include_training":true,"include_composition":true}
 ```
 
 This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four model IDs. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled `method_id` automatically gets its module before a final experiment if it was not already read. The final proposal stores `reference_reads` (path to host-computed SHA-256). Custom Agents can call `read_references(catalog, request)` or reuse `propose_with_references(complete, context, catalog=..., framework=...)`; `run_search` itself still accepts only final experiment/stop/request-data decisions. Hosts that retry final proposal validation must pass the same host-owned `read_state={}` across those retries, preserving the read budget and source ledger; never populate it from model output.
+
+`include_composition=true` loads the native `models/<framework>/composition.py`; it may be requested alone with `method_ids=[]`. PyTorch and TensorFlow each provide `ParallelBranches(branches, fusion)` with arbitrary native branches and candidate-written fusion. Each named branch receives its own keyword-input mapping and fusion receives the named output mapping. A proposal with nonempty horizontal groups automatically receives unread composition source when the task framework is known, including when `decision=defer` retains existing groups. These reads use the same budget and hash ledger; they do not execute or validate the candidate graph.
 
 Normal reflection uses `iteration_effort`, default `high`. The host can set `evaluation.review_required = True` for anomaly/leakage/cost-tradeoff review, which selects `review_effort`, default `max`. The flag is a host assessment, not a replacement for uncertainty or guardrail checks.

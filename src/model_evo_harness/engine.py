@@ -13,7 +13,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from .composition import composition_sources
+from .composition import composition_sources, validate_feature_groups
 from .evidence import (cited_facts, validate_audit_recommendations,
                        validate_host_evidence)
 
@@ -63,6 +63,9 @@ def _snapshot(task: object) -> dict:
         raise ValueError("task snapshot needs a list of capabilities")
     if "framework" in snapshot and snapshot["framework"] not in ("pytorch", "tensorflow"):
         raise ValueError("framework must be pytorch or tensorflow")
+    if "feature_groups" in snapshot:
+        snapshot = {**snapshot, "feature_groups": validate_feature_groups(
+            snapshot["feature_groups"], snapshot["fields"])}
     requirements = snapshot.get("domain_requirements", [])
     if not isinstance(requirements, list):
         raise ValueError("domain_requirements must be a list")
@@ -389,6 +392,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
     snapshot = _snapshot(task)
     if getattr(agent, "requires_model_design", False):
         snapshot = {**snapshot, "model_design_required": True}
+    if getattr(agent, "requires_horizontal_expansion", False):
+        snapshot = {**snapshot, "model_design_required": True, "horizontal_expansion_required": True}
     applicability_report = applicability(snapshot, catalog)
     method_report = method_applicability(snapshot, catalog)
     decision_report = decision_applicability(snapshot, catalog)

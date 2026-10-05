@@ -8,7 +8,7 @@ ModelEvoHarness is an **Agent-led offline experiment harness** for recommendatio
 
 | Component | Purpose |
 | --- | --- |
-| [22 family guides and 8 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training and exploration guidance from the installed package. |
+| [22 family guides and 9 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
 | 44 method cards and [structure patterns](docs/multi-source-guidance.md) | State *when* a method may address a measured bottleneck. A `ready` data contract is not a recommendation or an implementation claim. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
 | [44 direct-framework model cores](docs/models.md) | Every method card has independently written PyTorch and TensorFlow code, with generic TwoTower as one additional structure. The [manifest](src/model_evo_harness/data/model_implementations.json) gives exact class paths. Outputs include logits, retrieval scores, probabilities and representations; the host supplies the appropriate loss and evaluator. No model wrapper is required. |
@@ -41,7 +41,9 @@ The default research unit is a change inside a compatible backbone: read local r
 
 Every tracked recipe names its components and code locations. On the next iteration, the Agent accounts for each parent component as **retain, adapt, drop, or retest**, with source trial, compatibility and a validation plan. A new backbone therefore starts with an explicit review of accumulated improvements. References attached to components trigger the same bounded source-reading loop as whole-model selections. Joint gains keep their attribution limits; a transferred component does not become proven by reuse.
 
-Data contracts still decide what is possible. Few tabular fields can support crosses or training changes, while sequence/target-aware designs require real declared inputs. This is a preference for informative within-backbone experiments, not a ban on switching. Stable `estimator_id` / `backbone_id` are separate from editable structure descriptions; local changes inherit parent IDs when omitted. See the [composition contract and example](docs/compositional-evolution.md). The built-in provider enables it; custom adapters may opt in with `model_design_required=true`.
+Data contracts still decide what is possible. Few tabular fields can support crosses or training changes, while sequence/target-aware designs require real declared inputs. Stable `estimator_id` / `backbone_id` are separate from editable structure descriptions; local changes inherit parent IDs when omitted. See the [composition contract and example](docs/compositional-evolution.md).
+
+Every enabled proposal also assesses [horizontal composition](docs/horizontal-composition.md): parallel instances of any suitable module, chosen from field semantics and a testable bottleneck, with explicit sharing and fusion. Declared `feature_groups` do not establish sequence capabilities. A deferred expansion keeps existing groups in the record. Native PyTorch and TensorFlow `ParallelBranches` source is available through `include_composition=true`; branch types and candidate-written fusion remain open. The built-in provider enables `model_design_required` and `horizontal_expansion_required`; custom adapters can opt in, while older records remain readable under their original snapshot.
 
 ## Integrate a task
 

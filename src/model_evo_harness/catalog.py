@@ -48,7 +48,7 @@ def common_knowledge() -> dict[str, str]:
         "training_objectives", "sampling_and_hard_examples",
         "optimization_and_regularization", "feature_gap_decisions",
         "business_insight_synthesis", "exploration_strategy", "structure_extensions",
-        "causal_policy_experiments")}
+        "causal_policy_experiments", "horizontal_composition")}
 
 
 def read_references(catalog: dict, request: dict) -> dict:
@@ -60,12 +60,14 @@ def read_references(catalog: dict, request: dict) -> dict:
     framework = request.get("framework")
     methods = request.get("method_ids", [])
     training = request.get("include_training", False)
+    composition = request.get("include_composition", False)
     if framework not in ("pytorch", "tensorflow"):
         raise ValueError("reference framework must be pytorch or tensorflow")
     if (not isinstance(methods, list) or len(methods) > 4 or
             any(not isinstance(item, str) for item in methods) or
-            not isinstance(training, bool) or (not methods and not training)):
-        raise ValueError("reference needs up to four method_ids or include_training=true")
+            not isinstance(training, bool) or not isinstance(composition, bool) or
+            (not methods and not training and not composition)):
+        raise ValueError("reference needs up to four method_ids, include_training=true or include_composition=true")
     entries = {entry["id"]: entry for entry in catalog.get("model_implementations", [])
                if entry["framework"] == framework}
     if set(methods) - entries.keys():
@@ -73,6 +75,8 @@ def read_references(catalog: dict, request: dict) -> dict:
     paths = {entries[item]["file"] for item in methods}
     if training:
         paths.add(f"models/{framework}/training.py")
+    if composition:
+        paths.add(f"models/{framework}/composition.py")
     package = files("model_evo_harness")
     result = {}
     for path in sorted(paths):
@@ -467,7 +471,8 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
         if family_id is not None and entry["family_id"] != family_id:
             raise ValueError("method_id and family_id disagree")
     design = research.get("model_design")
-    if snapshot.get("model_design_required") or "model_design" in research:
+    if (snapshot.get("model_design_required") or snapshot.get("horizontal_expansion_required") or
+            "model_design" in research):
         from .composition import validate_model_design
 
         design = validate_model_design(design, snapshot, sources or [])

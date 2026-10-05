@@ -218,6 +218,34 @@ class CompositionTests(unittest.TestCase):
         current = validate_model_design(local(), SNAPSHOT, [parent])
         self.assertEqual(current["inheritance"][0]["decision"], "retain")
 
+    def test_retain_preserves_instance_and_output_contract_for_arbitrary_local_component_ids(self):
+        parent = source()
+        previous = parent["research"]["model_design"]["components"][0]
+        previous.update(instance_path="model.arm.cross", output_contract="Batch by 8 representation")
+        candidate = local()
+        candidate["components"][0] = {**previous, "id": "ordinary_local_copy"}
+        candidate["inheritance"][0]["target_component_id"] = "ordinary_local_copy"
+        result = validate_model_design(candidate, SNAPSHOT, [parent])
+        self.assertEqual(result["components"][0]["instance_path"], "model.arm.cross")
+        self.assertEqual(result["components"][0]["output_contract"], "Batch by 8 representation")
+        for key in ("instance_path", "output_contract"):
+            changed = copy.deepcopy(candidate)
+            changed["components"][0][key] = "Changed declaration"
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, key):
+                validate_model_design(changed, SNAPSHOT, [parent])
+            changed["inheritance"][0]["decision"] = "adapt"
+            self.assertEqual(validate_model_design(changed, SNAPSHOT, [parent])[
+                "components"][0][key], "Changed declaration")
+
+    def test_retain_cannot_add_or_remove_instance_or_output_contract(self):
+        for key in ("instance_path", "output_contract"):
+            for on_parent in (True, False):
+                parent, candidate = source(), local()
+                target = parent["research"]["model_design"] if on_parent else candidate
+                target["components"][0][key] = "Declared path or output"
+                with self.subTest(key=key, on_parent=on_parent), self.assertRaisesRegex(ValueError, key):
+                    validate_model_design(candidate, SNAPSHOT, [parent])
+
     def test_incompatible_source_needs_redeclared_legal_inputs(self):
         parent = source()
         old = parent["research"]["model_design"]["components"][0]
