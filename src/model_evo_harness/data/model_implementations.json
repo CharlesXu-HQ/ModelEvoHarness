@@ -4,541 +4,2173 @@
       "id": "afm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:AFM",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "The attention-weighted pair core omits paper-specific regularization and feature-column handling."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "afm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:AFM",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "The attention-weighted pair core omits paper-specific regularization and feature-column handling."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "aitm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:AITM",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "The bundled order loss assumes fully observed ordered labels; partial funnel labels require a host-defined mask."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "aitm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:AITM",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "The bundled order loss assumes fully observed ordered labels; partial funnel labels require a host-defined mask."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "apg",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:APG",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Only one scenario-generated low-rank transform is provided, not the full paper architecture."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "apg",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:APG",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Only one scenario-generated low-rank transform is provided, not the full paper architecture."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "autoint",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:AutoInt",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Field attention is compact; attention-depth and dense-feature variants are not reproduced."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "autoint",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:AutoInt",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Field attention is compact; attention-depth and dense-feature variants are not reproduced."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "biassvd",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:BiasSVD",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "ID embeddings and offsets require a host-selected rating or ranking objective."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "biassvd",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:BiasSVD",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "ID embeddings and offsets require a host-selected rating or ranking objective."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dcn",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:DCN",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "dense_feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-encoded dense input; feature typing, scaling, and leakage checks are not bundled.",
+        "Implements vector-cross DCN, not matrix-cross DCNv2."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dcn",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:DCN",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "dense_feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-encoded dense input; feature typing, scaling, and leakage checks are not bundled.",
+        "Implements vector-cross DCN, not matrix-cross DCNv2."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dcn_v2",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:DCNv2",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "dense_feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-encoded dense input; feature typing, scaling, and leakage checks are not bundled.",
+        "Implements matrix or low-rank crosses but no mixture-of-experts cross network."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dcn_v2",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:DCNv2",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "dense_feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-encoded dense input; feature typing, scaling, and leakage checks are not bundled.",
+        "Implements matrix or low-rank crosses but no mixture-of-experts cross network."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "deepfm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:DeepFM",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "FM and MLP share embeddings; feature columns and field-specific preprocessing are omitted."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "deepfm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:DeepFM",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "FM and MLP share embeddings; feature columns and field-specific preprocessing are omitted."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dien",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:DIEN",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "The auxiliary next-behavior loss of DIEN is omitted; only GRU extraction and attention-gated evolution are present."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dien",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:DIEN",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "The auxiliary next-behavior loss of DIEN is omitted; only GRU extraction and attention-gated evolution are present."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "din",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:DIN",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "The target-conditioned activation core has no feature-embedding pipeline or calibrated serving head."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "din",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:DIN",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "The target-conditioned activation core has no feature-embedding pipeline or calibrated serving head."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dsin",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:DSIN",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "Session bias encoding and paper-specific local activation are omitted; BiLSTM uses both directions."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dsin",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:DSIN",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
+        "Session bias encoding and paper-specific local activation are omitted; BiLSTM uses both directions."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dssm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:DSSM",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Independent towers and cosine pair score are present; listwise/contrastive training is host-owned."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "dssm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:DSSM",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Independent towers and cosine pair score are present; listwise/contrastive training is host-owned."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "eges",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:EGES",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Item-specific ID/side attention is present; random-walk pair generation is not."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "eges",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:EGES",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Item-specific ID/side attention is present; random-walk pair generation is not."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "esmm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:ESMM",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "impression_click_and_joint_labels",
+          "trainer",
+          "joint_funnel_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns click, post-click, and joint probabilities; the correct joint-label loss and observation masks are not bundled.",
+        "The entire-space joint objective needs impression-level click and click-and-conversion labels; forward probabilities alone do not train ESMM."
+      ],
+      "output_contract": {
+        "kind": "probability_triplet",
+        "shape": "{click:[B],post_click:[B],joint:[B]}"
+      }
     },
     {
       "id": "esmm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:ESMM",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "impression_click_and_joint_labels",
+          "trainer",
+          "joint_funnel_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns click, post-click, and joint probabilities; the correct joint-label loss and observation masks are not bundled.",
+        "The entire-space joint objective needs impression-level click and click-and-conversion labels; forward probabilities alone do not train ESMM."
+      ],
+      "output_contract": {
+        "kind": "probability_triplet",
+        "shape": "{click:[B],post_click:[B],joint:[B]}"
+      }
     },
     {
       "id": "fibinet",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:FiBiNET",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Uses one shared bilinear transform rather than all field/pair-specific bilinear variants."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fibinet",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:FiBiNET",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Uses one shared bilinear transform rather than all field/pair-specific bilinear variants."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:FM",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "One categorical ID per field is supported; weighted sparse or dense FM inputs are not."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:FM",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "One categorical ID per field is supported; weighted sparse or dense FM inputs are not."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fm_recall",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:FMRecall",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Candidate-independent user-only FM terms are omitted from the retrieval score."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fm_recall",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:FMRecall",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Candidate-independent user-only FM terms are omitted from the retrieval score."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "funksvd",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:FunkSVD",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "No explicit rating reconstruction objective, sampling rule, or regularization is included."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "funksvd",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:FunkSVD",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "No explicit rating reconstruction objective, sampling rule, or regularization is included."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fwfm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:FwFM",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Learns one scalar per field pair; it is not a field-specific embedding model."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "fwfm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:FwFM",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Learns one scalar per field pair; it is not a field-specific embedding model."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "hmoe",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:HMoE",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Domain routing is compact and requires known domain IDs at inference."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "hmoe",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:HMoE",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Domain routing is compact and requires known domain IDs at inference."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "hstu",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:HSTU",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "sequence_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "This is a causal gated sequence block, not an end-to-end generative recommender or full HSTU training stack."
+      ],
+      "output_contract": {
+        "kind": "sequence_states",
+        "shape": "[B,T,D]"
+      }
     },
     {
       "id": "hstu",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:HSTU",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "sequence_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "This is a causal gated sequence block, not an end-to-end generative recommender or full HSTU training stack."
+      ],
+      "output_contract": {
+        "kind": "sequence_states",
+        "shape": "[B,T,D]"
+      }
     },
     {
       "id": "item2vec",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:Item2Vec",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Skip-gram negative-sampling loss is included, but pair-window construction and sampling probabilities are host-owned."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "item2vec",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:Item2Vec",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler_or_labels",
+          "trainer",
+          "loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Pair scores are not calibrated probabilities; positive/negative provenance and ranking evaluation remain host-owned.",
+        "Skip-gram negative-sampling loss is included, but pair-window construction and sampling probabilities are host-owned."
+      ],
+      "output_contract": {
+        "kind": "pair_score",
+        "shape": "[B]"
+      }
     },
     {
       "id": "item_cf",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:ItemCF",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "item_cf",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:ItemCF",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "m2m",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:M2M",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Task/expert/scenario views are compact; task-specific objectives are host-owned."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "m2m",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:M2M",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Task/expert/scenario views are compact; task-specific objectives are host-owned."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "mind",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:MIND",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Uses a fixed K and compact routing; the source model has dynamic interest count and a sampled softmax training path.",
+        "Label-aware training readout is available, but dynamic K, side-feature tower, and source sampled-softmax path are not."
+      ],
+      "output_contract": {
+        "kind": "interest_vectors",
+        "shape": "[B,K,D]"
+      }
     },
     {
       "id": "mind",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:MIND",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Uses a fixed K and compact routing; the source model has dynamic interest count and a sampled softmax training path.",
+        "Label-aware training readout is available, but dynamic K, side-feature tower, and source sampled-softmax path are not."
+      ],
+      "output_contract": {
+        "kind": "interest_vectors",
+        "shape": "[B,K,D]"
+      }
     },
     {
       "id": "mlr",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.segmentation:MLR",
-      "file": "models/pytorch/segmentation.py"
+      "file": "models/pytorch/segmentation.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "observed_labels",
+          "trainer",
+          "probability_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Soft regions model predictive heterogeneity, not causal treatment effects or uplift."
+      ],
+      "output_contract": {
+        "kind": "probability",
+        "shape": "[B]"
+      }
     },
     {
       "id": "mlr",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.segmentation:MLR",
-      "file": "models/tensorflow/segmentation.py"
+      "file": "models/tensorflow/segmentation.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "observed_labels",
+          "trainer",
+          "probability_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Soft regions model predictive heterogeneity, not causal treatment effects or uplift."
+      ],
+      "output_contract": {
+        "kind": "probability",
+        "shape": "[B]"
+      }
     },
     {
       "id": "mmoe",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:MMoE",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Expert gates are present; task loss balancing and missing-label handling are not."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "mmoe",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:MMoE",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Expert gates are present; task loss balancing and missing-label handling are not."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "narm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:NARM",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "The recurrent mask must be a contiguous prefix; session-to-item scoring is host-owned."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "narm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:NARM",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "The recurrent mask must be a contiguous prefix; session-to-item scoring is host-owned."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "nfm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:NFM",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Bi-interaction pooling is present; optimizer and regularization variants are omitted."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "nfm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:NFM",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Bi-interaction pooling is present; optimizer and regularization variants are omitted."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "pepnet",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:PEPNet",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "EP/PP gating core is provided without all paper-specific towers and auxiliary constraints."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "pepnet",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:PEPNet",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "EP/PP gating core is provided without all paper-specific towers and auxiliary constraints."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "ple",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:PLE",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Progressive shared/task expert extraction is present; task-specific objective design is host-owned."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "ple",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:PLE",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Progressive shared/task expert extraction is present; task-specific objective design is host-owned."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "pnn",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:PNN",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Uses explicit pair inner/outer products, which can grow quadratically with field count and embedding dimension."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "pnn",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:PNN",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Uses explicit pair inner/outer products, which can grow quadratically with field count and embedding dimension."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "prm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:PRM",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "logged_slates",
+          "slate_labels",
+          "trainer",
+          "listwise_loss",
+          "slate_evaluator"
+        ]
+      },
+      "limitations": [
+        "Outputs a within-slate softmax distribution, not independent per-item click probabilities.",
+        "The pretrained per-user-per-item personalized vector described by PRM is not built internally."
+      ],
+      "output_contract": {
+        "kind": "slate_distribution",
+        "shape": "[B,S]"
+      }
     },
     {
       "id": "prm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:PRM",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "logged_slates",
+          "slate_labels",
+          "trainer",
+          "listwise_loss",
+          "slate_evaluator"
+        ]
+      },
+      "limitations": [
+        "Outputs a within-slate softmax distribution, not independent per-item click probabilities.",
+        "The pretrained per-user-per-item personalized vector described by PRM is not built internally."
+      ],
+      "output_contract": {
+        "kind": "slate_distribution",
+        "shape": "[B,S]"
+      }
     },
     {
       "id": "prs",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:PRS",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "logged_slates",
+          "position_labels",
+          "trainer",
+          "loss",
+          "slate_evaluator"
+        ]
+      },
+      "limitations": [
+        "Beam search is an inference heuristic; no unbiased logged-slate evaluator or position-bias correction is included."
+      ],
+      "output_contract": {
+        "kind": "slate_probability_dict",
+        "shape": "{ctr:[B,S],continuation:[B,S]}"
+      }
     },
     {
       "id": "prs",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:PRS",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "logged_slates",
+          "position_labels",
+          "trainer",
+          "loss",
+          "slate_evaluator"
+        ]
+      },
+      "limitations": [
+        "Beam search is an inference heuristic; no unbiased logged-slate evaluator or position-bias correction is included."
+      ],
+      "output_contract": {
+        "kind": "slate_probability_dict",
+        "shape": "{ctr:[B,S],continuation:[B,S]}"
+      }
     },
     {
       "id": "sasrec",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:SASRec",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "Causal history encoding is present, but next-item scoring and training objective are omitted."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "sasrec",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:SASRec",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "Causal history encoding is present, but next-item scoring and training objective are omitted."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "sdm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.sequence:SDM",
-      "file": "models/pytorch/sequence.py"
+      "file": "models/pytorch/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "Short LSTM/self-attention, long user attention, and gating are present; multi-field long-history and sampled-softmax retrieval are omitted."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "sdm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.sequence:SDM",
-      "file": "models/tensorflow/sequence.py"
+      "file": "models/tensorflow/sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "item_scorer",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns a user/session vector rather than item scores; an item scorer and retrieval objective are not bundled.",
+        "Short LSTM/self-attention, long user attention, and gating are present; multi-field long-history and sampled-softmax retrieval are omitted."
+      ],
+      "output_contract": {
+        "kind": "sequence_vector",
+        "shape": "[B,D]"
+      }
     },
     {
       "id": "shared_bottom",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:SharedBottom",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Only shared representation and task heads are provided; no label masks or task balancing."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "shared_bottom",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:SharedBottom",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "task_labels_and_masks",
+          "trainer",
+          "multi_task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Returns task logits; label coverage, missingness masks, loss weights, and the primary task are host-owned.",
+        "Only shared representation and task heads are provided; no label masks or task balancing."
+      ],
+      "output_contract": {
+        "kind": "task_logits",
+        "shape": "[B,T]"
+      }
     },
     {
       "id": "star",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.multitask:STAR",
-      "file": "models/pytorch/multitask.py"
+      "file": "models/pytorch/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Partitioned normalization and star weights are present; domain data-contract and serving behavior remain host-owned."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "star",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.multitask:STAR",
-      "file": "models/tensorflow/multitask.py"
+      "file": "models/tensorflow/multitask.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "scenario_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires a host-defined scenario/domain contract and corresponding held-out slices.",
+        "Partitioned normalization and star weights are present; domain data-contract and serving behavior remain host-owned."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "swing",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:Swing",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included.",
+        "Similarity uses all pairwise users/items densely; time weighting and production pruning are omitted."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "swing",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:Swing",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included.",
+        "Similarity uses all pairwise users/items densely; time weighting and production pruning are omitted."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "two_tower",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.architectures:TwoTower",
-      "file": "models/pytorch/architectures.py"
+      "file": "models/pytorch/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Generic matching example, not a method card; no item index, sampler, or full training recipe is included."
+      ],
+      "output_contract": {
+        "kind": "score_matrix",
+        "shape": "[B_user,B_item]"
+      }
     },
     {
       "id": "two_tower",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.architectures:TwoTower",
-      "file": "models/tensorflow/architectures.py"
+      "file": "models/tensorflow/architectures.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "positive_pair_builder",
+          "negative_sampler",
+          "trainer",
+          "ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Generic matching example, not a method card; no item index, sampler, or full training recipe is included."
+      ],
+      "output_contract": {
+        "kind": "score_matrix",
+        "shape": "[B_user,B_item]"
+      }
     },
     {
       "id": "user_cf",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:UserCF",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included.",
+        "Full user-user similarity matrix is not scalable without pruning or an index."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "user_cf",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:UserCF",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "positive_interaction_matrix",
+          "candidate_filter",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense similarity computation is a small-study reference; no gradient trainer or production index is included.",
+        "Full user-user similarity matrix is not scalable without pruning or an index."
+      ],
+      "output_contract": {
+        "kind": "neighbor_score_matrix",
+        "shape": "[B,I]"
+      }
     },
     {
       "id": "wide_deep",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:WideDeep",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Wide path uses explicit categorical pair tables, not arbitrary field-cross templates."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "wide_deep",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:WideDeep",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Wide path uses explicit categorical pair tables, not arbitrary field-cross templates."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "xdeepfm",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.interactions:XDeepFM",
-      "file": "models/pytorch/interactions.py"
+      "file": "models/pytorch/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Compact CIN omits split-half routing used by some xDeepFM configurations."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "xdeepfm",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.interactions:XDeepFM",
-      "file": "models/tensorflow/interactions.py"
+      "file": "models/tensorflow/interactions.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "binary_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
+        "Compact CIN omits split-half routing used by some xDeepFM configurations."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      }
     },
     {
       "id": "youtube_sbc",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:YouTubeSBC",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "candidate_sampler",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Scores only the supplied candidates; sampler, sampled objective, and full-catalog evaluation remain host-owned.",
+        "Subtracts supplied log item-sampling probabilities only; those are not exposure or treatment propensities."
+      ],
+      "output_contract": {
+        "kind": "candidate_score_matrix",
+        "shape": "[B,K]"
+      }
     },
     {
       "id": "youtube_sbc",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:YouTubeSBC",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "candidate_sampler",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Scores only the supplied candidates; sampler, sampled objective, and full-catalog evaluation remain host-owned.",
+        "Subtracts supplied log item-sampling probabilities only; those are not exposure or treatment propensities."
+      ],
+      "output_contract": {
+        "kind": "candidate_score_matrix",
+        "shape": "[B,K]"
+      }
     },
     {
       "id": "youtubednn",
       "framework": "pytorch",
       "symbol": "model_evo_harness.models.pytorch.retrieval:YouTubeDNN",
-      "file": "models/pytorch/retrieval.py"
+      "file": "models/pytorch/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "candidate_sampler",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Scores only the supplied candidates; sampler, sampled objective, and full-catalog evaluation remain host-owned.",
+        "Candidate scores are not a complete sampled softmax training objective; host supplies its sampler and loss."
+      ],
+      "output_contract": {
+        "kind": "candidate_score_matrix",
+        "shape": "[B,K]"
+      }
     },
     {
       "id": "youtubednn",
       "framework": "tensorflow",
       "symbol": "model_evo_harness.models.tensorflow.retrieval:YouTubeDNN",
-      "file": "models/tensorflow/retrieval.py"
+      "file": "models/tensorflow/retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "candidate_sampler",
+          "trainer",
+          "sampled_ranking_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Scores only the supplied candidates; sampler, sampled objective, and full-catalog evaluation remain host-owned.",
+        "Candidate scores are not a complete sampled softmax training objective; host supplies its sampler and loss."
+      ],
+      "output_contract": {
+        "kind": "candidate_score_matrix",
+        "shape": "[B,K]"
+      }
     }
   ]
 }

@@ -1,0 +1,21 @@
+# Adapting model research to randomized marketing
+
+A coupon experiment asks how an action changes an outcome. A response predictor can be a component, but its AUC is not the policy objective. The recommendation sources do not supply a complete treatment-effect experiment protocol. Use this guide when the host declares randomized assignment, observed outcomes and a fixed action budget; it does not make those facts true for an arbitrary marketing table.
+
+## Separate the estimation mechanism from the network
+
+First identify the actual bottleneck and a control. With weak arm-specific predictions, compare a shared outcome model with treatment interactions (S-style) against independent treatment/control models (T-style), matching capacity and training budget. With imbalanced arm support, an X-style learner is a different hypothesis: imputed effects and final effect regressions, not merely two response heads. Keep the neural feature encoder fixed while changing estimator, or keep estimator fixed while changing FM/cross/attention structure. Mixing both prevents a useful attribution. Consult the installed estimator's signature before generation: the online documentation version may differ from the host environment. [EconML meta-learners](https://www.pywhy.org/EconML/spec/estimation/metalearners.html).
+
+For a DR-style experiment, use cross-fitted nuisance outcome estimates and the recorded assignment probability to construct an augmented effect target. Train-fold predictions must exclude the row's fold; validation/test outcomes must never train nuisances, pseudo-targets, sampling weights or encoders. Inspect treatment-arm support, nuisance error and large pseudo-targets. Changing to a DR objective does not automatically supply valid inference for an arbitrary neural final stage. Reject a proposed improvement that arises from in-sample nuisance leakage or unsupported probability clipping. [EconML doubly robust learning](https://www.pywhy.org/EconML/spec/estimation/dr.html).
+
+A residualized experiment instead models outcome residuals against treatment residuals, with the conditional effect as their multiplier. Use out-of-fold nuisance estimates and a weighted residual objective; naive division by a near-zero treatment residual is unstable. Compare this mechanism with an existing estimator using the same encoder and scoring units. Report whether it changes variance, ordering or policy choices; a lower new training loss is not comparable to the old loss. [EconML DML](https://www.pywhy.org/EconML/spec/estimation/dml.html).
+
+## Keep the business decision observable
+
+The host must define the outcome horizon, randomization unit, assignment probability, treatment eligibility and cost basis. Revenue, gross margin, coupon face value, send cost and realized redemption cost are different quantities. If the public dataset lacks realized costs, freeze and label any cost assumption; do not infer profitability from conversion improvement. Preserve the same objective and budget through a search. Reweighting difficult training rows is an optimization experiment, not permission to change the population used for policy evaluation.
+
+Diagnose arm-specific fit, supported residual slices, action overlap with the control, budget utilization and policy effect separately. A high-response user may also respond without a coupon; feature importance does not reveal persuadability. Do not infer a user-level treatment-effect label from one observed response. Business experience should cite an evaluator-supplied population, estimate and uncertainty; missing segment diagnostics call for analysis of existing data before a human feature request.
+
+## Execution boundary
+
+These are original experiment designs, not additional implemented estimator classes. CouponEvo supplies an EconML/PyTorch execution contract; another host must supply its own. Every learned component must follow the host's device requirement, including nuisance and final-stage models. A library name alone does not establish CUDA use. Freeze dataset, folds, preprocessing, library versions and evaluator; record the implemented estimator and network variant. Use validation to explore and reserve a separately protected evaluation for any confirmed gain.

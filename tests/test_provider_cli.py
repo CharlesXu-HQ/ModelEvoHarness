@@ -35,7 +35,7 @@ class ProviderTests(unittest.TestCase):
                    "catalog": {"families": [{"id": "feature_interactions"}]},
                    "applicability": [{"family_id": "sequence_ranking", "status": "needs_data"}],
                    "steps": [{"evaluation": {"score": 0.3}}]}
-        observation = {"task": context["task"], "trial": {"evaluation": {"score": 0.2}}}
+        observation = {"task": context["task"], "trial": {"evaluation": {"score": 0.2, "review_required": True}}}
 
         with patch("model_evo_harness.provider.urlopen", side_effect=fake_open):
             self.assertEqual(agent.propose(context)["action"], "request_data")
@@ -64,6 +64,14 @@ class ProviderTests(unittest.TestCase):
         self.assertIn("measured", second_body["messages"][0]["content"])
         self.assertIn("technical_experience", second_body["messages"][0]["content"])
         self.assertIn("business_experience", second_body["messages"][0]["content"])
+
+    def test_normal_reflection_uses_high_unless_host_requests_review(self):
+        agent = OpenAICompatibleAgent("https://api.example.test/v1", "key", "model")
+        with patch.object(agent, "_complete", return_value={}) as complete:
+            agent.reflect({"trial": {"evaluation": {"score": 0.2}}})
+            self.assertEqual(complete.call_args.args[2], "high")
+            agent.reflect({"trial": {"evaluation": {"score": 0.2, "review_required": True}}})
+            self.assertEqual(complete.call_args.args[2], "max")
 
     def test_rejects_invalid_url_and_invalid_json_without_exposing_key(self):
         with self.assertRaises(ValueError):

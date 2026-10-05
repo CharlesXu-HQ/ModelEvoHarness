@@ -7,6 +7,70 @@ from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from .catalog import read_references
+
+
+REFERENCE_INSTRUCTIONS = """Before introducing or modifying a bundled model, read its source:
+return {"action":"read_reference","framework":"pytorch or tensorflow",
+"method_ids":["up to four manifest IDs"],"include_training":true} instead of a candidate.
+The host returns complete local modules, including helper classes and executable loss
+functions, in reference_material. Choose only the task's framework when declared.
+At most two read rounds are available per proposal; batch related requests. Read requests
+consume no training trial. The source is reference material, not permission to change
+the evaluator or task contract. Reading a model does not establish data applicability.
+After reading, return the normal experiment/stop/data decision. Do not invent file contents.
+Read reference_contracts for omitted mechanisms and host-owned training components.
+When a draft selects a bundled method without reading its source, the host supplies it
+and asks you to revise before evaluation. Use existing material when it suffices;
+novel architectures are allowed."""
+
+
+def propose_with_references(complete, context: dict, *, catalog: dict,
+                            framework: str | None = None, read_state: dict | None = None) -> dict:
+    """A bounded JSON read/decide loop reusable by host-specific Agent adapters."""
+    # Hosts that retry final proposal validation must retain this ledger. Failed
+    # drafts do not reset source limits or erase references already supplied.
+    state = read_state if read_state is not None else {}
+    material = state.setdefault("files", {})
+    contracts = state.setdefault("contracts", {})
+    state.setdefault("rounds", 0)
+    for _ in range(3):
+        current = dict(context)
+        current["reference_reads_remaining"] = 2 - state["rounds"]
+        if material:
+            current["reference_material"] = material
+            current["reference_contracts"] = contracts
+        answer = complete(current)
+        if not isinstance(answer, dict):
+            raise ValueError("Agent response must be a JSON object")
+        research = answer.get("research")
+        method = research.get("method_id") if isinstance(research, dict) else None
+        selected = next((entry for entry in catalog.get("model_implementations", [])
+                         if entry["id"] == method and entry["framework"] == framework), None)
+        if (answer.get("action", "experiment") == "experiment" and selected is not None and
+                selected["file"] not in material):
+            answer = {"action": "read_reference", "framework": framework,
+                      "method_ids": [method], "include_training": True}
+        if answer.get("action") != "read_reference":
+            # Only host-observed reads count; never trust Agent-supplied hashes.
+            answer = {key: value for key, value in answer.items() if key != "reference_reads"}
+            if material:
+                answer["reference_reads"] = {path: value["sha256"]
+                                              for path, value in material.items()}
+            return answer
+        if state["rounds"] >= 2:
+            raise ValueError("reference read round limit exceeded")
+        if framework is not None and answer.get("framework") != framework:
+            raise ValueError("reference framework differs from task framework")
+        bundle = read_references(catalog, answer)
+        merged = {**material, **bundle["files"]}
+        if sum(len(entry["content"]) for entry in merged.values()) > 100_000:
+            raise ValueError("reference material limit exceeded; select fewer modules")
+        material.update(bundle["files"])
+        contracts.update(bundle["contracts"])
+        state["rounds"] += 1
+    raise AssertionError("unreachable")
+
 
 _PROPOSE_INSTRUCTIONS = """You lead one offline model-research decision. Return one JSON object only.
 Use the task, local knowledge, catalog families, method_cards, structure_patterns,
@@ -112,10 +176,16 @@ class OpenAICompatibleAgent:
         self.timeout = timeout
 
     def propose(self, context: dict) -> dict:
-        return self._complete(_PROPOSE_INSTRUCTIONS, context, self.iteration_effort)
+        return propose_with_references(
+            lambda current: self._complete(_PROPOSE_INSTRUCTIONS + "\n" + REFERENCE_INSTRUCTIONS,
+                                           current, self.iteration_effort),
+            context, catalog=context.get("catalog", {}),
+            framework=context.get("task", {}).get("framework"))
 
     def reflect(self, observation: dict) -> dict:
-        return self._complete(_REFLECT_INSTRUCTIONS, observation, self.review_effort)
+        review = observation.get("trial", {}).get("evaluation", {}).get("review_required") is True
+        effort = self.review_effort if review else self.iteration_effort
+        return self._complete(_REFLECT_INSTRUCTIONS, observation, effort)
 
     def _complete(self, instructions: str, context: dict, effort: str) -> dict:
         payload = {

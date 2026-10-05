@@ -222,6 +222,8 @@ def _proposal(value: object, snapshot: dict, catalog: dict) -> dict:
     checked_research = validate_research(value, snapshot, catalog)
     proposal = {"action": "experiment", "research": checked_research,
                 "candidate": value["candidate"]}
+    if "reference_reads" in value:
+        proposal["reference_reads"] = value["reference_reads"]
     _json_bytes(proposal)
     return proposal
 
@@ -264,7 +266,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
     if not isinstance(catalog, dict):
         raise ValueError("catalog must be a dict")
 
-    from .catalog import (applicability, catalog_digest, decision_applicability,
+    from .catalog import (applicability, catalog_digest, common_knowledge, decision_applicability,
                           implementation_digest, load_guide, model_api, method_applicability,
                           training_applicability)
 
@@ -277,6 +279,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
                  for item in applicability_report if item["status"] == "ready" and
                  any(family["id"] == item["family_id"] and family.get("local_guide")
                      for family in catalog["families"])}
+    if catalog.get("experience_schema_version") == 2:
+        knowledge.update(common_knowledge())
     ready_methods = {item["method_id"] for item in method_report if item["status"] == "ready"}
     frameworks = ((snapshot["framework"],) if "framework" in snapshot else
                   ("pytorch", "tensorflow"))

@@ -67,7 +67,7 @@ class Agent:
     def reflect(self, observation: dict) -> dict: ...
 ```
 
-`context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides, ready `model_api` signatures, baseline, completed trials, best ID and remaining steps. The catalog includes 22 research families, 44 method cards, structural patterns, training patterns and a model implementation manifest. `method_applicability.frameworks` reports direct PyTorch/TensorFlow code for each card. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both. The generic `two_tower` example is in the implementation manifest but is not one of the 44 method cards. A `ready` method means its inputs are declared; it does not prove that the method helps.
+`context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. The catalog includes 22 research families, 44 method cards, structural patterns, training patterns and a model implementation manifest. `method_applicability.frameworks` reports direct PyTorch/TensorFlow code for each card. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both. The generic `two_tower` example is in the implementation manifest but is not one of the 44 method cards. A `ready` method means its inputs are declared; it does not prove that the method helps.
 
 A proposal has this shape:
 
@@ -120,3 +120,16 @@ After a trial, `reflect()` returns separate records:
 For `business_experience.status = "observed"`, include an `observation_id` present in that trial's `evaluation.business_observations`, plus nonempty `insight` and `limitations`. The technical lesson can concern structure, feature representation, loss, sampling, optimization, calibration or decision mapping. A business insight concerns a defined population and measured outcome; its wording must not outrun the observation's uncertainty or causal design. Both types remain bound to the task and dataset fingerprint.
 
 The journal is stored in `output/journal.json` through an atomic replace. Failed `evaluate()` calls become failed trials with a bounded error type. Do not include API keys or raw user rows in snapshots, proposals, metrics or reflections. The final holdout is a separate host action after selecting a candidate.
+
+
+## Bounded source retrieval
+
+The built-in API provider understands a preparatory JSON action:
+
+```json
+{"action":"read_reference","framework":"pytorch","method_ids":["fm","deepfm"],"include_training":true}
+```
+
+This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four model IDs. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled `method_id` automatically gets its module before a final experiment if it was not already read. The final proposal stores `reference_reads` (path to host-computed SHA-256). Custom Agents can call `read_references(catalog, request)` or reuse `propose_with_references(complete, context, catalog=..., framework=...)`; `run_search` itself still accepts only final experiment/stop/request-data decisions. Hosts that retry final proposal validation must pass the same host-owned `read_state={}` across those retries, preserving the read budget and source ledger; never populate it from model output.
+
+Normal reflection uses `iteration_effort`, default `high`. The host can set `evaluation.review_required = True` for anomaly/leakage/cost-tradeoff review, which selects `review_effort`, default `max`. The flag is a host assessment, not a replacement for uncertainty or guardrail checks.

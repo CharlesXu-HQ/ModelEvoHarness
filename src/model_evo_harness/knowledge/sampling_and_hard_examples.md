@@ -16,7 +16,7 @@ Assess full-catalog or fixed-candidate recall, tail coverage, calibration if sco
 
 ## When to request data
 
-If exposure/impression information is absent, the system cannot tell many true negatives from unobserved items; request exposure logs directly. If exposure exists, try sampling and correction experiments before claiming a new feature field is needed.
+Absent impression logs do not prevent all retrieval experiments. A declared implicit-feedback task can compare uniform, popularity, in-batch and model-mined non-interactions while acknowledging that these are sampled unobserved items, not verified negatives. Keep the candidate evaluator fixed and report false-negative risk. Exposure-conditioned response modeling requires actual exposure records; an immediate terminal data request still needs an explicit host domain requirement. Missing inputs for one sampler do not show that other experiments are impossible.
 
 ## Research lineage
 

@@ -42,6 +42,55 @@ def load_guide(family_id: str) -> str:
         encoding="utf-8")
 
 
+def common_knowledge() -> dict[str, str]:
+    """Working material that applies across model families, including novel ideas."""
+    return {name: load_guide(name) for name in (
+        "training_objectives", "sampling_and_hard_examples",
+        "optimization_and_regularization", "feature_gap_decisions",
+        "business_insight_synthesis", "exploration_strategy", "structure_extensions",
+        "causal_policy_experiments")}
+
+
+def read_references(catalog: dict, request: dict) -> dict:
+    """Read complete bundled modules by model ID; never execute or fetch code.
+
+    Whole modules preserve shared helpers and base classes. The bundled modules
+    use only their framework and stdlib, so their imports need no other sources.
+    """
+    framework = request.get("framework")
+    methods = request.get("method_ids", [])
+    training = request.get("include_training", False)
+    if framework not in ("pytorch", "tensorflow"):
+        raise ValueError("reference framework must be pytorch or tensorflow")
+    if (not isinstance(methods, list) or len(methods) > 4 or
+            any(not isinstance(item, str) for item in methods) or
+            not isinstance(training, bool) or (not methods and not training)):
+        raise ValueError("reference needs up to four method_ids or include_training=true")
+    entries = {entry["id"]: entry for entry in catalog.get("model_implementations", [])
+               if entry["framework"] == framework}
+    if set(methods) - entries.keys():
+        raise ValueError("reference method_ids must exist in the implementation manifest")
+    paths = {entries[item]["file"] for item in methods}
+    if training:
+        paths.add(f"models/{framework}/training.py")
+    package = files("model_evo_harness")
+    result = {}
+    for path in sorted(paths):
+        # Paths are bundled identifiers, not arbitrary filesystem access.
+        parts = path.split("/")
+        if (len(parts) != 3 or parts[:2] != ["models", framework] or
+                not parts[2].endswith(".py") or not parts[2][:-3].isidentifier()):
+            raise ValueError("reference file must be a framework model module")
+        content = package.joinpath(path).read_text(encoding="utf-8")
+        result[path] = {"content": content,
+                        "sha256": hashlib.sha256(content.encode()).hexdigest()}
+    contracts = {item: {key: entries[item][key] for key in (
+        "reference_scope", "training_support", "output_contract", "limitations")
+        if key in entries[item]} for item in sorted(set(methods))}
+    return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
+            "contracts": contracts}
+
+
 def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
     """Expose local model constructors and public operations without importing a DL runtime."""
     if framework not in ("pytorch", "tensorflow"):
@@ -67,6 +116,8 @@ def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
             "inherits": [ast.unparse(base) for base in model.bases],
             "constructor": public.pop("__init__", "inherited"),
             "methods": public,
+            **{key: entry[key] for key in ("reference_scope", "training_support",
+                                          "output_contract", "limitations") if key in entry},
         }
     return result
 

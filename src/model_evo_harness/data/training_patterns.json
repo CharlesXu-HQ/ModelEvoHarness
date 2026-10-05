@@ -38,10 +38,10 @@
     },
     {
       "id": "hard_negative_mining", "category": "sampling", "stages": ["retrieval"],
-      "requires": ["implicit_feedback", "negative_sampler_definition", "item_catalog", "exposure_logs"],
-      "mechanism": "Mine confusable exposed non-clicked items while mixing random negatives and guarding against unobserved positives.",
-      "when_to_try": "Random negatives are trivially separated but recall on exposed, similar items remains low.",
-      "required_evidence": "Time-safe exposure logs, item catalog, sampler probabilities and false-negative risk by popularity slice.",
+      "requires": ["implicit_feedback", "negative_sampler_definition", "item_catalog"],
+      "mechanism": "Mine confusable eligible candidates from a declared training-negative pool; compare random, in-batch and hard mixtures while guarding against false negatives.",
+      "when_to_try": "Random negatives are trivially separated but fixed-universe recall remains weak; hard candidates may provide a more informative training comparison.",
+      "required_evidence": "Training-period positives and eligible catalog, declared negative provenance, sampler probabilities when applying correction, and false-negative risk. Exposure logs are required only when claiming observed non-response; sampled non-interactions remain unobserved.",
       "controlled_comparison": "Keep tower, positive events, batch size, total negatives and evaluation universe fixed; vary only hard-negative share.",
       "reject_if": "Full-catalog recall or coverage falls, false-negative contamination grows, or mining uses future interactions."
     },

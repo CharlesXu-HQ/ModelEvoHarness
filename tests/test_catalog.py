@@ -117,6 +117,12 @@ class CatalogTests(unittest.TestCase):
                   training_applicability(self.task, self.catalog)}
         self.assertEqual(screen["focal_loss"]["status"], "ready")
 
+    def test_retrieval_mining_does_not_require_impression_logs_for_declared_sampled_feedback(self):
+        task = {"stage": "retrieval", "capabilities": ["implicit_feedback",
+                "negative_sampler_definition", "item_catalog"]}
+        screen = {item["pattern_id"]: item for item in training_applicability(task, self.catalog)}
+        self.assertEqual(screen["hard_negative_mining"]["status"], "ready")
+
     def test_model_manifest_distinguishes_code_from_guidance(self):
         implementations = self.catalog["model_implementations"]
         card_ids = {card["id"] for card in self.catalog["method_cards"]}

@@ -4,7 +4,7 @@ Most production training datasets already contain many fields. The Agent should 
 
 ## Two valid paths
 
-1. **Expert prerequisite:** business knowledge directly establishes that an input is essential to the decision and absent from the dataset. Examples include actual coupon cost for a net-value objective, timestamped history for a sequence hypothesis, or historical impressions for exposure-aware negative sampling. The Agent can request the field immediately, without running models to prove a definitional absence.
+1. **Expert prerequisite:** business knowledge directly establishes that an input is essential to the decision and absent from the dataset. Examples include actual coupon cost for a net-value objective, timestamped history for a sequence hypothesis, or historical impressions for exposure-aware negative sampling. The Agent can request the field immediately when the host supplies that prerequisite with field, source and pre-decision timing. A field needed only for one architecture does not make it essential for the whole task; continue testable alternatives. Without an explicit host rule, the current runtime requires evidence from distinct completed mechanisms before recording a feature request.
 2. **Empirical residual:** the field gap is not obvious. The Agent compares simple baselines, feature transformations, interactions, sequence models where data permit, losses, and training choices on fixed splits. It records the residual slice, checks leakage and support, and explains why existing fields cannot encode the hypothesized cause. Only then does it propose a precise human data change.
 
 ## A useful request artifact

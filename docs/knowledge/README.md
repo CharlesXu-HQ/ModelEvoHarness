@@ -36,3 +36,8 @@ These 22 substantive, independently written family guides are packaged with Mode
 - [From experiments to business insight](../../src/model_evo_harness/knowledge/business_insight_synthesis.md)
 
 The complete original-source path mapping and reuse boundary are in [source attribution](../research/source-attribution.md). The [implementation manifest](../../src/model_evo_harness/data/model_implementations.json) lists exact model class paths in both frameworks. The catalog records machine-readable applicability; these guides carry the technical explanation and do not claim measured performance gains.
+
+- [Choosing the next experiment](../../src/model_evo_harness/knowledge/exploration_strategy.md): symptom-driven exploration, stage-specific sampling, controlled comparisons and current implementation boundaries.
+
+- [Additional structural hypotheses](../../src/model_evo_harness/knowledge/structure_extensions.md): non-overlapping field, sequence and interest mechanisms; explicitly marked design-only.
+- [Randomized marketing experiments](../../src/model_evo_harness/knowledge/causal_policy_experiments.md): estimator vs network changes, cross-fitting, observable cost and policy contracts.
