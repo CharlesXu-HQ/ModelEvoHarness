@@ -1030,7 +1030,7 @@
           "positive_pair_builder",
           "negative_sampler_or_labels",
           "trainer",
-          "loss",
+          "invoke_builtin_negative_sampling_loss",
           "evaluator"
         ]
       },
@@ -1055,7 +1055,7 @@
           "positive_pair_builder",
           "negative_sampler_or_labels",
           "trainer",
-          "loss",
+          "invoke_builtin_negative_sampling_loss",
           "evaluator"
         ]
       },

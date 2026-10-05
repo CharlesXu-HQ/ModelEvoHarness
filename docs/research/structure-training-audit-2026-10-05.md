@@ -29,7 +29,7 @@ I checked the PyTorch and TensorFlow model modules, the manifest, [training help
 
 ## Directory-level non-overlap check
 
-This is a **name-to-mechanism diff**, not a demand to port every upstream model. Source directories can contain aliases, variants and models that share a controlled hypothesis. The local method IDs are in [`method_cards.json`](../../src/model_evo_harness/data/method_cards.json) and [`supplemental_method_cards.json`](../../src/model_evo_harness/data/supplemental_method_cards.json).
+This is a **name-to-mechanism diff**, not a demand to port every upstream model. Source directories can contain aliases, variants and models that share a controlled hypothesis. The local method IDs are in [`method_cards.json`](../../src/model_evo_harness/data/method_cards.json) and [`supplemental_method_cards.json`](../../src/model_evo_harness/data/supplemental_method_cards.json). The [structure extensions guide](../../src/model_evo_harness/knowledge/structure_extensions.md) turns the distinct gaps into testable hypotheses; it does not claim they have runnable local references.
 
 | Upstream exported/listed group | Already represented by local card or same controlled mechanism | Important non-overlap and disposition |
 | --- | --- | --- |
