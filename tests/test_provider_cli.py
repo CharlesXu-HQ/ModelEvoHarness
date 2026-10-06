@@ -152,6 +152,15 @@ class CliTests(unittest.TestCase):
                       "--max-steps", "1"])
         self.assertEqual(error.exception.code, 1)
 
+    def test_strict_promotion_flag_reaches_the_search_policy(self):
+        output = Path(self.temp.name) / "strict"
+        result = cli.main(["run", "--task", "harness_cli_test_adapter:Task",
+                           "--agent", "harness_cli_test_adapter:agent", "--output", str(output),
+                           "--max-steps", "0", "--require-verified-implementation"])
+        self.assertEqual(result, 0)
+        state = json.loads((output / "journal.json").read_text())
+        self.assertEqual(state["promotion_policy"], {"require_verified_implementation": True})
+
     def test_run_reads_provider_config_and_env_key(self):
         config = Path(self.temp.name) / "agent.json"
         config.write_text(json.dumps({"provider_url": "https://api.example.test/v1",

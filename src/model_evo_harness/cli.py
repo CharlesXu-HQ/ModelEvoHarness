@@ -55,6 +55,8 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--output", type=Path, required=True, metavar="DIR")
     run.add_argument("--max-steps", type=int, required=True, metavar="N")
     run.add_argument("--resume", action="store_true")
+    run.add_argument("--require-verified-implementation", action="store_true",
+                     help="promote only candidates with a host-verified implementation")
     commands.add_parser("catalog-check", help="check research source coverage")
     args = parser.parse_args(argv)
 
@@ -73,7 +75,8 @@ def main(argv: list[str] | None = None) -> int:
         key = os.environ.pop(key_env) if key_env else None
         try:
             result = run_search(task, agent, output=args.output, catalog=load_catalog(),
-                                max_steps=args.max_steps, resume=args.resume)
+                                max_steps=args.max_steps, resume=args.resume,
+                                require_verified_implementation=args.require_verified_implementation)
         finally:
             if key_env:
                 os.environ[key_env] = key

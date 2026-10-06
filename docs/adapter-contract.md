@@ -71,6 +71,10 @@ The host may add `evidence` lists to `snapshot()`, `baseline()`, and `evaluate()
 
 The host may attach `implementation_check` with status `verified`, `contradicted`, or `unverified`, plus a separate `change_audit` with status and `changed_factors`, to an evaluation. Agent-declared changes are not a host audit. Contradicted implementations stay in the journal but cannot become the validation champion.
 
+`run_search(..., require_verified_implementation=True)` or CLI `--require-verified-implementation` additionally blocks promotion of missing/unverified implementation checks. The default remains exploratory score comparison. The fixed baseline remains the initial comparator; strict mode checks replacement candidates, not the baseline. Hosts must implement meaningful positive verification before enabling strict mode. Checks should establish that the claimed structure/loss/training change is actually connected and executed, within explicitly reported coverage. Statistical confirmation and isolated mechanism attribution are separate checks: `change_audit` does not gate promotion.
+
+`promotion_policy` is exposed in proposal/reflection context and the journal and included in run identity. Changing it requires a new run. Each attempted trial records `promotion` with `eligible`, `promoted`, `previous_best_id` and `reason`: `promoted`, `no_gain`, `unverified`, `contradicted` or `evaluation_failed`. Eligibility means passing the implementation gate; it does not imply a score gain. Unverified candidates are retained for follow-up even when they cannot become `best_id`.
+
 ## Agent context and proposal
 
 For backbone-local code changes and selective component migration, see the [composition contract](compositional-evolution.md). The built-in provider enables `snapshot.model_design_required=true` and `snapshot.horizontal_expansion_required=true`; custom adapters can opt in with those flags. Research then includes `model_design` and a horizontal-expansion decision, and reflection includes per-component assessments. A `defer` decision still records existing groups; branch and fusion components declare their instance paths, input fields, forward/call locations and output contracts. The engine supplies compact `composition_sources` alongside full trial history. Older snapshots without these flags remain valid under their original requirements; enabling a new contract changes the frozen identity.
@@ -151,7 +155,26 @@ The built-in API provider understands a preparatory JSON action:
 {"action":"read_reference","framework":"pytorch","method_ids":["fm","deepfm"],"include_training":true,"include_composition":true}
 ```
 
-This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four model IDs. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled `method_id` automatically gets its module before a final experiment if it was not already read. The final proposal stores `reference_reads` (path to host-computed SHA-256). Custom Agents can call `read_references(catalog, request)` or reuse `propose_with_references(complete, context, catalog=..., framework=...)`; `run_search` itself still accepts only final experiment/stop/request-data decisions. Hosts that retry final proposal validation must pass the same host-owned `read_state={}` across those retries, preserving the read budget and source ledger; never populate it from model output.
+This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four model IDs. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled `method_id` automatically gets its module before a final experiment if it was not already read.
+
+Within `run_search`, the engine creates a separate reference ledger for each `agent.propose()` invocation. Only `read_references(catalog, request)` populates official `reference_reads` (path to SHA-256). The engine ignores Agent-returned `reference_reads` and `reference_events`. The journal's ordered `reference_events` distinguishes actual `read` events from `delivered` events: source material supplied to a host completion callback. Both events record a `files` path/hash mapping; the enclosing trial and run identity identify the proposal and installed source version. Delivery does not attest to a successful API response, model understanding, or candidate correctness. Trusted Python host adapters remain responsible for forwarding context to the provider; this is not isolation from malicious in-process code.
+
+Custom adapters can reuse `propose_with_references(complete, context, catalog=..., framework=...)`, or explicitly use:
+
+```python
+from model_evo_harness import read_references, call_with_references
+
+# Inside agent.propose(context):
+bundle = read_references(context["catalog"], {
+    "framework": "pytorch", "method_ids": ["fm"], "include_training": True,
+})
+decision = call_with_references(complete, {
+    **context, "reference_material": bundle["files"],
+    "reference_contracts": bundle["contracts"],
+})
+```
+
+The delivery helper copies callback inputs and checks source content against actual reads in the current proposal scope. A bare read records no delivery. A self-reported hash, altered source, or cache from outside this proposal scope cannot establish delivery; re-read through the host reader. A failed proposal closes the scope so it cannot contaminate a resumed decision. Hosts retrying final proposal validation within one `propose()` call should pass the same host-owned `read_state={}` to `propose_with_references`, retaining its read budget and material; never populate it from model output. Standalone use of that helper still returns its compatibility `reference_reads` map, but only the engine-owned ledger becomes official search evidence. `run_search` still accepts only final experiment/stop/request-data decisions.
 
 `include_composition=true` loads the native `models/<framework>/composition.py`; it may be requested alone with `method_ids=[]`. PyTorch and TensorFlow each provide `ParallelBranches(branches, fusion)` with arbitrary native branches and candidate-written fusion. Each named branch receives its own keyword-input mapping and fusion receives the named output mapping. A proposal with nonempty horizontal groups automatically receives unread composition source when the task framework is known, including when `decision=defer` retains existing groups. These reads use the same budget and hash ledger; they do not execute or validate the candidate graph.
 

@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from .catalog import read_references
+from .references import call_with_references
 
 
 REFERENCE_INSTRUCTIONS = """Before introducing or modifying a bundled model, read its source:
@@ -41,7 +42,7 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
         if material:
             current["reference_material"] = material
             current["reference_contracts"] = contracts
-        answer = complete(current)
+        answer = call_with_references(complete, current)
         if not isinstance(answer, dict):
             raise ValueError("Agent response must be a JSON object")
         research = answer.get("research")
@@ -189,6 +190,10 @@ framework-specific import paths and signatures. Reuse those modules when the hos
 candidate contract permits imports; inspect each model's input and output contract.
 Keep the task's objective, constraints, split, and metric fixed. A proposal is a falsifiable
 hypothesis, not a proven outcome. Do not claim an improvement before the host evaluates it.
+Read promotion_policy and each trial's promotion record. When verified implementation is
+required, an unverified score gain remains a candidate for diagnosis, not the champion.
+Identify the missing host check without rewriting the evaluator or inventing verification.
+Implementation eligibility does not establish statistical confirmation or component attribution.
 The catalog is research guidance, not a closed model list; a new direction may omit family_id
 and method_id. Method cards describe controlled ablations, not installed models.
 Before changing model structure, connect a pattern's when_to_try to a measured bottleneck,

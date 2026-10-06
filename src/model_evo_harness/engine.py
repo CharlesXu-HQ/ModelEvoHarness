@@ -16,6 +16,7 @@ from pathlib import Path
 from .composition import composition_sources, validate_feature_groups
 from .evidence import (cited_facts, validate_audit_recommendations,
                        validate_host_evidence)
+from .references import _collect_reference_events
 
 
 PACKAGE_VERSION = "0.2.0"
@@ -232,8 +233,8 @@ def validate_reflection(reflection: dict, evaluation: dict | None,
             not isinstance(technical.get(key), str) or not technical[key].strip()
             for key in ("lesson", "evidence", "uncertainty", "next_test")):
         raise ValueError("technical_experience needs lesson, evidence, uncertainty, next_test")
-    implementation = (evaluation or {}).get("implementation_check", {})
-    audit = (evaluation or {}).get("change_audit", {})
+    implementation = (evaluation or {}).get("implementation_check") or {}
+    audit = (evaluation or {}).get("change_audit") or {}
     implementation_status = implementation.get("status", "unverified")
     if technical.setdefault("implementation_status", implementation_status) != implementation_status:
         raise ValueError("technical implementation_status must match the host check")
@@ -334,8 +335,6 @@ def _proposal(value: object, snapshot: dict, catalog: dict, *,
     checked_research = validate_research(value, snapshot, catalog, evidence=evidence, sources=sources)
     proposal = {"action": "experiment", "research": checked_research,
                 "candidate": value["candidate"]}
-    if "reference_reads" in value:
-        proposal["reference_reads"] = value["reference_reads"]
     _json_bytes(proposal)
     return proposal
 
@@ -351,6 +350,7 @@ def _reflect_pending(agent: object, snapshot: dict, state: dict,
         "steps": state["steps"][:-1],
         "trial": {key: value for key, value in step.items() if key != "reflection"},
         "best_id": state["best_id"],
+        "promotion_policy": state["promotion_policy"],
         "remaining_steps": max(0, max_steps - len(state["steps"])),
     }
     evidence = _host_evidence(snapshot, state["baseline"], state["steps"])
@@ -373,17 +373,24 @@ def _reflect_pending(agent: object, snapshot: dict, state: dict,
 
 
 def run_search(task: object, agent: object, *, output: Path, catalog: dict,
-               max_steps: int, resume: bool = False) -> dict:
+               max_steps: int, resume: bool = False,
+               require_verified_implementation: bool = False) -> dict:
     """Run up to ``max_steps`` attempted experiments and return the journal.
 
     ``task`` supplies snapshot/baseline/evaluate; ``agent`` supplies
     propose/reflect. Only task and catalog identity, proposals, observations,
     and reflections are persisted. Agent/provider configuration is excluded.
+    With ``require_verified_implementation``, candidates need a host ``verified``
+    check to replace the baseline/incumbent. Attribution audits remain separate.
+    The promotion policy is frozen with the run identity.
     """
     if isinstance(max_steps, bool) or not isinstance(max_steps, int) or max_steps < 0:
         raise ValueError("max_steps must be a nonnegative integer")
     if not isinstance(catalog, dict):
         raise ValueError("catalog must be a dict")
+    if not isinstance(require_verified_implementation, bool):
+        raise ValueError("require_verified_implementation must be a bool")
+    promotion_policy = {"require_verified_implementation": require_verified_implementation}
 
     from .catalog import (applicability, catalog_digest, common_knowledge, decision_applicability,
                           implementation_digest, load_guide, model_api, method_applicability,
@@ -418,6 +425,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         "catalog_sha256": catalog_digest(catalog),
         "package_version": PACKAGE_VERSION,
         "implementation_sha256": implementation_digest(),
+        "promotion_policy": promotion_policy,
     }
     if "evaluation_protocol" in snapshot:
         identity["evaluation_protocol_sha256"] = _digest(snapshot["evaluation_protocol"])
@@ -429,6 +437,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         if not journal_path.exists():
             raise FileNotFoundError(f"cannot resume without {journal_path}")
         state = json.loads(journal_path.read_text(encoding="utf-8"))
+        if state.get("identity", {}).get("promotion_policy") != promotion_policy:
+            raise ValueError("journal promotion policy differs from this run")
         if (state.get("identity", {}).get("evaluation_protocol_sha256") !=
                 identity.get("evaluation_protocol_sha256")):
             raise ValueError("journal evaluation protocol differs from this task")
@@ -446,7 +456,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         baseline_dir.mkdir(exist_ok=True)
         baseline = _evaluation(task.baseline(baseline_dir))
         state = {"identity": identity, "baseline": baseline, "steps": [],
-                 "best_id": "baseline", "status": "running"}
+                 "best_id": "baseline", "status": "running",
+                 "promotion_policy": promotion_policy}
         _write_journal(journal_path, state)
 
     while len(state["steps"]) < max_steps:
@@ -463,6 +474,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "baseline": state["baseline"],
             "steps": state["steps"],
             "best_id": state["best_id"],
+            "promotion_policy": promotion_policy,
             "remaining_steps": max_steps - len(state["steps"]),
             "composition_sources": composition_sources(state["steps"]),
         }
@@ -471,7 +483,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         else:
             context["evidence_status"] = "not_supplied"
         # The Agent may mutate its input; the journal must retain observed history.
-        decision = agent.propose(json.loads(_json_bytes(context)))
+        with _collect_reference_events() as references:
+            decision = agent.propose(json.loads(_json_bytes(context)))
         if not isinstance(decision, dict):
             raise ValueError("agent.propose() must return a dict")
         action = decision.get("action")
@@ -503,6 +516,9 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
 
         proposal = _proposal(decision, snapshot, catalog, evidence=evidence,
                              sources=composition_sources(state["steps"]))
+        if references["events"]:
+            proposal["reference_reads"] = references["reads"]
+            proposal["reference_events"] = references["events"]
         trial_id = f"trial_{len(state['steps']) + 1:03d}"
         trial_dir = output / trial_id
         trial_dir.mkdir(exist_ok=True)
@@ -513,6 +529,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             # Exception messages may contain credentials or raw data. The type
             # gives the Agent a bounded failure signal without storing either.
             step.update(status="failed", error=f"evaluation failed: {type(error).__name__}"[:120])
+            step["promotion"] = {"eligible": False, "promoted": False,
+                                 "reason": "evaluation_failed", "previous_best_id": state["best_id"]}
         else:
             evaluation = _evaluation(raw_evaluation)
             step.update(status="evaluated", evaluation=evaluation)
@@ -522,7 +540,15 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
                                   if previous["id"] == state["best_id"]))
             better = (evaluation["score"] > current_score if snapshot["objective"]["direction"] == "max"
                       else evaluation["score"] < current_score)
-            if better and evaluation.get("implementation_check", {}).get("status") != "contradicted":
+            check = (evaluation.get("implementation_check") or {}).get("status", "unverified")
+            eligible = check != "contradicted" and (
+                not require_verified_implementation or check == "verified")
+            promoted = eligible and better
+            reason = ("contradicted" if check == "contradicted" else
+                      "unverified" if not eligible else "promoted" if promoted else "no_gain")
+            step["promotion"] = {"eligible": eligible, "promoted": promoted,
+                                 "reason": reason, "previous_best_id": state["best_id"]}
+            if promoted:
                 state["best_id"] = trial_id
         state["steps"].append(step)
         state["status"] = "running"

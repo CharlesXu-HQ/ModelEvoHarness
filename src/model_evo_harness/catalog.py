@@ -7,6 +7,8 @@ import hashlib
 import json
 from importlib.resources import files
 
+from .references import _record_reference_read
+
 
 def _bundled(name: str) -> dict:
     return json.loads(files("model_evo_harness").joinpath("data", name).read_text())
@@ -91,6 +93,7 @@ def read_references(catalog: dict, request: dict) -> dict:
     contracts = {item: {key: entries[item][key] for key in (
         "reference_scope", "training_support", "output_contract", "limitations")
         if key in entries[item]} for item in sorted(set(methods))}
+    _record_reference_read(result)
     return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
             "contracts": contracts}
 

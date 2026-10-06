@@ -99,6 +99,214 @@ class EngineTests(unittest.TestCase):
             "source_docs": [], "source_models": [],
         }]}
 
+    def test_promotion_policy_uses_host_implementation_status_without_attribution_gate(self):
+        for strict, status, expected in (
+                (False, None, "promoted"), (False, "unverified", "promoted"),
+                (False, "contradicted", "contradicted"),
+                (True, None, "unverified"), (True, "unverified", "unverified"),
+                (True, "contradicted", "contradicted"), (True, "verified", "promoted")):
+            with self.subTest(strict=strict, status=status):
+                class CheckedTask(Task):
+                    def evaluate(self, proposal, trial_dir):
+                        result = super().evaluate(proposal, trial_dir)
+                        if status is not None:
+                            result["implementation_check"] = {"status": status}
+                        result["change_audit"] = {"status": "unverified"}
+                        return result
+
+                agent = Agent([experiment()])
+                state = run_search(CheckedTask(scores=(0.6,)), agent,
+                                   output=self.output / f"{strict}-{status}", catalog=self.catalog,
+                                   max_steps=1, require_verified_implementation=strict)
+                promoted = expected == "promoted"
+                self.assertEqual(state["best_id"], "trial_001" if promoted else "baseline")
+                self.assertEqual(state["steps"][0]["promotion"]["reason"], expected)
+                self.assertEqual(state["steps"][0]["promotion"]["promoted"], promoted)
+                policy = {"require_verified_implementation": strict}
+                self.assertEqual(state["promotion_policy"], policy)
+                self.assertEqual(agent.contexts[0]["promotion_policy"], policy)
+                self.assertEqual(agent.observations[0]["promotion_policy"], policy)
+
+    def test_verified_lower_score_is_eligible_but_not_promoted(self):
+        class CheckedTask(Task):
+            def evaluate(self, proposal, trial_dir):
+                return {**super().evaluate(proposal, trial_dir),
+                        "implementation_check": {"status": "verified"}}
+
+        state = run_search(CheckedTask(scores=(0.3,)), Agent([experiment()]),
+                           output=self.output, catalog=self.catalog, max_steps=1,
+                           require_verified_implementation=True)
+        decision = state["steps"][0]["promotion"]
+        self.assertEqual(decision["reason"], "no_gain")
+        self.assertTrue(decision["eligible"])
+        self.assertFalse(decision["promoted"])
+
+    def test_null_implementation_check_is_treated_as_unverified(self):
+        self.catalog['experience_schema_version'] = 2
+        class CheckedTask(Task):
+            def evaluate(self, proposal, trial_dir):
+                return {**super().evaluate(proposal, trial_dir), "implementation_check": None,
+                        "change_audit": None}
+        class StructuredAgent(Agent):
+            def reflect(self, observation):
+                return structured_reflection()
+        state = run_search(CheckedTask(scores=(0.6,)), StructuredAgent([experiment()]),
+                           output=self.output, catalog=self.catalog, max_steps=1,
+                           require_verified_implementation=True)
+        self.assertEqual(state["best_id"], "baseline")
+        self.assertEqual(state["steps"][0]["promotion"]["reason"], "unverified")
+
+    def test_promotion_policy_is_frozen_for_resume(self):
+        task = Task()
+        run_search(task, Agent([]), output=self.output, catalog=self.catalog, max_steps=0,
+                   require_verified_implementation=True)
+        with self.assertRaisesRegex(ValueError, "promotion policy"):
+            run_search(task, Agent([]), output=self.output, catalog=self.catalog, max_steps=0,
+                       resume=True)
+        state = run_search(task, Agent([]), output=self.output, catalog=self.catalog,
+                           max_steps=0, resume=True, require_verified_implementation=True)
+        self.assertEqual(state["baseline"]["score"], 0.4)
+        self.assertEqual(task.baseline_calls, 1)
+
+    def test_forged_agent_reference_metadata_never_enters_official_journal(self):
+        proposal = experiment()
+        proposal["reference_reads"] = {"invented.py": "a" * 64}
+        proposal["reference_events"] = [{"event": "read", "path": "invented.py"}]
+        state = run_search(Task(), Agent([proposal]), output=self.output,
+                           catalog=self.catalog, max_steps=1)
+        recorded = state["steps"][0]["proposal"]
+        self.assertNotIn("reference_reads", recorded)
+        self.assertNotIn("reference_events", recorded)
+
+    def test_reference_reads_and_delivery_are_host_observed_and_proposal_scoped(self):
+        from model_evo_harness import read_references, call_with_references
+        full_catalog = load_catalog()
+        path = "models/pytorch/training.py"
+
+        class ReadingAgent(Agent):
+            def propose(self, context):
+                if context["steps"]:
+                    return experiment()
+                bundle = read_references(full_catalog, {
+                    "framework": "pytorch", "include_training": True})
+                self.expected_hash = bundle["files"][path]["sha256"]
+
+                def complete(delivered):
+                    delivered["reference_material"][path]["sha256"] = "mutated"
+                    return {**experiment(), "reference_reads": {"fake.py": "forged"}}
+
+                return call_with_references(complete, {**context,
+                    "reference_material": bundle["files"]})
+
+        agent = ReadingAgent([])
+        state = run_search(Task(), agent, output=self.output, catalog=self.catalog, max_steps=2)
+        recorded = state["steps"][0]["proposal"]
+        self.assertEqual(recorded["reference_reads"], {path: agent.expected_hash})
+        self.assertEqual([event["event"] for event in recorded["reference_events"]],
+                         ["read", "delivered"])
+        self.assertEqual(recorded["reference_events"][1]["files"], {path: agent.expected_hash})
+        self.assertNotIn("reference_reads", state["steps"][1]["proposal"])
+
+    def test_reference_wrapper_read_is_distinct_from_delivery_and_does_not_trust_cached_claims(self):
+        from model_evo_harness import read_references, call_with_references
+        full_catalog = load_catalog()
+
+        class ReadOnlyAgent(Agent):
+            def propose(self, context):
+                read_references(full_catalog, {"framework": "pytorch", "include_training": True})
+                return experiment()
+
+        state = run_search(Task(), ReadOnlyAgent([]), output=self.output,
+                           catalog=self.catalog, max_steps=1)
+        events = state["steps"][0]["proposal"]["reference_events"]
+        self.assertEqual([event["event"] for event in events], ["read"])
+
+        class ForgedDeliveryAgent(Agent):
+            def propose(self, context):
+                return call_with_references(lambda _: experiment(), {
+                    "reference_material": {"fake.py": {"content": "fake", "sha256": "forged"}}})
+
+        with self.assertRaisesRegex(ValueError, "host-observed read"):
+            run_search(Task(), ForgedDeliveryAgent([]), output=self.output / "forged",
+                       catalog=self.catalog, max_steps=1)
+
+    def test_failed_proposal_reference_scope_is_not_reused_by_resume(self):
+        from model_evo_harness import read_references
+        full_catalog = load_catalog()
+
+        class BrokenAgent(Agent):
+            def propose(self, context):
+                read_references(full_catalog, {"framework": "pytorch", "include_training": True})
+                raise RuntimeError("provider unavailable")
+
+        task = Task()
+        with self.assertRaisesRegex(RuntimeError, "provider unavailable"):
+            run_search(task, BrokenAgent([]), output=self.output,
+                       catalog=self.catalog, max_steps=1)
+        state = run_search(task, Agent([experiment()]), output=self.output,
+                           catalog=self.catalog, max_steps=1, resume=True)
+        self.assertNotIn("reference_reads", state["steps"][0]["proposal"])
+
+    def test_changed_reference_content_cannot_be_recorded_as_delivered(self):
+        from model_evo_harness import read_references, call_with_references
+        full_catalog = load_catalog()
+
+        class MutatingAgent(Agent):
+            def propose(self, context):
+                bundle = read_references(full_catalog, {
+                    "framework": "pytorch", "include_training": True})
+                bundle["files"]["models/pytorch/training.py"]["content"] = "fake content"
+                return call_with_references(lambda _: experiment(), {
+                    "reference_material": bundle["files"]})
+
+        with self.assertRaisesRegex(ValueError, "host-observed read"):
+            run_search(Task(), MutatingAgent([]), output=self.output,
+                       catalog=self.catalog, max_steps=1)
+
+    def test_reference_retry_keeps_actual_reads_and_records_each_delivery(self):
+        from model_evo_harness import propose_with_references
+        full_catalog = load_catalog()
+
+        class RetryingAgent(Agent):
+            def propose(self, context):
+                read_state = {}
+                responses = iter([
+                    {"action": "read_reference", "framework": "pytorch", "include_training": True},
+                    {"action": "experiment", "candidate": None},
+                ])
+                propose_with_references(lambda _: next(responses), context,
+                                        catalog=full_catalog, framework="pytorch", read_state=read_state)
+                return propose_with_references(lambda _: experiment(), context,
+                    catalog=full_catalog, framework="pytorch", read_state=read_state)
+
+        state = run_search(Task(), RetryingAgent([]), output=self.output,
+                           catalog=self.catalog, max_steps=1)
+        events = state["steps"][0]["proposal"]["reference_events"]
+        self.assertEqual([event["event"] for event in events], ["read", "delivered", "delivered"])
+
+    def test_builtin_reference_loop_records_delivery_without_trusting_result(self):
+        from model_evo_harness import propose_with_references
+        full_catalog = load_catalog()
+        calls = []
+
+        class ReadingAgent(Agent):
+            def propose(self, context):
+                def complete(current):
+                    calls.append(current)
+                    if len(calls) == 1:
+                        return {"action": "read_reference", "framework": "pytorch",
+                                "include_training": True}
+                    return experiment()
+                return propose_with_references(complete, context, catalog=full_catalog,
+                                               framework="pytorch")
+
+        state = run_search(Task(), ReadingAgent([]), output=self.output,
+                           catalog=self.catalog, max_steps=1)
+        recorded = state["steps"][0]["proposal"]
+        self.assertIn("models/pytorch/training.py", recorded["reference_reads"])
+        self.assertEqual([event["event"] for event in recorded["reference_events"]],
+                         ["read", "delivered"])
+
     def test_two_trials_record_real_history_and_best_result(self):
         task = Task()
         agent = Agent([experiment(), experiment("try a tree")])
