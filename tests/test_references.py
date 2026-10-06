@@ -89,6 +89,23 @@ class ReferenceTests(unittest.TestCase):
         self.assertEqual(state['rounds'], 2)
         self.assertNotIn('models/pytorch/architectures.py', state['files'])
 
+    def test_explicit_interaction_reads_native_source_and_reaches_prompt(self):
+        for framework in ('pytorch', 'tensorflow'):
+            material = catalog.read_references(self.catalog, {
+                'framework': framework, 'include_interactions': True})
+            self.assertIn(f'models/{framework}/explicit.py', material['files'])
+        agent = provider.OpenAICompatibleAgent('https://example.test/v1', 'key', 'model')
+        calls = []
+        def complete(instructions, context, effort):
+            self.assertIn('interaction_plan_required', instructions)
+            calls.append(context)
+            return {'action': 'experiment', 'research': {'interaction_plan': {'decision': 'test'}}}
+        agent._complete = complete
+        result = agent.propose({'catalog': self.catalog, 'task': {'framework': 'pytorch'}})
+        self.assertEqual(len(calls), 2)
+        self.assertIn('class GroupedFM', str(calls[1]['reference_material']))
+        self.assertIn('models/pytorch/explicit.py', result['reference_reads'])
+
     def test_common_guides_are_exposed(self):
         self.assertTrue(hasattr(catalog, 'common_knowledge'))
         guides = catalog.common_knowledge()

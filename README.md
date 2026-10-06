@@ -47,6 +47,12 @@ Data contracts still decide what is possible. Few tabular fields can support cro
 
 Every enabled proposal also assesses [horizontal composition](docs/horizontal-composition.md): parallel instances of any suitable module, chosen from field semantics and a testable bottleneck, with explicit sharing and fusion. Declared `feature_groups` do not establish sequence capabilities. A deferred expansion keeps existing groups in the record. Native PyTorch and TensorFlow `ParallelBranches` source is available through `include_composition=true`; branch types and candidate-written fusion remain open. The built-in provider enables `model_design_required` and `horizontal_expansion_required`; custom adapters can opt in, while older records remain readable under their original snapshot.
 
+## Explicit feature crosses, chosen from evidence
+
+Opted-in hosts declare typed `interaction_views` and set `interaction_plan_required`. The Agent distinguishes field representation from coarse interaction coverage, ranks a falsifiable change using host evidence, and proposes a same-source model-config control. Numeric, categorical and derived views can participate; no field type or named architecture has unconditional priority. Deferring interactions keeps loss and diagnosis work available.
+
+Native PyTorch and TensorFlow `NumericFieldEmbedding` and `GroupedFM` provide numeric field vectors and selected within/between-group second-order terms. The Agent can read them with `include_interactions=true` and compose its own branches, subsets and fusion. Mechanisms remain open-ended. The host owns actual control execution and paired metrics; a plan, coverage assessment or executed branch is not proof of benefit. See the [design and contract](docs/explicit-interactions.md).
+
 ## Integrate a task
 
 Requires Python 3.12 or newer. Install the package and inspect its catalog:

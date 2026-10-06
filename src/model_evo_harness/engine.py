@@ -17,6 +17,7 @@ from .composition import composition_sources, validate_feature_groups
 from .evidence import (cited_facts, validate_audit_recommendations,
                        validate_host_evidence)
 from .references import _collect_reference_events
+from .interaction import interaction_context, validate_interaction_views
 
 
 PACKAGE_VERSION = "0.2.0"
@@ -67,6 +68,9 @@ def _snapshot(task: object) -> dict:
     if "feature_groups" in snapshot:
         snapshot = {**snapshot, "feature_groups": validate_feature_groups(
             snapshot["feature_groups"], snapshot["fields"])}
+    if snapshot.get("interaction_plan_required") or "interaction_views" in snapshot:
+        snapshot = {**snapshot, "interaction_views": validate_interaction_views(
+            snapshot.get("interaction_views"), snapshot["fields"])}
     requirements = snapshot.get("domain_requirements", [])
     if not isinstance(requirements, list):
         raise ValueError("domain_requirements must be a list")
@@ -478,6 +482,8 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "remaining_steps": max_steps - len(state["steps"]),
             "composition_sources": composition_sources(state["steps"]),
         }
+        if "interaction_views" in snapshot:
+            context["interaction_context"] = interaction_context(snapshot, state["steps"])
         if evidence is not None:
             context["evidence"] = evidence
         else:

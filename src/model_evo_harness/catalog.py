@@ -63,13 +63,14 @@ def read_references(catalog: dict, request: dict) -> dict:
     methods = request.get("method_ids", [])
     training = request.get("include_training", False)
     composition = request.get("include_composition", False)
+    interactions = request.get("include_interactions", False)
     if framework not in ("pytorch", "tensorflow"):
         raise ValueError("reference framework must be pytorch or tensorflow")
     if (not isinstance(methods, list) or len(methods) > 4 or
             any(not isinstance(item, str) for item in methods) or
-            not isinstance(training, bool) or not isinstance(composition, bool) or
-            (not methods and not training and not composition)):
-        raise ValueError("reference needs up to four method_ids, include_training=true or include_composition=true")
+            not isinstance(training, bool) or not isinstance(composition, bool) or not isinstance(interactions, bool) or
+            (not methods and not training and not composition and not interactions)):
+        raise ValueError("reference needs up to four method_ids or include_training/include_composition/include_interactions=true")
     entries = {entry["id"]: entry for entry in catalog.get("model_implementations", [])
                if entry["framework"] == framework}
     if set(methods) - entries.keys():
@@ -79,6 +80,8 @@ def read_references(catalog: dict, request: dict) -> dict:
         paths.add(f"models/{framework}/training.py")
     if composition:
         paths.add(f"models/{framework}/composition.py")
+    if interactions:
+        paths.add(f"models/{framework}/explicit.py")
     package = files("model_evo_harness")
     result = {}
     for path in sorted(paths):
@@ -474,6 +477,10 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
         if family_id is not None and entry["family_id"] != family_id:
             raise ValueError("method_id and family_id disagree")
     design = research.get("model_design")
+    interaction_plan = research.get("interaction_plan")
+    if snapshot.get("interaction_plan_required") or "interaction_plan" in research:
+        from .interaction import validate_interaction_plan
+        interaction_plan = validate_interaction_plan(interaction_plan, snapshot, evidence=evidence)
     if (snapshot.get("model_design_required") or snapshot.get("horizontal_expansion_required") or
             "model_design" in research):
         from .composition import validate_model_design
@@ -486,6 +493,7 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
             if method is not None and (method, snapshot.get("framework")) not in references:
                 raise ValueError("component reference_method_id must exist for the task framework")
     return {**{key: research[key].strip() for key in fields}, "input_fields": inputs,
+            **({"interaction_plan": interaction_plan} if interaction_plan is not None else {}),
             **({"model_design": design} if design is not None else {}),
             "alternatives": [{key: item[key].strip() for key in ("direction", "mechanism", "reason")}
                              for item in alternatives],

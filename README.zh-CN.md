@@ -16,6 +16,12 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 [来源署名](docs/research/source-attribution.md)记录研究目录参考的原始资料。仓库内的说明和模型代码均为原创，没有镜像上游正文或源码。[研究覆盖说明](docs/source-coverage.md)列出具体范围。
 
+## 显式特征交叉：先判断关系，再选择结构
+
+宿主提供 `interaction_views` 并启用 `interaction_plan_required` 后，Agent 区分字段表示与当前交互覆盖，基于实际证据排列实验优先级，并给出同源码的模型配置对照。数值、类别、缺失指示等视图都可参与；没有“某类字段必须先做 FM”的固定规则。也允许暂缓交叉，优先诊断尺度、融合方式或训练问题。
+
+PyTorch 与 TensorFlow 的独立原生 `NumericFieldEmbedding`、`GroupedFM` 提供数值字段向量及可选择的组内/组间二阶交互。Agent 通过 `include_interactions=true` 读取源码，在现有 backbone 中组合字段子集、并行分支与融合；这些组件不是封闭的策略列表。对照是否执行、配对指标如何，均由宿主提供；计划、覆盖声明、代码执行与收益归因分别记录。[设计与合同](docs/explicit-interactions.md)。
+
 ## 实验闭环
 
 1. 读取现有字段、目标、评估协议和历史实验，用实际指标诊断问题，查阅适用的本地指南。

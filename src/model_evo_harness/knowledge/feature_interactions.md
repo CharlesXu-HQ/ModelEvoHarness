@@ -16,6 +16,18 @@ Use a linear model and plain MLP as controls, then add one interaction mechanism
 
 If multiple distinct interaction designs fail on the same supported slice, investigate target noise, missing temporal context, or absent semantics before requesting another cross. Ask humans to add a specific aggregate or cross field after controlled attempts reveal an input gap. A business expert can instead name an inherently essential missing pre-decision field, such as recent spending band for a coupon value decision, without waiting for model ablations.
 
+## Choosing the next explicit interaction
+
+Separate raw fields, their representations, and the relations a branch can express. Categorical embeddings preserve field identity; numeric fields can become `x_i * v_i`, train-fitted bins, or remain scalar inputs to a cross network. A flattened embedding coordinate is not an independent raw field. Missing flags are derived from the numeric source and may overlap with imputation effects. A sequence summary is only available if the host supplies that history and an eligible temporal cutoff.
+
+Audit coarse view-pair coverage in the current backbone: implicit MLP, explicit product/cross branch, mixed, none or unknown. Record the code basis. Coverage is a declared structural assessment, not measured feature importance. A DCN over concatenated dense and embedded inputs may already explicitly cover mixed relations even if an earlier FM used categorical fields only.
+
+Rank the next experiment using observed metrics, implementation diagnostics, field support, compute cost and dataset-bound history. Numeric-category crosses are a reasonable hypothesis when those representations are available, but neither numeric fields nor FM have unconditional priority. Check scale and fusion before increasing width/order. Avoid inferring that one failed categorical-FM recipe rejects the entire interaction family. Conversely, an untested pair does not automatically justify an experiment. Defer interactions when loss, leakage checks or other diagnosis have higher expected information value.
+
+Use one discriminating control: same source, fixed protocol, and a meaningful model-config gate removing the selected term. Keep module construction stable when possible. Report whether the control actually completed and the paired candidate-minus-control result. Shared retraining, output scaling and adaptive validation selection still limit attribution. Do not write planned ablations as observed success.
+
+Local source is available through `read_reference` with `include_interactions: true`: `models/pytorch/explicit.py` and `models/tensorflow/explicit.py` contain independent `NumericFieldEmbedding` and `GroupedFM` primitives. Selected within/between disjoint-group terms are returned separately so the Agent can implement parallel scopes, scaling, gates or learned fusion inside its backbone. These are optional building blocks, not a closed strategy list. Full-pair tensors and exhaustive original-field pair testing are unnecessary.
+
 ## Method choices
 
 | Method | What changes | First discriminating test |

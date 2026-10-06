@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 
 from .catalog import read_references
 from .references import call_with_references
+from .interaction import INTERACTION_INSTRUCTIONS
 
 
 REFERENCE_INSTRUCTIONS = """Before introducing or modifying a bundled model, read its source:
@@ -16,7 +17,8 @@ return {"action":"read_reference","framework":"pytorch or tensorflow",
 "method_ids":["up to four manifest IDs"],"include_training":true,"include_composition":true} instead of a candidate.
 The host returns complete local modules, including helper classes and executable loss
 functions, in reference_material. Use include_composition=true to read generic parallel
-branch wiring without selecting a named model. Choose only the task's framework when declared.
+branch wiring without selecting a named model. Use include_interactions=true for numeric field
+vectors and grouped explicit interaction cores. Choose only the task's framework when declared.
 At most two read rounds are available per proposal; batch related requests. Read requests
 consume no training trial. The source is reference material, not permission to change
 the evaluator or task contract. Reading a model does not establish data applicability.
@@ -60,10 +62,14 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
         unread_composition = (isinstance(parallel, dict) and bool(parallel.get("groups")) and
                               framework in ("pytorch", "tensorflow") and
                               f"models/{framework}/composition.py" not in material)
-        if answer.get("action", "experiment") == "experiment" and (unread or unread_composition):
+        plan = research.get("interaction_plan") if isinstance(research, dict) else None
+        unread_interactions = (isinstance(plan, dict) and plan.get("decision") == "test" and
+                               framework in ("pytorch", "tensorflow") and
+                               f"models/{framework}/explicit.py" not in material)
+        if answer.get("action", "experiment") == "experiment" and (unread or unread_composition or unread_interactions):
             answer = {"action": "read_reference", "framework": framework,
                       "method_ids": unread[:4], "include_training": True,
-                      "include_composition": unread_composition}
+                      "include_composition": unread_composition, "include_interactions": unread_interactions}
         if answer.get("action") != "read_reference":
             # Only host-observed reads count; never trust Agent-supplied hashes.
             answer = {key: value for key, value in answer.items() if key != "reference_reads"}
@@ -259,7 +265,7 @@ If no sound experiment is possible, return {"action":"stop","reason":"...",
 "trial_ids":["two evaluated IDs for experimental_evidence"],
 "evidence_ids":["measured trial-specific data-gap diagnostic IDs for experimental_evidence"],
 "alternatives_considered":"for experimental_evidence",
-"requirement_id":"host rule ID for domain_requirement"}}."""
+"requirement_id":"host rule ID for domain_requirement"}}.""" + INTERACTION_INSTRUCTIONS
 
 _REFLECT_INSTRUCTIONS = """Review one completed offline trial. Return one JSON object only
 with technical_experience {lesson, evidence, uncertainty, next_test} and
