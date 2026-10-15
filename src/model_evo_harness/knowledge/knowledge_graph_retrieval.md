@@ -17,3 +17,12 @@ A gain solely from catalog metadata does not establish value from graph reasonin
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [recbole](https://recbole.io/docs/user_guide/data/atomic_files.html).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `ripplenet` / `RippleNet`: Candidate-conditioned relation-matrix attention over multi-hop heads and tails. Output: `click_probability`, `[B]`. Host supplies ripple sets. Optional none/plus/replace item updates; omits KG auxiliary reconstruction objective and graph sampling.
+- `kgat` / `KGAT`: Relation-projected attention and sum/product bi-interaction neighborhood propagation. Output: `representation`, `[B,O]`. One propagation layer; excludes TransR/BPR training objectives, deeper-layer concatenation and alternating attention refresh.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

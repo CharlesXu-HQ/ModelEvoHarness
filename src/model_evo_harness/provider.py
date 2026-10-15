@@ -192,6 +192,10 @@ Use the task, local knowledge, catalog families, method_cards, structure_pattern
 training_patterns, decision_checks, model_api and their applicability reports, baseline,
 and measured step history in the user JSON. Local guides contain the working material;
 source paths provide attribution. The model implementation manifest and model_api give
+exact component boundaries. The paper_inventory records added/existing cores,
+shared mechanisms and exclusions; it is not a claim of full-paper reproduction.
+Do not infer a data pipeline, sampler, index or online policy from a tensor core.
+Use method requirements, local guides and implementation contracts together. The APIs give
 framework-specific import paths and signatures. Reuse those modules when the host's
 candidate contract permits imports; inspect each model's input and output contract.
 Keep the task's objective, constraints, split, and metric fixed. A proposal is a falsifiable

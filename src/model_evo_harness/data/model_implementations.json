@@ -2171,6 +2171,1404 @@
         "kind": "candidate_score_matrix",
         "shape": "[B,K]"
       }
+    },
+    {
+      "id": "graphsage",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:GraphSAGE",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One mean-aggregator layer; host constructs neighborhoods and chooses its training objective.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-035"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "neighborhood_message_passing"
+    },
+    {
+      "id": "graphsage",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:GraphSAGE",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One mean-aggregator layer; host constructs neighborhoods and chooses its training objective.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-035"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "neighborhood_message_passing"
+    },
+    {
+      "id": "pinsage",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:PinSage",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One convolution; host supplies random-walk visit weights. No random walks, top-T selection, curriculum or MapReduce.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-089"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "neighborhood_message_passing"
+    },
+    {
+      "id": "pinsage",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:PinSage",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One convolution; host supplies random-walk visit weights. No random walks, top-T selection, curriculum or MapReduce.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-089"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "neighborhood_message_passing"
+    },
+    {
+      "id": "sdne",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:SDNE",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense small-graph reference; training_loss requires adjacency rows indexed consistently with supplied edges. Beta is inside the squared error.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "embedding_and_reconstruction",
+        "shape": "([B,D], [B,N])"
+      },
+      "paper_ids": [
+        "reco-030"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "graph_embedding_objectives"
+    },
+    {
+      "id": "sdne",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:SDNE",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense small-graph reference; training_loss requires adjacency rows indexed consistently with supplied edges. Beta is inside the squared error.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "embedding_and_reconstruction",
+        "shape": "([B,D], [B,N])"
+      },
+      "paper_ids": [
+        "reco-030"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "graph_embedding_objectives"
+    },
+    {
+      "id": "line",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:LINE",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host provides edges and negatives; no alias sampling or graph ingestion. Train and concatenate the two orders outside the core.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "edge_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-044"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "graph_embedding_objectives"
+    },
+    {
+      "id": "line",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:LINE",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host provides edges and negatives; no alias sampling or graph ingestion. Train and concatenate the two orders outside the core.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "edge_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-044"
+      ],
+      "local_guide": "knowledge/graph_representation.md",
+      "structure_pattern": "graph_embedding_objectives"
+    },
+    {
+      "id": "ripplenet",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:RippleNet",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies ripple sets. Optional none/plus/replace item updates; omits KG auxiliary reconstruction objective and graph sampling.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "click_probability",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-038"
+      ],
+      "local_guide": "knowledge/knowledge_graph_retrieval.md",
+      "structure_pattern": "relation_aware_propagation"
+    },
+    {
+      "id": "ripplenet",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:RippleNet",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies ripple sets. Optional none/plus/replace item updates; omits KG auxiliary reconstruction objective and graph sampling.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "click_probability",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-038"
+      ],
+      "local_guide": "knowledge/knowledge_graph_retrieval.md",
+      "structure_pattern": "relation_aware_propagation"
+    },
+    {
+      "id": "kgat",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:KGAT",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One propagation layer; excludes TransR/BPR training objectives, deeper-layer concatenation and alternating attention refresh.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-041"
+      ],
+      "local_guide": "knowledge/knowledge_graph_retrieval.md",
+      "structure_pattern": "relation_aware_propagation"
+    },
+    {
+      "id": "kgat",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:KGAT",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One propagation layer; excludes TransR/BPR training objectives, deeper-layer concatenation and alternating attention refresh.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,O]"
+      },
+      "paper_ids": [
+        "reco-041"
+      ],
+      "local_guide": "knowledge/knowledge_graph_retrieval.md",
+      "structure_pattern": "relation_aware_propagation"
+    },
+    {
+      "id": "cdl",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.graph:CDL",
+      "file": "models/pytorch/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Deterministic paired-minibatch MAP-style core, not Bayesian inference. Repeated items repeat content/coupling terms; host owns corruption and confidence construction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "rating_reconstruction_and_code",
+        "shape": "([B], [B,C], [B,D])"
+      },
+      "paper_ids": [
+        "reco-017"
+      ],
+      "local_guide": "knowledge/collaborative_retrieval.md",
+      "structure_pattern": "content_factor_coupling"
+    },
+    {
+      "id": "cdl",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.graph:CDL",
+      "file": "models/tensorflow/graph.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Deterministic paired-minibatch MAP-style core, not Bayesian inference. Repeated items repeat content/coupling terms; host owns corruption and confidence construction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "rating_reconstruction_and_code",
+        "shape": "([B], [B,C], [B,D])"
+      },
+      "paper_ids": [
+        "reco-017"
+      ],
+      "local_guide": "knowledge/collaborative_retrieval.md",
+      "structure_pattern": "content_factor_coupling"
+    },
+    {
+      "id": "deepcrossing",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:DeepCrossing",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-011"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "residual_feature_learning"
+    },
+    {
+      "id": "deepcrossing",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:DeepCrossing",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-011"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "residual_feature_learning"
+    },
+    {
+      "id": "fnn",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:FNN",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "FM pretraining and feature-ID alignment are host responsibilities; randomly initialized MLP is not a faithful FNN baseline.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-024"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "residual_feature_learning"
+    },
+    {
+      "id": "fnn",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:FNN",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "FM pretraining and feature-ID alignment are host responsibilities; randomly initialized MLP is not a faithful FNN baseline.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-024"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "residual_feature_learning"
+    },
+    {
+      "id": "neumf",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:NeuMF",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host owns negative sampling, optional GMF/MLP pretraining and evaluation; ID embeddings require cold-start handling.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-023"
+      ],
+      "local_guide": "knowledge/collaborative_retrieval.md",
+      "structure_pattern": "collaborative_signal"
+    },
+    {
+      "id": "neumf",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:NeuMF",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host owns negative sampling, optional GMF/MLP pretraining and evaluation; ID embeddings require cold-start handling.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-023"
+      ],
+      "local_guide": "knowledge/collaborative_retrieval.md",
+      "structure_pattern": "collaborative_signal"
+    },
+    {
+      "id": "latent_cross",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:LatentCross",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Tensor interaction only; host owns recurrent encoder, context encoding and padding. No sequence construction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "modulated_hidden_state",
+        "shape": "same as hidden input"
+      },
+      "paper_ids": [
+        "reco-027"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "context_hidden_modulation"
+    },
+    {
+      "id": "latent_cross",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:LatentCross",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Tensor interaction only; host owns recurrent encoder, context encoding and padding. No sequence construction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "modulated_hidden_state",
+        "shape": "same as hidden input"
+      },
+      "paper_ids": [
+        "reco-027"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "context_hidden_modulation"
+    },
+    {
+      "id": "multi_view_dssm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:MultiViewDSSM",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact tower computation; excludes cross-domain data alignment, joint sampling and original task-specific training schedule.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "cosine_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-018"
+      ],
+      "local_guide": "knowledge/two_tower_matching.md",
+      "structure_pattern": "independent_retrieval_towers"
+    },
+    {
+      "id": "multi_view_dssm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:MultiViewDSSM",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact tower computation; excludes cross-domain data alignment, joint sampling and original task-specific training schedule.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "cosine_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-018"
+      ],
+      "local_guide": "knowledge/two_tower_matching.md",
+      "structure_pattern": "independent_retrieval_towers"
+    },
+    {
+      "id": "predictive_bilinear",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:PredictiveBilinear",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Only the predictor; host must build as-of dynamic features and fit the intended objective.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "bilinear_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-064"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "pairwise_feature_interaction"
+    },
+    {
+      "id": "predictive_bilinear",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:PredictiveBilinear",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Only the predictor; host must build as-of dynamic features and fit the intended objective.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "bilinear_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-064"
+      ],
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "pairwise_feature_interaction"
+    },
+    {
+      "id": "transact",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_sequence:TransAct",
+      "file": "models/pytorch/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate concatenation and projection before a compact real-time action encoder. No random time-window augmentation, batch PinnerFormer fusion or production serving stack.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_representation",
+        "shape": "[B,(K+1)*D]"
+      },
+      "paper_ids": [
+        "reco-028"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "target_conditioned_history"
+    },
+    {
+      "id": "transact",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_sequence:TransAct",
+      "file": "models/tensorflow/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate concatenation and projection before a compact real-time action encoder. No random time-window augmentation, batch PinnerFormer fusion or production serving stack.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_representation",
+        "shape": "[B,(K+1)*D]"
+      },
+      "paper_ids": [
+        "reco-028"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "target_conditioned_history"
+    },
+    {
+      "id": "pinnerformer",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_sequence:PinnerFormer",
+      "file": "models/pytorch/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact causal Transformer and normalized states/readout, with future-positive contrastive loss only. Host supplies future positives, negatives and valid prefix mask; no K-day target sampling, timestamp validation or full Pinterest feature encoder.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "user_representation",
+        "shape": "[B,D]; encode() -> [B,T,D]"
+      },
+      "paper_ids": [
+        "reco-014"
+      ],
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "ordered_sequence_retrieval"
+    },
+    {
+      "id": "pinnerformer",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_sequence:PinnerFormer",
+      "file": "models/tensorflow/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact causal Transformer and normalized states/readout, with future-positive contrastive loss only. Host supplies future positives, negatives and valid prefix mask; no K-day target sampling, timestamp validation or full Pinterest feature encoder.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "user_representation",
+        "shape": "[B,D]; encode() -> [B,T,D]"
+      },
+      "paper_ids": [
+        "reco-014"
+      ],
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "ordered_sequence_retrieval"
+    },
+    {
+      "id": "seq2slate",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_sequence:Seq2Slate",
+      "file": "models/pytorch/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact pointer core with no-repeat eligibility; host supplies supervision/rewards. No policy-gradient trainer or full encoder-decoder reproduction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "selected_indices",
+        "shape": "[B,K], -1 after exhaustion; teacher_forced_logits() -> [B,K,N]"
+      },
+      "paper_ids": [
+        "reco-004"
+      ],
+      "local_guide": "knowledge/slate_reranking.md",
+      "structure_pattern": "slate_aware_decision"
+    },
+    {
+      "id": "seq2slate",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_sequence:Seq2Slate",
+      "file": "models/tensorflow/paper_sequence.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Compact pointer core with no-repeat eligibility; host supplies supervision/rewards. No policy-gradient trainer or full encoder-decoder reproduction.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "selected_indices",
+        "shape": "[B,K], -1 after exhaustion; teacher_forced_logits() -> [B,K,N]"
+      },
+      "paper_ids": [
+        "reco-004"
+      ],
+      "local_guide": "knowledge/slate_reranking.md",
+      "structure_pattern": "slate_aware_decision"
+    },
+    {
+      "id": "dpp_greedy",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:DPPGreedy",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "psd_kernel_builder",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Fixed-capacity, deterministic non-differentiable selector, not exact or unconstrained-cardinality MAP. Host defines relevance/diversity kernel; stops on singular or exhausted feasible set.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "selected_indices",
+        "shape": "[B,K], -1 after early stop"
+      },
+      "paper_ids": [
+        "reco-005"
+      ],
+      "local_guide": "knowledge/slate_reranking.md",
+      "structure_pattern": "slate_aware_decision"
+    },
+    {
+      "id": "dpp_greedy",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:DPPGreedy",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "psd_kernel_builder",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Fixed-capacity, deterministic non-differentiable selector, not exact or unconstrained-cardinality MAP. Host defines relevance/diversity kernel; stops on singular or exhausted feasible set.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "selected_indices",
+        "shape": "[B,K], -1 after early stop"
+      },
+      "paper_ids": [
+        "reco-005"
+      ],
+      "local_guide": "knowledge/slate_reranking.md",
+      "structure_pattern": "slate_aware_decision"
+    },
+    {
+      "id": "ranknet",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:RankNet",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Loss only; host supplies query groups/backbone. Does not implement LambdaMART or tree boosting.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-007"
+      ],
+      "local_guide": "knowledge/learning_to_rank.md",
+      "structure_pattern": "query_ranking_objective"
+    },
+    {
+      "id": "ranknet",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:RankNet",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Loss only; host supplies query groups/backbone. Does not implement LambdaMART or tree boosting.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-007"
+      ],
+      "local_guide": "knowledge/learning_to_rank.md",
+      "structure_pattern": "query_ranking_objective"
+    },
+    {
+      "id": "lambdarank",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_ranking:LambdaRank",
+      "file": "models/pytorch/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "LambdaRank-style gradient surrogate; no LambdaMART. Sorting/metric weights are non-differentiable and label gains require nonnegative relevance.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-007"
+      ],
+      "local_guide": "knowledge/learning_to_rank.md",
+      "structure_pattern": "query_ranking_objective"
+    },
+    {
+      "id": "lambdarank",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_ranking:LambdaRank",
+      "file": "models/tensorflow/paper_ranking.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "LambdaRank-style gradient surrogate; no LambdaMART. Sorting/metric weights are non-differentiable and label gains require nonnegative relevance.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-007"
+      ],
+      "local_guide": "knowledge/learning_to_rank.md",
+      "structure_pattern": "query_ranking_objective"
+    },
+    {
+      "id": "pal",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.debias:PAL",
+      "file": "models/pytorch/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "No automatic causal identification. Host excludes position from relevance features; serve relevance() without a fabricated position.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "probability_components",
+        "shape": "{relevance:[B], examination:[B], observed:[B]}"
+      },
+      "paper_ids": [
+        "reco-114"
+      ],
+      "local_guide": "knowledge/feedback_factorization.md",
+      "structure_pattern": "bias_factorization"
+    },
+    {
+      "id": "pal",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.debias:PAL",
+      "file": "models/tensorflow/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "No automatic causal identification. Host excludes position from relevance features; serve relevance() without a fabricated position.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "probability_components",
+        "shape": "{relevance:[B], examination:[B], observed:[B]}"
+      },
+      "paper_ids": [
+        "reco-114"
+      ],
+      "local_guide": "knowledge/feedback_factorization.md",
+      "structure_pattern": "bias_factorization"
+    },
+    {
+      "id": "meta_embedding",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.debias:MetaEmbedding",
+      "file": "models/pytorch/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host owns support/query construction and nested autodiff. Generator alone trained by ordinary supervised loss is not meta-learning; no copying of unlicensed author code.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "generated_embedding",
+        "shape": "[B,D]"
+      },
+      "paper_ids": [
+        "reco-113"
+      ],
+      "local_guide": "knowledge/cold_start.md",
+      "structure_pattern": "attribute_embedding_initialization"
+    },
+    {
+      "id": "meta_embedding",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.debias:MetaEmbedding",
+      "file": "models/tensorflow/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host owns support/query construction and nested autodiff. Generator alone trained by ordinary supervised loss is not meta-learning; no copying of unlicensed author code.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "generated_embedding",
+        "shape": "[B,D]"
+      },
+      "paper_ids": [
+        "reco-113"
+      ],
+      "local_guide": "knowledge/cold_start.md",
+      "structure_pattern": "attribute_embedding_initialization"
+    },
+    {
+      "id": "dice",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.debias:DICE",
+      "file": "models/pytorch/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Mask true means negative more popular. Host owns sampling/curriculum and regularization; optional negative L2 discrepancy is unbounded and disabled by default. Does not establish causal effects.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "score_components",
+        "shape": "{interest:[B], conformity:[B], total:[B]}"
+      },
+      "paper_ids": [
+        "reco-115"
+      ],
+      "local_guide": "knowledge/feedback_factorization.md",
+      "structure_pattern": "bias_factorization"
+    },
+    {
+      "id": "dice",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.debias:DICE",
+      "file": "models/tensorflow/debias.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Mask true means negative more popular. Host owns sampling/curriculum and regularization; optional negative L2 discrepancy is unbounded and disabled by default. Does not establish causal effects.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "score_components",
+        "shape": "{interest:[B], conformity:[B], total:[B]}"
+      },
+      "paper_ids": [
+        "reco-115"
+      ],
+      "local_guide": "knowledge/feedback_factorization.md",
+      "structure_pattern": "bias_factorization"
+    },
+    {
+      "id": "dicm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multimodal:DICM",
+      "file": "models/pytorch/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "DICM rank-stage pooling only; compact scoring MLP choice is declared. No image descriptor/AMS; candidate-dependent output is not an independent retrieval tower.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_representation",
+        "shape": "[B,2D]"
+      },
+      "paper_ids": [
+        "reco-016"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "multimodal_history_attention"
+    },
+    {
+      "id": "dicm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multimodal:DICM",
+      "file": "models/tensorflow/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "DICM rank-stage pooling only; compact scoring MLP choice is declared. No image descriptor/AMS; candidate-dependent output is not an independent retrieval tower.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_representation",
+        "shape": "[B,2D]"
+      },
+      "paper_ids": [
+        "reco-016"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "multimodal_history_attention"
+    },
+    {
+      "id": "mmrec",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multimodal:MMRec",
+      "file": "models/pytorch/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Exact attention/scoring head over supplied embeddings; excludes ViLBERT, image ROI extraction and multimodal pretraining.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-057"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "multimodal_history_attention"
+    },
+    {
+      "id": "mmrec",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multimodal:MMRec",
+      "file": "models/tensorflow/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Exact attention/scoring head over supplied embeddings; excludes ViLBERT, image ROI extraction and multimodal pretraining.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "ranking_score",
+        "shape": "[B]"
+      },
+      "paper_ids": [
+        "reco-057"
+      ],
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "multimodal_history_attention"
+    },
+    {
+      "id": "dmtl_distillation",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multimodal:DMTLDistillation",
+      "file": "models/pytorch/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies MMoE teacher and two-tower student. No duration discretization or training schedule. CTR helper follows click labels in prose/Figure 1, resolving apparent Eq.8 typo.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-001"
+      ],
+      "local_guide": "knowledge/multiobjective.md",
+      "structure_pattern": "teacher_student_distillation"
+    },
+    {
+      "id": "dmtl_distillation",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multimodal:DMTLDistillation",
+      "file": "models/tensorflow/multimodal.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "tensor_adapter",
+          "trainer",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies MMoE teacher and two-tower student. No duration discretization or training schedule. CTR helper follows click labels in prose/Figure 1, resolving apparent Eq.8 typo.",
+        "No paper benchmark reproduction or production improvement is implied."
+      ],
+      "output_contract": {
+        "kind": "scalar_loss",
+        "shape": "[]"
+      },
+      "paper_ids": [
+        "reco-001"
+      ],
+      "local_guide": "knowledge/multiobjective.md",
+      "structure_pattern": "teacher_student_distillation"
     }
   ]
 }

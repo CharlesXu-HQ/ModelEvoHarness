@@ -30,3 +30,11 @@ If recall improves only on sampled evaluation, the negative distribution may be 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_1_retrieval/3.two_tower/1.fm.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/3.two_tower/1.fm.html), [docs/chapter_1_retrieval/3.two_tower/2.dssm.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/3.two_tower/2.dssm.html), [src/funrec/models/fm_recall.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/fm_recall.py), [src/funrec/models/dssm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/dssm.py).
 
 Additional pinned source for `youtube_sbc`: [torch_rechub/models/matching/youtube_sbc.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/youtube_sbc.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `multi_view_dssm` / `MultiViewDSSM`: Shared user projection and separate domain item projections into normalized common latent space. Output: `cosine_score`, `[B]`. Compact tower computation; excludes cross-domain data alignment, joint sampling and original task-specific training schedule.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

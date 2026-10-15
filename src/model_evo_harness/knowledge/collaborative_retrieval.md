@@ -27,3 +27,12 @@ A gain concentrated among dense-history users favors collaborative evidence; fai
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_1_retrieval/1.cf/1.itemcf.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/1.cf/1.itemcf.html), [docs/chapter_1_retrieval/1.cf/2.swing.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/1.cf/2.swing.html), [src/funrec/models/item_cf.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/item_cf.py), [src/funrec/models/user_cf.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/user_cf.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `cdl` / `CDL`: Content denoising autoencoder coupled to item factors, with confidence-weighted feedback loss. Output: `rating_reconstruction_and_code`, `([B], [B,C], [B,D])`. Deterministic paired-minibatch MAP-style core, not Bayesian inference. Repeated items repeat content/coupling terms; host owns corruption and confidence construction.
+- `neumf` / `NeuMF`: Separate GMF product and nonlinear user-item MLP branches joined into a learned score. Output: `binary_logit`, `[B]`. Host owns negative sampling, optional GMF/MLP pretraining and evaluation; ID embeddings require cold-start handling.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

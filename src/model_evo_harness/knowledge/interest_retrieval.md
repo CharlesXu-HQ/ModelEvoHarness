@@ -28,3 +28,11 @@ A gain from order-sensitive models over shuffled-order controls is evidence for 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_1_retrieval/4.sequence/1.mind.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/4.sequence/1.mind.html), [docs/chapter_1_retrieval/4.sequence/2.sdm.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_1_retrieval/4.sequence/2.sdm.html), [src/funrec/models/mind.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/mind.py), [src/funrec/models/sdm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/sdm.py).
 
 Additional pinned source for `narm`: [torch_rechub/models/matching/narm.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/narm.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `pinnerformer` / `PinnerFormer`: Causal user-action encoder with normalized position representations and a dense future-positive contrastive objective. Output: `user_representation`, `[B,D]` (`encode()` returns `[B,T,D]`). Host supplies future positives, negatives and valid prefix mask; no K-day target sampling, timestamp validation or full Pinterest feature encoder.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

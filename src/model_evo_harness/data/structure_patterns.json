@@ -3,7 +3,7 @@
     {
       "id": "collaborative_signal",
       "name": "Neighborhood and latent collaborative signals",
-      "method_ids": ["user_cf", "item_cf", "swing", "funksvd", "biassvd"],
+      "method_ids": ["user_cf", "item_cf", "swing", "funksvd", "biassvd", "neumf"],
       "structural_change": "Use interaction neighborhoods or learned user and item ID factors as an additional retrieval signal; neighborhood methods aggregate observed co-interactions, while factor methods compress them into vectors.",
       "when_to_try": "A popularity or content-only baseline misses repeat-interest items on a fixed user cohort, and interaction density is sufficient to estimate neighbors or factors.",
       "required_evidence": "Time-ordered user-item interactions, catalog membership, interaction-density and cold-user/item slices, and a fixed retrieval candidate universe.",
@@ -23,7 +23,7 @@
     {
       "id": "pairwise_feature_interaction",
       "name": "Pairwise feature interactions",
-      "method_ids": ["fm", "deepfm", "nfm", "pnn", "afm", "fibinet", "fwfm"],
+      "method_ids": ["fm", "deepfm", "nfm", "pnn", "afm", "fibinet", "fwfm", "predictive_bilinear"],
       "structural_change": "Add second-order field interactions through factorized products, pooled product vectors, field-pair weights, or attention and gating over pairs.",
       "when_to_try": "A linear or plain MLP baseline leaves repeatable validation errors on supported pairs of pre-decision fields, such as user segment by offer attribute.",
       "required_evidence": "Typed field schema, pre-decision availability, support counts for candidate field pairs, and slice-level residuals on a held-out split.",
@@ -43,7 +43,7 @@
     {
       "id": "independent_retrieval_towers",
       "name": "Indexable user and item representations",
-      "method_ids": ["dssm", "fm_recall", "youtubednn"],
+      "method_ids": ["dssm", "fm_recall", "youtubednn", "multi_view_dssm"],
       "structural_change": "Encode user context and catalog items into separately computable vectors so dot product or cosine similarity can retrieve candidates from an index.",
       "when_to_try": "The current candidate generator has low recall at a fixed candidate count, and user and item features support separately computed representations.",
       "required_evidence": "Item catalog and index update cadence, user/item features available before retrieval, labeled interactions, and a fixed candidate and negative-sampling protocol.",
@@ -63,7 +63,7 @@
     {
       "id": "target_conditioned_history",
       "name": "Target-aware history for ranking",
-      "method_ids": ["din", "dien", "dsin"],
+      "method_ids": ["din", "dien", "dsin", "transact"],
       "structural_change": "Condition attention over past behavior on the candidate item; optionally model interest evolution or aggregate within and across sessions before target activation.",
       "when_to_try": "The same user receives different outcomes for candidate types and a pooled-history baseline has persistent target-specific residuals.",
       "required_evidence": "Timestamped histories strictly before each candidate decision, candidate features, valid session boundaries when used, and adequate sequence coverage.",
@@ -73,7 +73,7 @@
     {
       "id": "ordered_sequence_retrieval",
       "name": "Order-sensitive sequence retrieval",
-      "method_ids": ["sasrec", "sdm", "narm", "hstu"],
+      "method_ids": ["sasrec", "sdm", "narm", "hstu", "pinnerformer"],
       "structural_change": "Encode the ordered history or current session with causal attention, recurrent states, or short- and long-term fusion to predict the next item.",
       "when_to_try": "Next-item errors vary with recency or within-session order, and an order-agnostic history representation leaves stable temporal residuals.",
       "required_evidence": "Event timestamps, session boundaries where applicable, pre-decision sequence construction, a fixed next-item candidate universe, and negative-sampling details.",
@@ -133,12 +133,151 @@
     {
       "id": "slate_aware_decision",
       "name": "Slate-aware reranking and position response",
-      "method_ids": ["prm", "prs"],
+      "method_ids": ["prm", "prs", "seq2slate", "dpp_greedy"],
       "structural_change": "Score candidates jointly with position and neighboring-item context, or model per-position response and continuation before selecting an order.",
       "when_to_try": "Item-level scores are stable but observed slate outcomes vary by position or neighboring items, and independent score sorting leaves a measurable slate-level gap.",
       "required_evidence": "Logged candidate sets and displayed positions, pre-decision slate features, exposure and position-bias assumptions, and a valid slate-level evaluation protocol.",
       "controlled_comparison": "Reorder the same fixed candidate set under the same placement constraints; compare with independent-score sorting on slate-level outcomes and position slices.",
       "reject_if": "Position or exposure effects cannot be identified from logs, the gain is only an offline bias artifact, or item-level guardrails fail."
+    },
+    {
+      "id": "neighborhood_message_passing",
+      "name": "Neighborhood message passing",
+      "method_ids": [
+        "graphsage",
+        "pinsage"
+      ],
+      "structural_change": "Mean neighbor aggregation followed by concatenation, projection, activation and L2 normalization.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "node_features, sampled_neighbors, neighbor_mask, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "graph_embedding_objectives",
+      "name": "Graph embedding objectives",
+      "method_ids": [
+        "sdne",
+        "line"
+      ],
+      "structural_change": "Nonlinear adjacency autoencoder with beta-weighted reconstruction and weighted first-order edge distance.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "adjacency_rows, graph_edges, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "relation_aware_propagation",
+      "name": "Relation aware propagation",
+      "method_ids": [
+        "ripplenet",
+        "kgat"
+      ],
+      "structural_change": "Candidate-conditioned relation-matrix attention over multi-hop heads and tails.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "ripple_triples, ripple_mask, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "content_factor_coupling",
+      "name": "Content factor coupling",
+      "method_ids": [
+        "cdl"
+      ],
+      "structural_change": "Content denoising autoencoder coupled to item factors, with confidence-weighted feedback loss.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "content_features, corrupted_content, confidence_weights, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "residual_feature_learning",
+      "name": "Residual feature learning",
+      "method_ids": [
+        "deepcrossing",
+        "fnn"
+      ],
+      "structural_change": "Stacked dense feature vectors processed by dimension-preserving residual MLP units.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "encoded_features, observed_outcome_labels, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "context_hidden_modulation",
+      "name": "Context hidden modulation",
+      "method_ids": [
+        "latent_cross"
+      ],
+      "structural_change": "Elementwise modulation of recurrent hidden states using contextual features.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "context_embeddings, hidden_states, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "query_ranking_objective",
+      "name": "Query ranking objective",
+      "method_ids": [
+        "ranknet",
+        "lambdarank"
+      ],
+      "structural_change": "Pairwise logistic loss within each query, excluding padding and label ties.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "query_groups, graded_relevance, candidate_mask, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "bias_factorization",
+      "name": "Bias factorization",
+      "method_ids": [
+        "pal",
+        "dice"
+      ],
+      "structural_change": "Multiply position-only examination and position-free relevance probabilities; optimize stable joint BCE.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "logged_positions, relevance_logits, observed_outcome_labels, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "attribute_embedding_initialization",
+      "name": "Attribute embedding initialization",
+      "method_ids": [
+        "meta_embedding"
+      ],
+      "structural_change": "Attribute-to-ID generator plus differentiable inner embedding update and cold/warm objective combination.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "item_attributes, per_entity_support_query, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "multimodal_history_attention",
+      "name": "Multimodal history attention",
+      "method_ids": [
+        "dicm",
+        "mmrec"
+      ],
+      "structural_change": "Independent image-query and ID-query attention channels pool the same behavior-image history.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "behavior_image_embeddings, candidate_image_embeddings, candidate_id_embeddings, sequence_mask, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "teacher_student_distillation",
+      "name": "Teacher student distillation",
+      "method_ids": [
+        "dmtl_distillation"
+      ],
+      "structural_change": "Detached Bernoulli KL from joint click/long-read teacher probability to a two-tower student; joint teacher BCE helper.",
+      "when_to_try": "A measured residual or supported slice suggests this component addresses a specific limitation of the current model.",
+      "required_evidence": "teacher_logits, student_logits, impression_click_and_read_labels, pre-decision provenance and matched evaluation data.",
+      "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
+      "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
     }
   ]
 }

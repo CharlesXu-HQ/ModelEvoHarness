@@ -25,3 +25,14 @@ A DIN gain with no DIEN gain suggests relevance to the candidate but weak increm
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/3.sequence.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/3.sequence.html), [src/funrec/models/din.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/din.py), [src/funrec/models/dien.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/dien.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `latent_cross` / `LatentCross`: Residual modulation `hidden * (1 + projected_context)` preserves the hidden state at zero projected context. Output: `modulated_hidden_state`, `same as hidden input`. Tensor interaction only; host owns recurrent encoder, context encoding and padding. No sequence construction.
+- `transact` / `TransAct`: Candidate-conditioned action Transformer (`history, candidate, mask`) followed by concatenated recent token outputs and masked max pooling. Output: `ranking_representation`, `[B,(K+1)*D]`. Compact real-time action encoder. No random time-window augmentation, batch PinnerFormer fusion or production serving stack.
+- `dicm` / `DICM`: Independent image-query and ID-query attention channels pool the same behavior-image history. Output: `ranking_representation`, `[B,2D]`. DICM rank-stage pooling only; compact scoring MLP choice is declared. No image descriptor/AMS; candidate-dependent output is not an independent retrieval tower.
+- `mmrec` / `MMRec`: Four separately normalized text/image candidate-history attention streams, summed before joint candidate scoring. Output: `ranking_score`, `[B]`. Exact attention/scoring head over supplied embeddings; excludes ViLBERT, image ROI extraction and multimodal pretraining.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

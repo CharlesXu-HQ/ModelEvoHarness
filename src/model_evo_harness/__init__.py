@@ -3,7 +3,7 @@
 from .catalog import (applicability, catalog_digest, coverage_report, decision_applicability,
                       implementation_digest, load_catalog, load_guide,
                       common_knowledge, read_references, model_api, method_applicability,
-                      training_applicability, validate_research)
+                      training_applicability, validate_research, paper_coverage_report)
 from .composition import composition_sources, model_design_identity, validate_model_design, validate_feature_groups
 from .engine import run_search, validate_data_request, validate_reflection
 from .evidence import validate_audit_recommendations, validate_host_evidence
@@ -13,7 +13,7 @@ from .interaction import interaction_context, validate_interaction_views, valida
 
 __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_applicability",
            "implementation_digest", "load_catalog", "load_guide", "model_api", "method_applicability",
-           "common_knowledge", "read_references", "call_with_references",
+           "common_knowledge", "read_references", "call_with_references", "paper_coverage_report",
            "COMPOSITION_INSTRUCTIONS", "composition_sources", "model_design_identity", "validate_model_design",
            "REFERENCE_INSTRUCTIONS", "propose_with_references", "validate_feature_groups",
            "training_applicability", "run_search", "validate_data_request",

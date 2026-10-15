@@ -52,3 +52,13 @@ This guide is independently written. Pinned upstream materials used for orientat
 Additional pinned source for `dcn_v2`: [torch_rechub/models/ranking/dcn_v2.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/ranking/dcn_v2.py).
 
 Additional pinned source for `fwfm`: [deepctr/models/fwfm.py](https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/fwfm.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `deepcrossing` / `DeepCrossing`: Stacked dense feature vectors processed by dimension-preserving residual MLP units. Output: `binary_logit`, `[B]`. Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system.
+- `fnn` / `FNN`: Initialize field embeddings from a supplied pretrained FM, then train an MLP over the concatenated fields. Output: `binary_logit`, `[B]`. FM pretraining and feature-ID alignment are host responsibilities; randomly initialized MLP is not a faithful FNN baseline.
+- `predictive_bilinear` / `PredictiveBilinear`: Bilinear user-content interaction x_user^T W x_item for changing item features. Output: `bilinear_score`, `[B]`. Only the predictor; host must build as-of dynamic features and fit the intended objective.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

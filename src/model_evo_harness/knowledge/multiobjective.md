@@ -32,3 +32,11 @@ A secondary-task improvement with a primary-task loss is not success unless the 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/4.multi_objective/1.arch.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/4.multi_objective/1.arch.html), [docs/chapter_2_ranking/4.multi_objective/2.dependency_modeling.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/4.multi_objective/2.dependency_modeling.html), [src/funrec/models/shared_bottom.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/shared_bottom.py), [src/funrec/models/esmm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/esmm.py).
 
 Additional pinned source for `aitm`: [torch_rechub/models/multi_task/aitm.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/multi_task/aitm.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `dmtl_distillation` / `DMTLDistillation`: Detached Bernoulli KL from joint click/long-read teacher probability to a two-tower student; joint teacher BCE helper. Output: `scalar_loss`, `[]`. Host supplies MMoE teacher and two-tower student. No duration discretization or training schedule. CTR helper follows click labels in prose/Figure 1, resolving apparent Eq.8 typo.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

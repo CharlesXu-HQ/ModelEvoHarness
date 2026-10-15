@@ -24,3 +24,12 @@ When the effect exists only through position, acquire position and impression lo
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_3_rerank/1.greedy.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_3_rerank/1.greedy.html), [docs/chapter_3_rerank/2.personalized.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_3_rerank/2.personalized.html), [src/funrec/models/prm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/prm.py), [src/funrec/models/prs.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/prs.py).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `seq2slate` / `Seq2Slate`: Autoregressive pointer decoder conditions each choice on previously selected candidates. Output: `selected_indices`, `[B,K]` (`teacher_forced_logits()` returns `[B,K,N]`). Compact pointer core with no-repeat eligibility; host supplies supervision/rewards. No policy-gradient trainer or full encoder-decoder reproduction.
+- `dpp_greedy` / `DPPGreedy`: Greedy DPP MAP selection using incremental conditional variance updates of a supplied PSD kernel. Output: `selected_indices`, `[B,K], -1 after early stop`. Fixed-capacity, deterministic non-differentiable selector, not exact or unconstrained-cardinality MAP. Host defines relevance/diversity kernel; stops on singular or exhausted feasible set.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

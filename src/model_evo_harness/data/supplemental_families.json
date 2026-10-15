@@ -35,6 +35,68 @@
       "experiment": "Hold the candidate pool and evaluation protocol fixed; ablate relation-aware information against matched item representations.",
       "pitfalls": "Entity links or graph edges formed after the evaluation cutoff leak future information.",
       "source_docs": [], "source_models": [], "source_support": [], "source_project": []
+    },
+    {
+      "id": "graph_representation",
+      "name": "Graph neighborhood and proximity representations",
+      "source_repo": "reco-papers",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BGraphSAGE%5DInductive%20Representation%20Learning%20on%20Large%20Graphs.pdf",
+      "stages": [
+        "retrieval",
+        "ranking"
+      ],
+      "requires": [
+        "graph_tensors"
+      ],
+      "question": "Do supplied graph neighborhoods or proximity objectives add signal beyond independent item features?",
+      "experiment": "Keep the data cutoff, labels, candidate universe and evaluator fixed; replace one model component with a simple control and compare held-out slices.",
+      "pitfalls": "Graph/position/popularity inputs require explicit provenance; structural assumptions alone do not identify causal effects.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "feedback_factorization",
+      "name": "Logged-feedback factorization",
+      "source_repo": "reco-papers",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BPAL%5D%20A%20Position-Bias%20Aware%20Learning%20Framework%20for%20CTR%20Prediction%20in%20Live%20Recommender%20Systems.pdf",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "advertising",
+        "reranking"
+      ],
+      "requires": [
+        "logged_feedback"
+      ],
+      "question": "Does explicit exposure or popularity factorization improve the declared prediction target under supported assumptions?",
+      "experiment": "Keep the data cutoff, labels, candidate universe and evaluator fixed; replace one model component with a simple control and compare held-out slices.",
+      "pitfalls": "Graph/position/popularity inputs require explicit provenance; structural assumptions alone do not identify causal effects.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "learning_to_rank",
+      "name": "Query-group ranking objectives",
+      "source_repo": "reco-papers",
+      "source_url": "https://www.microsoft.com/en-us/research/uploads/prod/2016/02/MSR-TR-2010-82.pdf",
+      "stages": [
+        "ranking",
+        "reranking"
+      ],
+      "requires": [
+        "query_groups"
+      ],
+      "question": "Does a grouped ranking objective improve ordering with the same scores, labels and candidate universe?",
+      "experiment": "Hold backbone and queries fixed; compare pointwise loss, RankNet and detached DeltaNDCG-weighted pairs.",
+      "pitfalls": "Cross-query pairs, padded candidates and metric weights with unsupported relevance labels invalidate the comparison.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
     }
   ]
 }
