@@ -71,6 +71,587 @@
       "comparison": "Correct versus uncorrected logits with identical sampled items and the same full-catalog evaluation universe.",
       "failure_signals": "Weights are unknown or do not match the sampler, or gains disappear under full-catalog evaluation.",
       "implementation_boundary": "Sampling weights describe retrieval training negatives, not treatment-assignment or exposure propensities."
+    },
+    {
+      "id": "graphsage",
+      "family_id": "graph_representation",
+      "source_repo": "reco-papers",
+      "source_model": "Embedding/[GraphSAGE]Inductive Representation Learning on Large Graphs.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BGraphSAGE%5DInductive%20Representation%20Learning%20on%20Large%20Graphs.pdf",
+      "paper_ids": [
+        "reco-035"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/williamleif/GraphSAGE",
+          "commit_sha": "a0fdef95dca7b456dab01cb35034717c8b6dd017",
+          "path": "graphsage/aggregators.py",
+          "url": "https://github.com/williamleif/GraphSAGE/blob/a0fdef95dca7b456dab01cb35034717c8b6dd017/graphsage/aggregators.py",
+          "license": "MIT",
+          "use": "consulted; independent implementation"
+        }
+      ],
+      "mechanism": "Mean neighbor aggregation followed by concatenation, projection, activation and L2 normalization.",
+      "requires": [
+        "node_features",
+        "sampled_neighbors",
+        "neighbor_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate graphsage against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "One mean-aggregator layer; host constructs neighborhoods and chooses its training objective."
+    },
+    {
+      "id": "pinsage",
+      "family_id": "graph_representation",
+      "source_repo": "reco-papers",
+      "source_model": "Industry Recommender System/[Pinterest] Graph Convolutional Neural Networks for Web-Scale Recommender Systems (Pinterest 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BPinterest%5D%20Graph%20Convolutional%20Neural%20Networks%20for%20Web-Scale%20Recommender%20Systems%20%28Pinterest%202018%29.pdf",
+      "paper_ids": [
+        "reco-089"
+      ],
+      "source_references": [],
+      "mechanism": "Transform neighbors before importance-weighted pooling, then concatenate self features and normalize.",
+      "requires": [
+        "node_features",
+        "weighted_neighbors",
+        "neighbor_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate pinsage against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "One convolution; host supplies random-walk visit weights. No random walks, top-T selection, curriculum or MapReduce."
+    },
+    {
+      "id": "sdne",
+      "family_id": "graph_representation",
+      "source_repo": "reco-papers",
+      "source_model": "Embedding/[SDNE] Structural Deep Network Embedding (THU 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BSDNE%5D%20Structural%20Deep%20Network%20Embedding%20%28THU%202016%29.pdf",
+      "paper_ids": [
+        "reco-030"
+      ],
+      "source_references": [],
+      "mechanism": "Nonlinear adjacency autoencoder with beta-weighted reconstruction and weighted first-order edge distance.",
+      "requires": [
+        "adjacency_rows",
+        "graph_edges"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate sdne against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Dense small-graph reference; training_loss requires adjacency rows indexed consistently with supplied edges. Beta is inside the squared error."
+    },
+    {
+      "id": "line",
+      "family_id": "graph_representation",
+      "source_repo": "reco-papers",
+      "source_model": "Embedding/[LINE] LINE - Large-scale Information Network Embedding (MSRA 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BLINE%5D%20LINE%20-%20Large-scale%20Information%20Network%20Embedding%20%28MSRA%202015%29.pdf",
+      "paper_ids": [
+        "reco-044"
+      ],
+      "source_references": [],
+      "mechanism": "First-order shared or second-order separate context factors with weighted positive/negative logistic objective.",
+      "requires": [
+        "graph_edges",
+        "edge_weights",
+        "negative_node_ids"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate line against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Host provides edges and negatives; no alias sampling or graph ingestion. Train and concatenate the two orders outside the core."
+    },
+    {
+      "id": "ripplenet",
+      "family_id": "knowledge_graph_retrieval",
+      "source_repo": "reco-papers",
+      "source_model": "Embedding/[RippleNet] Propagating User Preferences on the Knowledge Graph for Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BRippleNet%5D%20Propagating%20User%20Preferences%20on%20the%20Knowledge%20Graph%20for%20Recommender%20Systems.pdf",
+      "paper_ids": [
+        "reco-038"
+      ],
+      "source_references": [],
+      "mechanism": "Candidate-conditioned relation-matrix attention over multi-hop heads and tails.",
+      "requires": [
+        "ripple_triples",
+        "ripple_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate ripplenet against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Host supplies ripple sets. Optional none/plus/replace item updates; omits KG auxiliary reconstruction objective and graph sampling."
+    },
+    {
+      "id": "kgat",
+      "family_id": "knowledge_graph_retrieval",
+      "source_repo": "reco-papers",
+      "source_model": "Embedding/[KGAT] Knowledge Graph Attention Network for Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BKGAT%5D%20Knowledge%20Graph%20Attention%20Network%20for%20Recommendation.pdf",
+      "paper_ids": [
+        "reco-041"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/xiangwang1223/knowledge_graph_attention_network",
+          "commit_sha": "c03737be46ac26a0b5431efe149828e982ffbbfb",
+          "path": "Model/KGAT.py",
+          "url": "https://github.com/xiangwang1223/knowledge_graph_attention_network/blob/c03737be46ac26a0b5431efe149828e982ffbbfb/Model/KGAT.py",
+          "license": "MIT",
+          "use": "consulted; independent implementation"
+        }
+      ],
+      "mechanism": "Relation-projected attention and sum/product bi-interaction neighborhood propagation.",
+      "requires": [
+        "typed_neighbors",
+        "neighbor_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate kgat against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "One propagation layer; excludes TransR/BPR training objectives, deeper-layer concatenation and alternating attention refresh."
+    },
+    {
+      "id": "cdl",
+      "family_id": "collaborative_retrieval",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[CDL] Collaborative Deep Learning for Recommender Systems (HKUST, 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BCDL%5D%20Collaborative%20Deep%20Learning%20for%20Recommender%20Systems%20%28HKUST%2C%202015%29.pdf",
+      "paper_ids": [
+        "reco-017"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/js05212/CDL",
+          "commit_sha": "9d8c090a8f54e7723852111786ce9a8a481d2300",
+          "path": "cdl.m",
+          "url": "https://github.com/js05212/CDL/blob/9d8c090a8f54e7723852111786ce9a8a481d2300/cdl.m",
+          "license": "GPL-2.0",
+          "use": "not copied; paper-derived implementation"
+        }
+      ],
+      "mechanism": "Content denoising autoencoder coupled to item factors, with confidence-weighted feedback loss.",
+      "requires": [
+        "content_features",
+        "corrupted_content",
+        "confidence_weights"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate cdl against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Deterministic paired-minibatch MAP-style core, not Bayesian inference. Repeated items repeat content/coupling terms; host owns corruption and confidence construction."
+    },
+    {
+      "id": "deepcrossing",
+      "family_id": "feature_interactions",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[Deep Crossing] Deep Crossing - Web-Scale Modeling without Manually Crafted Combinatorial Features (Microsoft 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDeep%20Crossing%5D%20Deep%20Crossing%20-%20Web-Scale%20Modeling%20without%20Manually%20Crafted%20Combinatorial%20Features%20%28Microsoft%202016%29.pdf",
+      "paper_ids": [
+        "reco-011"
+      ],
+      "source_references": [],
+      "mechanism": "Stacked dense feature vectors processed by dimension-preserving residual MLP units.",
+      "requires": [
+        "encoded_features",
+        "observed_outcome_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate deepcrossing against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system."
+    },
+    {
+      "id": "fnn",
+      "family_id": "feature_interactions",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[FNN] Deep Learning over Multi-field Categorical Data (UCL 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BFNN%5D%20Deep%20Learning%20over%20Multi-field%20Categorical%20Data%20%28UCL%202016%29.pdf",
+      "paper_ids": [
+        "reco-024"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/wnzhang/deep-ctr",
+          "commit_sha": "229ad52cb97bc213012ba596b451990dcca6b897",
+          "path": "",
+          "url": "https://github.com/wnzhang/deep-ctr/tree/229ad52cb97bc213012ba596b451990dcca6b897/",
+          "license": "no license found",
+          "use": "not copied; paper-derived implementation"
+        }
+      ],
+      "mechanism": "Initialize field embeddings from a supplied pretrained FM, then train an MLP over the concatenated fields.",
+      "requires": [
+        "categorical_field_identities",
+        "fm_pretrained_embeddings",
+        "observed_outcome_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate fnn against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "FM pretraining and feature-ID alignment are host responsibilities; randomly initialized MLP is not a faithful FNN baseline."
+    },
+    {
+      "id": "neumf",
+      "family_id": "collaborative_retrieval",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[NCF] Neural Collaborative Filtering (NUS 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BNCF%5D%20Neural%20Collaborative%20Filtering%20%28NUS%202017%29.pdf",
+      "paper_ids": [
+        "reco-023"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/hexiangnan/neural_collaborative_filtering",
+          "commit_sha": "4aab159e81c44b062c091bdaed0ab54ac632371f",
+          "path": "NeuMF.py",
+          "url": "https://github.com/hexiangnan/neural_collaborative_filtering/blob/4aab159e81c44b062c091bdaed0ab54ac632371f/NeuMF.py",
+          "license": "Apache-2.0",
+          "use": "consulted; independent implementation"
+        }
+      ],
+      "mechanism": "Separate GMF product and nonlinear user-item MLP branches joined into a learned score.",
+      "requires": [
+        "user_item_ids",
+        "observed_outcome_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate neumf against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Host owns negative sampling, optional GMF/MLP pretraining and evaluation; ID embeddings require cold-start handling."
+    },
+    {
+      "id": "latent_cross",
+      "family_id": "sequence_ranking",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[Latent Cross] Latent Cross- Making Use of Context in Recurrent Recommender Systems (Google 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BLatent%20Cross%5D%20Latent%20Cross-%20Making%20Use%20of%20Context%20in%20Recurrent%20Recommender%20Systems%20%28Google%202018%29.pdf",
+      "paper_ids": [
+        "reco-027"
+      ],
+      "source_references": [],
+      "mechanism": "Residual elementwise context modulation hidden * (1 + projected_context), preserving a neutral zero-context identity.",
+      "requires": [
+        "context_embeddings",
+        "hidden_states"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate latent_cross against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Tensor interaction only; host owns recurrent encoder, context encoding and padding. No sequence construction."
+    },
+    {
+      "id": "multi_view_dssm",
+      "family_id": "two_tower_matching",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[DSSM in Recsys] A Multi-View Deep Learning Approach for Cross Domain User Modeling in Recommendation Systems (Microsoft 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDSSM%20in%20Recsys%5D%20A%20Multi-View%20Deep%20Learning%20Approach%20for%20Cross%20Domain%20User%20Modeling%20in%20Recommendation%20Systems%20%28Microsoft%202015%29.pdf",
+      "paper_ids": [
+        "reco-018"
+      ],
+      "source_references": [],
+      "mechanism": "Shared user projection and separate domain item projections into normalized common latent space.",
+      "requires": [
+        "domain_item_features",
+        "domain_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate multi_view_dssm against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Compact tower computation; excludes cross-domain data alignment, joint sampling and original task-specific training schedule."
+    },
+    {
+      "id": "predictive_bilinear",
+      "family_id": "feature_interactions",
+      "source_repo": "reco-papers",
+      "source_model": "Classic Recommender System/[Bilinear] Personalized Recommendation on Dynamic Content Using Predictive Bilinear Models (Yahoo 2009).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BBilinear%5D%20Personalized%20Recommendation%20on%20Dynamic%20Content%20Using%20Predictive%20Bilinear%20Models%20%28Yahoo%202009%29.pdf",
+      "paper_ids": [
+        "reco-064"
+      ],
+      "source_references": [],
+      "mechanism": "Bilinear user-content interaction x_user^T W x_item for changing item features.",
+      "requires": [
+        "user_features",
+        "item_features"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate predictive_bilinear against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Only the predictor; host must build as-of dynamic features and fit the intended objective."
+    },
+    {
+      "id": "transact",
+      "family_id": "sequence_ranking",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[TransAct] Transformer-based Real-time User Action Model for Recommendation at Pinterest.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BTransAct%5D%20Transformer-based%20Real-time%20User%20Action%20Model%20for%20Recommendation%20at%20Pinterest.pdf",
+      "paper_ids": [
+        "reco-028"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/pinterest/transformer_user_action",
+          "commit_sha": "2c8b6c93b679949b9581cf592c46ddcba55f3d09",
+          "path": "",
+          "url": "https://github.com/pinterest/transformer_user_action/tree/2c8b6c93b679949b9581cf592c46ddcba55f3d09/",
+          "license": "Apache-2.0",
+          "use": "consulted; independent implementation"
+        }
+      ],
+      "mechanism": "Target-aware action Transformer followed by concatenated recent token outputs and masked max pooling.",
+      "requires": [
+        "event_sequence",
+        "candidate_features",
+        "sequence_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate transact against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Candidate concatenation and projection before a compact real-time action encoder. No random time-window augmentation, batch PinnerFormer fusion or production serving stack."
+    },
+    {
+      "id": "pinnerformer",
+      "family_id": "interest_retrieval",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[PinnerFormer] Sequence Modeling for User Representation at Pinterest.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BPinnerFormer%5D%20Sequence%20Modeling%20for%20User%20Representation%20at%20Pinterest.pdf",
+      "paper_ids": [
+        "reco-014"
+      ],
+      "source_references": [],
+      "mechanism": "Causal user-action encoder with normalized position representations and a dense future-positive contrastive objective.",
+      "requires": [
+        "event_sequence",
+        "sequence_mask",
+        "future_positive_embeddings"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate pinnerformer against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Compact causal Transformer and normalized states/readout, with future-positive contrastive loss only. Host supplies future positives, negatives and valid prefix mask; no K-day target sampling, timestamp validation or full Pinterest feature encoder."
+    },
+    {
+      "id": "seq2slate",
+      "family_id": "slate_reranking",
+      "source_repo": "reco-papers",
+      "source_model": "Retrieval and Rerank/[Seq2Slate] Re-ranking and Slate Optimization with RNNs.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BSeq2Slate%5D%20Re-ranking%20and%20Slate%20Optimization%20with%20RNNs.pdf",
+      "paper_ids": [
+        "reco-004"
+      ],
+      "source_references": [],
+      "mechanism": "Autoregressive pointer decoder conditions each choice on previously selected candidates.",
+      "requires": [
+        "candidate_slates",
+        "candidate_eligibility",
+        "teacher_order"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate seq2slate against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Compact pointer core with no-repeat eligibility; host supplies supervision/rewards. No policy-gradient trainer or full encoder-decoder reproduction."
+    },
+    {
+      "id": "dpp_greedy",
+      "family_id": "slate_reranking",
+      "source_repo": "reco-papers",
+      "source_model": "Retrieval and Rerank/[Hulu Diversity] Fast Greedy Map Inference for Determinantal Point Processes to Improve Recommendation Diversity.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BHulu%20Diversity%5D%20Fast%20Greedy%20Map%20Inference%20for%20Determinantal%20Point%20Processes%20to%20Improve%20Recommendation%20Diversity.pdf",
+      "paper_ids": [
+        "reco-005"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/laming-chen/fast-map-dpp",
+          "commit_sha": "6ab745ca1273941412a7f32ce6432549cfe4b5af",
+          "path": "",
+          "url": "https://github.com/laming-chen/fast-map-dpp/tree/6ab745ca1273941412a7f32ce6432549cfe4b5af/",
+          "license": "Apache-2.0",
+          "use": "consulted; independent implementation"
+        }
+      ],
+      "mechanism": "Greedy DPP MAP selection using incremental conditional variance updates of a supplied PSD kernel.",
+      "requires": [
+        "psd_candidate_kernel",
+        "candidate_eligibility"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate dpp_greedy against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Fixed-capacity, deterministic non-differentiable selector, not exact or unconstrained-cardinality MAP. Host defines relevance/diversity kernel; stops on singular or exhausted feasible set."
+    },
+    {
+      "id": "ranknet",
+      "family_id": "learning_to_rank",
+      "source_repo": "reco-papers",
+      "source_model": "Retrieval and Rerank/[LTR] From RankNet to LambdaRank to LambdaMART- An Overview.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BLTR%5D%20From%20RankNet%20to%20LambdaRank%20to%20LambdaMART-%20An%20Overview.pdf",
+      "paper_ids": [
+        "reco-007"
+      ],
+      "source_references": [],
+      "mechanism": "Pairwise logistic loss within each query, excluding padding and label ties.",
+      "requires": [
+        "query_groups",
+        "graded_relevance",
+        "candidate_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate ranknet against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Loss only; host supplies query groups/backbone. Does not implement LambdaMART or tree boosting."
+    },
+    {
+      "id": "lambdarank",
+      "family_id": "learning_to_rank",
+      "source_repo": "reco-papers",
+      "source_model": "Retrieval and Rerank/[LTR] From RankNet to LambdaRank to LambdaMART- An Overview.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BLTR%5D%20From%20RankNet%20to%20LambdaRank%20to%20LambdaMART-%20An%20Overview.pdf",
+      "paper_ids": [
+        "reco-007"
+      ],
+      "source_references": [],
+      "mechanism": "RankNet pair loss weighted by detached swap DeltaNDCG based on predicted ranks.",
+      "requires": [
+        "query_groups",
+        "graded_relevance",
+        "candidate_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate lambdarank against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "LambdaRank-style gradient surrogate; no LambdaMART. Sorting/metric weights are non-differentiable and label gains require nonnegative relevance."
+    },
+    {
+      "id": "pal",
+      "family_id": "feedback_factorization",
+      "source_repo": "reco-papers",
+      "source_model": "Cold Start and Debias/[PAL] A Position-Bias Aware Learning Framework for CTR Prediction in Live Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BPAL%5D%20A%20Position-Bias%20Aware%20Learning%20Framework%20for%20CTR%20Prediction%20in%20Live%20Recommender%20Systems.pdf",
+      "paper_ids": [
+        "reco-114"
+      ],
+      "source_references": [],
+      "mechanism": "Multiply position-only examination and position-free relevance probabilities; optimize stable joint BCE.",
+      "requires": [
+        "logged_positions",
+        "relevance_logits",
+        "observed_outcome_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate pal against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "No automatic causal identification. Host excludes position from relevance features; serve relevance() without a fabricated position."
+    },
+    {
+      "id": "meta_embedding",
+      "family_id": "cold_start",
+      "source_repo": "reco-papers",
+      "source_model": "Cold Start and Debias/[Meta Emb]Warm Up Cold-start Advertisements- Improving CTR Predictions via Learning to Learn ID Embeddings.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BMeta%20Emb%5DWarm%20Up%20Cold-start%20Advertisements-%20Improving%20CTR%20Predictions%20via%20Learning%20to%20Learn%20ID%20Embeddings.pdf",
+      "paper_ids": [
+        "reco-113"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/Feiyang/MetaEmbedding",
+          "commit_sha": "b4995ee64a7b14a2f205bd4275d39bb913b5ab12",
+          "path": "code/example-MovieLens.ipynb",
+          "url": "https://github.com/Feiyang/MetaEmbedding/blob/b4995ee64a7b14a2f205bd4275d39bb913b5ab12/code/example-MovieLens.ipynb",
+          "license": "no license found",
+          "use": "not copied; paper-derived implementation"
+        }
+      ],
+      "mechanism": "Attribute-to-ID generator plus differentiable inner embedding update and cold/warm objective combination.",
+      "requires": [
+        "item_attributes",
+        "per_entity_support_query"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate meta_embedding against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Host owns support/query construction and nested autodiff. Generator alone trained by ordinary supervised loss is not meta-learning; no copying of unlicensed author code."
+    },
+    {
+      "id": "dice",
+      "family_id": "feedback_factorization",
+      "source_repo": "reco-papers",
+      "source_model": "Cold Start and Debias/[DICE] Disentangling User Interest and Conformity for Recommendation with Causal Embedding.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BDICE%5D%20Disentangling%20User%20Interest%20and%20Conformity%20for%20Recommendation%20with%20Causal%20Embedding.pdf",
+      "paper_ids": [
+        "reco-115"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/tsinghua-fib-lab/DICE",
+          "commit_sha": "591b883cd62bf0d88c906d12ed2ab88ff8fccc36",
+          "path": "src/model.py",
+          "url": "https://github.com/tsinghua-fib-lab/DICE/blob/591b883cd62bf0d88c906d12ed2ab88ff8fccc36/src/model.py",
+          "license": "MIT",
+          "use": "masked objective adapted; license retained in THIRD_PARTY_NOTICES.md"
+        }
+      ],
+      "mechanism": "Separate interest/conformity factors with mask-directed BPR components and optional L2 discrepancy.",
+      "requires": [
+        "user_item_ids",
+        "positive_negative_pairs",
+        "negative_popularity_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate dice against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Mask true means negative more popular. Host owns sampling/curriculum and regularization; optional negative L2 discrepancy is unbounded and disabled by default. Does not establish causal effects."
+    },
+    {
+      "id": "dicm",
+      "family_id": "sequence_ranking",
+      "source_repo": "reco-papers",
+      "source_model": "Deep Learning Recommender System/[Image CTR] Image Matters - Visually modeling user behaviors using Advanced Model Server (Alibaba 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BImage%20CTR%5D%20Image%20Matters%20-%20Visually%20modeling%20user%20behaviors%20using%20Advanced%20Model%20Server%20%28Alibaba%202018%29.pdf",
+      "paper_ids": [
+        "reco-016"
+      ],
+      "source_references": [],
+      "mechanism": "Independent image-query and ID-query attention channels pool the same behavior-image history.",
+      "requires": [
+        "behavior_image_embeddings",
+        "candidate_image_embeddings",
+        "candidate_id_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate dicm against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "DICM rank-stage pooling only; compact scoring MLP choice is declared. No image descriptor/AMS; candidate-dependent output is not an independent retrieval tower."
+    },
+    {
+      "id": "mmrec",
+      "family_id": "sequence_ranking",
+      "source_repo": "reco-papers",
+      "source_model": "Feature Data and Infra/[MM-Rec] Multimodal News Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BMM-Rec%5D%20Multimodal%20News%20Recommendation.pdf",
+      "paper_ids": [
+        "reco-057"
+      ],
+      "source_references": [
+        {
+          "repository": "https://github.com/zcfinal/MM-Rec",
+          "commit_sha": "7c1feb65698d21da1075c7a6276b4b15c8cc636e",
+          "path": "model.py",
+          "url": "https://github.com/zcfinal/MM-Rec/blob/7c1feb65698d21da1075c7a6276b4b15c8cc636e/model.py",
+          "license": "no license found",
+          "use": "not copied; paper-derived implementation"
+        }
+      ],
+      "mechanism": "Four separately normalized text/image candidate-history attention streams, summed before joint candidate scoring.",
+      "requires": [
+        "history_text_image_embeddings",
+        "candidate_text_image_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate mmrec against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Exact attention/scoring head over supplied embeddings; excludes ViLBERT, image ROI extraction and multimodal pretraining."
+    },
+    {
+      "id": "dmtl_distillation",
+      "family_id": "multiobjective",
+      "source_repo": "reco-papers",
+      "source_model": "Retrieval and Rerank/[Distillation] Distillation Based Multi-task Learning- A Candidate Generation Model for Improving Reading Duration.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BDistillation%5D%20Distillation%20Based%20Multi-task%20Learning-%20A%20Candidate%20Generation%20Model%20for%20Improving%20Reading%20Duration.pdf",
+      "paper_ids": [
+        "reco-001"
+      ],
+      "source_references": [],
+      "mechanism": "Detached Bernoulli KL from joint click/long-read teacher probability to a two-tower student; joint teacher BCE helper.",
+      "requires": [
+        "teacher_logits",
+        "student_logits",
+        "impression_click_and_read_labels"
+      ],
+      "comparison": "On identical inputs, labels, split and evaluation budget, ablate dmtl_distillation against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
+      "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
+      "implementation_boundary": "Host supplies MMoE teacher and two-tower student. No duration discretization or training schedule. CTR helper follows click labels in prose/Figure 1, resolving apparent Eq.8 typo."
     }
   ]
 }

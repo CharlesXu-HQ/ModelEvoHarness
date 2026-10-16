@@ -8,6 +8,7 @@ version = "0.2.0"
 description = "Agent-led offline model iteration for recommendation, search, ads, and marketing"
 readme = "README.md"
 license = "Apache-2.0"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
 requires-python = ">=3.12"
 dependencies = []
 

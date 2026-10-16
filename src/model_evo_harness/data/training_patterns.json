@@ -116,6 +116,144 @@
       "required_evidence": "Event timestamps, decision cutoff, sequence-length distribution and a no-future-event audit.",
       "controlled_comparison": "Keep architecture, rows and evaluation prefixes fixed; compare unaugmented and one time-safe augmentation rule.",
       "reject_if": "Prefix consistency or held-out utility worsens, or augmentation exposes future events."
+    },
+    {
+      "id": "query_delta_ndcg",
+      "category": "loss",
+      "method_ids": [
+        "ranknet",
+        "lambdarank"
+      ],
+      "stages": [],
+      "requires": [
+        "query_groups",
+        "graded_relevance",
+        "candidate_mask"
+      ],
+      "mechanism": "Within-query pairwise logistic objective, optionally weighted by detached swap DeltaNDCG.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "joint_examination_bce",
+      "category": "loss",
+      "method_ids": [
+        "pal"
+      ],
+      "stages": [],
+      "requires": [
+        "logged_positions",
+        "observed_outcome_labels"
+      ],
+      "mechanism": "Optimize the examination-relevance probability product rather than adding position to the relevance tower.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "masked_interest_conformity",
+      "category": "loss",
+      "method_ids": [
+        "dice"
+      ],
+      "stages": [],
+      "requires": [
+        "negative_popularity_mask",
+        "positive_negative_pairs"
+      ],
+      "mechanism": "Apply popularity-direction masks to interest and conformity BPR components.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "embedding_meta_objective",
+      "category": "loss",
+      "method_ids": [
+        "meta_embedding"
+      ],
+      "stages": [],
+      "requires": [
+        "per_entity_support_query"
+      ],
+      "mechanism": "Differentiate through a functional support update into the cold/warm query objective.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "product_teacher_distillation",
+      "category": "loss",
+      "method_ids": [
+        "dmtl_distillation"
+      ],
+      "stages": [],
+      "requires": [
+        "teacher_logits",
+        "student_logits"
+      ],
+      "mechanism": "Fit a student to the detached joint-outcome teacher using Bernoulli KL.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "graph_proximity_objective",
+      "category": "loss",
+      "method_ids": [
+        "sdne",
+        "line"
+      ],
+      "stages": [],
+      "requires": [
+        "graph_tensors"
+      ],
+      "mechanism": "Apply adjacency reconstruction/proximity or weighted edge logistic objectives to caller-supplied graph tensors.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "dense_future_action_objective",
+      "category": "loss",
+      "method_ids": [
+        "pinnerformer"
+      ],
+      "stages": [],
+      "requires": [
+        "future_positive_embeddings",
+        "sequence_mask"
+      ],
+      "mechanism": "Train causal prefix states against caller-supplied future-positive and negative embeddings.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "content_factor_coupling_loss",
+      "category": "loss",
+      "method_ids": [
+        "cdl"
+      ],
+      "stages": [],
+      "requires": [
+        "content_features",
+        "corrupted_content",
+        "confidence_weights"
+      ],
+      "mechanism": "Combine content reconstruction, item-factor coupling and confidence-weighted feedback in the supplied minibatch.",
+      "when_to_try": "The current objective mismatches the declared task metric or supported feedback structure.",
+      "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
+      "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
+      "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
     }
   ]
 }

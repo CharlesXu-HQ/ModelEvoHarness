@@ -17,3 +17,11 @@ If content-only works on new items, the gap may be ID dependence rather than mis
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_4_trends/2.cold_start.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_4_trends/2.cold_start.html).
+
+## Reco-papers component map
+
+These entries are independent computational components, not full training systems. Read each exact signature and limitation through `model_api` or `read_references`; use the same input tensors and evaluator when comparing them.
+
+- `meta_embedding` / `MetaEmbedding`: Attribute-to-ID generator plus differentiable inner embedding update and cold/warm objective combination. Output: `generated_embedding`, `[B,D]`. Host owns support/query construction and nested autodiff. Generator alone trained by ordinary supervised loss is not meta-learning; no copying of unlicensed author code.
+
+The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.

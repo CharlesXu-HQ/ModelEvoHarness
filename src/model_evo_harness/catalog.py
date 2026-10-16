@@ -25,6 +25,7 @@ def load_catalog(*, extra_families: list[dict] | None = None) -> dict:
     catalog["structure_patterns"] = _bundled("structure_patterns.json")["structure_patterns"]
     catalog["training_patterns"] = _bundled("training_patterns.json")["training_patterns"]
     catalog["model_implementations"] = _bundled("model_implementations.json")["model_implementations"]
+    catalog["paper_inventory"] = _bundled("reco_papers.json")
     catalog["experience_schema_version"] = 2
     if extra_families:
         catalog["families"].extend(extra_families)
@@ -94,7 +95,8 @@ def read_references(catalog: dict, request: dict) -> dict:
         result[path] = {"content": content,
                         "sha256": hashlib.sha256(content.encode()).hexdigest()}
     contracts = {item: {key: entries[item][key] for key in (
-        "reference_scope", "training_support", "output_contract", "limitations")
+        "reference_scope", "training_support", "output_contract", "limitations",
+        "paper_ids", "local_guide", "structure_pattern")
         if key in entries[item]} for item in sorted(set(methods))}
     _record_reference_read(result)
     return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
@@ -127,7 +129,8 @@ def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
             "constructor": public.pop("__init__", "inherited"),
             "methods": public,
             **{key: entry[key] for key in ("reference_scope", "training_support",
-                                          "output_contract", "limitations") if key in entry},
+                                          "output_contract", "limitations", "paper_ids",
+                                          "local_guide", "structure_pattern") if key in entry},
         }
     return result
 
@@ -283,6 +286,50 @@ def validate_catalog(catalog: dict) -> None:
         if key in implementation_keys:
             raise ValueError("duplicate model implementation")
         implementation_keys.add(key)
+    inventory = catalog.get("paper_inventory")
+    if inventory is not None:
+        papers = inventory.get("papers", [])
+        paper_ids = {paper["id"] for paper in papers}
+        paths = {paper["pdf_path"] for paper in papers}
+        if len(papers) != inventory.get("pdf_count") or len(paper_ids) != len(papers) or len(paths) != len(papers):
+            raise ValueError("paper inventory count or unique IDs/PDF paths disagree")
+        card_map = {card["id"]: card for card in cards}
+        pattern_map = {method: pattern["id"] for pattern in patterns for method in pattern["method_ids"]}
+        for paper in papers:
+            status, methods = paper.get("disposition"), paper.get("method_ids", [])
+            if status not in {"added_core", "existing_core", "shared_mechanism", "excluded", "duplicate"}:
+                raise ValueError("unknown paper disposition")
+            if not paper.get("reason") or not paper.get("source_url", "").startswith("https://"):
+                raise ValueError("paper needs a reason and source URL")
+            if status == "excluded":
+                if methods or not paper.get("exclusion_category"):
+                    raise ValueError("excluded paper needs category and no implementation claim")
+            elif not methods or set(methods) - card_ids:
+                raise ValueError("included paper needs known method IDs")
+            families = sorted({card_map[method]["family_id"] for method in methods})
+            if (paper.get("family_ids") != families or
+                    paper.get("local_guides") != [f"knowledge/{family}.md" for family in families] or
+                    paper.get("structure_pattern_ids") != sorted({pattern_map.get(method) for method in methods})):
+                raise ValueError("paper family/guide/structure mapping disagrees with method cards")
+            if set(paper.get("training_pattern_ids", [])) - training_ids:
+                raise ValueError("paper references an unknown training pattern")
+            if status == "duplicate" and (paper.get("duplicate_of") not in paper_ids or paper["duplicate_of"] == paper["id"]):
+                raise ValueError("duplicate paper needs a different known source entry")
+        for card in cards:
+            if set(card.get("paper_ids", [])) - paper_ids:
+                raise ValueError("method card references an unknown paper")
+
+
+def paper_coverage_report(catalog: dict) -> dict:
+    """Account for source PDFs without treating shared mechanisms as full reproductions."""
+    validate_catalog(catalog)
+    inventory = catalog.get("paper_inventory", {})
+    papers = inventory.get("papers", [])
+    return {"source_commit_sha": inventory.get("commit_sha"), "pdf_count": len(papers),
+            "dispositions": {status: sum(p["disposition"] == status for p in papers)
+                             for status in ("added_core", "existing_core", "shared_mechanism", "excluded", "duplicate")},
+            "added_method_count": len({method for p in papers if p["disposition"] == "added_core"
+                                       for method in p["method_ids"]})}
 
 
 def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
@@ -303,6 +350,7 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
                      for family in funrec_families}
     package = files("model_evo_harness")
     return {
+        "reco_papers": paper_coverage_report(catalog),
         "source_commit_sha": inventory["commit_sha"],
         "source_tree_sha": inventory["tree_sha"],
         "document_count": len(expected_docs),

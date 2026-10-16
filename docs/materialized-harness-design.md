@@ -5,7 +5,7 @@ This design records the October 2026 expansion of ModelEvoHarness. The package r
 ## Boundaries
 
 - Every catalog family has a substantive local guide. A source URL and pinned revision provide attribution, while the local guide is the working material. Guides cover the mechanism, inputs, measurement conditions, controlled tests, and failure cases.
-- Executable model references for all 44 method cards live in separate `models/pytorch` and `models/tensorflow` directories. They import only their respective framework and Python standard library. The manifest gives exact import paths; a ready data contract only means the host declared the inputs, not that a model is appropriate or has improved the task.
+- Executable model references for all 69 method cards live in separate `models/pytorch` and `models/tensorflow` directories. They import only their respective framework and Python standard library. The manifest gives exact import paths; a ready data contract only means the host declared the inputs, not that a model is appropriate or has improved the task.
 - Training changes are first-class experiment directions. Loss, sampling, hard-example mining, optimizer, regularization, and calibration choices follow the same measured-symptom, fixed-control, reject-if protocol as architecture changes. The catalog remains open: an Agent can propose a justified direction beyond its examples.
 - A task adapter owns the frozen dataset, labels, splits, candidate execution, GPU selection, and final holdout. The Agent receives validation evidence and cannot change the evaluation protocol.
 

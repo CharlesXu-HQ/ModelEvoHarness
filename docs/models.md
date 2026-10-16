@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness includes an original implementation of **each of its 44 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
+ModelEvoHarness includes a tensor implementation of **each of its 69 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
 
 The frameworks are isolated under [`models/pytorch`](../src/model_evo_harness/models/pytorch/) and [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Each module imports only its own deep-learning framework and Python's standard library; there is no DeepCTR, Torch-RecHub, RecBole or other model-wrapper dependency. Importing `model_evo_harness` itself does not import PyTorch or TensorFlow. Install the framework you intend to use separately.
 
@@ -70,3 +70,7 @@ The host constructs `allowed_negative_mask`, excludes positives, unexposed or fu
 - MLR's soft regions are predictive segments, not causal treatment effects. No architecture here establishes coupon uplift or net-value improvement without the host's randomized evaluation and cost definition.
 
 Every method has a [local technical guide](knowledge/README.md) explaining its data prerequisites, controlled comparison and rejection signals. The [source attribution record](research/source-attribution.md) lists pinned materials that informed those original explanations and implementations; upstream prose and code were not copied into this Apache-2.0 repository. No task-level performance improvement is claimed by having these implementations available.
+
+## Reco-papers components
+
+The [component map](reco-papers-coverage.md#new-implementation-map) lists the 25 additions and all method/guide/structure links. `paper_inventory` records source-level dispositions; `paper_coverage_report` and `catalog-check` validate and summarize them.

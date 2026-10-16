@@ -32,7 +32,7 @@ def test_each_method_has_explicit_framework_boundaries():
         assert frameworks["pytorch"]["output_contract"] == frameworks["tensorflow"][
             "output_contract"]
         for entry in frameworks.values():
-            if method_id in {"item_cf", "user_cf", "swing"}:
+            if method_id in {"item_cf", "user_cf", "swing", "dpp_greedy"}:
                 assert entry["training_support"]["mode"] == "closed_form"
                 assert "trainer" not in entry["training_support"]["requires_host"]
             else:

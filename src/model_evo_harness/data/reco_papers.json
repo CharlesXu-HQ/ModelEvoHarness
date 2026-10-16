@@ -1,0 +1,2169 @@
+{
+  "repository": "https://github.com/wzhe06/Reco-papers",
+  "commit_sha": "2c617a1659c38f60848c051b377f3faef5df831f",
+  "pdf_count": 115,
+  "scope": "Portable non-LLM model/objective/selector tensors; dispositions do not claim full-paper reproduction.",
+  "papers": [
+    {
+      "id": "reco-001",
+      "title": "[Distillation] Distillation Based Multi-task Learning- A Candidate Generation Model for Improving Reading Duration",
+      "pdf_path": "Retrieval and Rerank/[Distillation] Distillation Based Multi-task Learning- A Candidate Generation Model for Improving Reading Duration.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BDistillation%5D%20Distillation%20Based%20Multi-task%20Learning-%20A%20Candidate%20Generation%20Model%20for%20Improving%20Reading%20Duration.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "dmtl_distillation"
+      ],
+      "family_ids": [
+        "multiobjective"
+      ],
+      "local_guides": [
+        "knowledge/multiobjective.md"
+      ],
+      "structure_pattern_ids": [
+        "teacher_student_distillation"
+      ],
+      "training_pattern_ids": [
+        "product_teacher_distillation"
+      ]
+    },
+    {
+      "id": "reco-002",
+      "title": "[PRM] Personalized Re-ranking for Recommendation",
+      "pdf_path": "Retrieval and Rerank/[PRM] Personalized Re-ranking for Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BPRM%5D%20Personalized%20Re-ranking%20for%20Recommendation.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "prm"
+      ],
+      "family_ids": [
+        "slate_reranking"
+      ],
+      "local_guides": [
+        "knowledge/slate_reranking.md"
+      ],
+      "structure_pattern_ids": [
+        "slate_aware_decision"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-003",
+      "title": "[COLD] Towards the Next Generation of Pre-ranking System",
+      "pdf_path": "Retrieval and Rerank/[COLD] Towards the Next Generation of Pre-ranking System.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BCOLD%5D%20Towards%20the%20Next%20Generation%20of%20Pre-ranking%20System.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "excluded",
+      "reason": "Pre-ranking system optimization and feature-budget/serving tradeoffs; no distinct portable core is claimed.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-004",
+      "title": "[Seq2Slate] Re-ranking and Slate Optimization with RNNs",
+      "pdf_path": "Retrieval and Rerank/[Seq2Slate] Re-ranking and Slate Optimization with RNNs.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BSeq2Slate%5D%20Re-ranking%20and%20Slate%20Optimization%20with%20RNNs.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "seq2slate"
+      ],
+      "family_ids": [
+        "slate_reranking"
+      ],
+      "local_guides": [
+        "knowledge/slate_reranking.md"
+      ],
+      "structure_pattern_ids": [
+        "slate_aware_decision"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-005",
+      "title": "[Hulu Diversity] Fast Greedy Map Inference for Determinantal Point Processes to Improve Recommendation Diversity",
+      "pdf_path": "Retrieval and Rerank/[Hulu Diversity] Fast Greedy Map Inference for Determinantal Point Processes to Improve Recommendation Diversity.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BHulu%20Diversity%5D%20Fast%20Greedy%20Map%20Inference%20for%20Determinantal%20Point%20Processes%20to%20Improve%20Recommendation%20Diversity.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "dpp_greedy"
+      ],
+      "family_ids": [
+        "slate_reranking"
+      ],
+      "local_guides": [
+        "knowledge/slate_reranking.md"
+      ],
+      "structure_pattern_ids": [
+        "slate_aware_decision"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-006",
+      "title": "[TDM] Learning Tree-based Deep Model for Recommender Systems",
+      "pdf_path": "Retrieval and Rerank/[TDM] Learning Tree-based Deep Model for Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BTDM%5D%20Learning%20Tree-based%20Deep%20Model%20for%20Recommender%20Systems.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "excluded",
+      "reason": "Tree construction and tree-guided retrieval change the candidate index/training procedure.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "index"
+    },
+    {
+      "id": "reco-007",
+      "title": "[LTR] From RankNet to LambdaRank to LambdaMART- An Overview",
+      "pdf_path": "Retrieval and Rerank/[LTR] From RankNet to LambdaRank to LambdaMART- An Overview.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BLTR%5D%20From%20RankNet%20to%20LambdaRank%20to%20LambdaMART-%20An%20Overview.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "ranknet",
+        "lambdarank"
+      ],
+      "family_ids": [
+        "learning_to_rank"
+      ],
+      "local_guides": [
+        "knowledge/learning_to_rank.md"
+      ],
+      "structure_pattern_ids": [
+        "query_ranking_objective"
+      ],
+      "training_pattern_ids": [
+        "query_delta_ndcg"
+      ]
+    },
+    {
+      "id": "reco-008",
+      "title": "[AirBnb Rerank] Managing Diversity in Airbnb Search",
+      "pdf_path": "Retrieval and Rerank/[AirBnb Rerank] Managing Diversity in Airbnb Search.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BAirBnb%20Rerank%5D%20Managing%20Diversity%20in%20Airbnb%20Search.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "excluded",
+      "reason": "Airbnb diversity objective and constrained reranking policy are not included; DPP is a separate optional kernel selector.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-009",
+      "title": "[Deep Retrieval] Learning a Retrievable Structure for Large-scale Recommendations",
+      "pdf_path": "Retrieval and Rerank/[Deep Retrieval] Learning a Retrievable Structure for Large-scale Recommendations.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BDeep%20Retrieval%5D%20Learning%20a%20Retrievable%20Structure%20for%20Large-scale%20Recommendations.pdf",
+      "category": "Retrieval and Rerank",
+      "disposition": "excluded",
+      "reason": "Learned retrievable structure requires index/training/search co-design.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "index"
+    },
+    {
+      "id": "reco-010",
+      "title": "[DCN] Deep & Cross Network for Ad Click Predictions (Stanford 2017)",
+      "pdf_path": "Deep Learning Recommender System/[DCN] Deep & Cross Network for Ad Click Predictions (Stanford 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDCN%5D%20Deep%20%26%20Cross%20Network%20for%20Ad%20Click%20Predictions%20%28Stanford%202017%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "dcn"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "explicit_high_order_cross"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-011",
+      "title": "[Deep Crossing] Deep Crossing - Web-Scale Modeling without Manually Crafted Combinatorial Features (Microsoft 2016)",
+      "pdf_path": "Deep Learning Recommender System/[Deep Crossing] Deep Crossing - Web-Scale Modeling without Manually Crafted Combinatorial Features (Microsoft 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDeep%20Crossing%5D%20Deep%20Crossing%20-%20Web-Scale%20Modeling%20without%20Manually%20Crafted%20Combinatorial%20Features%20%28Microsoft%202016%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "deepcrossing"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "residual_feature_learning"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-012",
+      "title": "[DIN] Deep Interest Network for Click-Through Rate Prediction (Alibaba 2018)",
+      "pdf_path": "Deep Learning Recommender System/[DIN] Deep Interest Network for Click-Through Rate Prediction (Alibaba 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDIN%5D%20Deep%20Interest%20Network%20for%20Click-Through%20Rate%20Prediction%20%28Alibaba%202018%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "din"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "target_conditioned_history"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-013",
+      "title": "[DL Recsys Intro] Deep Learning based Recommender System- A Survey and New Perspectives (UNSW 2018)",
+      "pdf_path": "Deep Learning Recommender System/[DL Recsys Intro] Deep Learning based Recommender System- A Survey and New Perspectives (UNSW 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDL%20Recsys%20Intro%5D%20Deep%20Learning%20based%20Recommender%20System-%20A%20Survey%20and%20New%20Perspectives%20%28UNSW%202018%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "excluded",
+      "reason": "Broad recommender survey, not one implementable model.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-014",
+      "title": "[PinnerFormer] Sequence Modeling for User Representation at Pinterest",
+      "pdf_path": "Deep Learning Recommender System/[PinnerFormer] Sequence Modeling for User Representation at Pinterest.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BPinnerFormer%5D%20Sequence%20Modeling%20for%20User%20Representation%20at%20Pinterest.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "pinnerformer"
+      ],
+      "family_ids": [
+        "interest_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/interest_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "ordered_sequence_retrieval"
+      ],
+      "training_pattern_ids": [
+        "dense_future_action_objective"
+      ]
+    },
+    {
+      "id": "reco-015",
+      "title": "[xDeepFM] xDeepFM - Combining Explicit and Implicit Feature Interactions for Recommender Systems (USTC 2018)",
+      "pdf_path": "Deep Learning Recommender System/[xDeepFM] xDeepFM - Combining Explicit and Implicit Feature Interactions for Recommender Systems (USTC 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BxDeepFM%5D%20xDeepFM%20-%20Combining%20Explicit%20and%20Implicit%20Feature%20Interactions%20for%20Recommender%20Systems%20%28USTC%202018%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "xdeepfm"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "explicit_high_order_cross"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-016",
+      "title": "[Image CTR] Image Matters - Visually modeling user behaviors using Advanced Model Server (Alibaba 2018)",
+      "pdf_path": "Deep Learning Recommender System/[Image CTR] Image Matters - Visually modeling user behaviors using Advanced Model Server (Alibaba 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BImage%20CTR%5D%20Image%20Matters%20-%20Visually%20modeling%20user%20behaviors%20using%20Advanced%20Model%20Server%20%28Alibaba%202018%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "dicm"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "multimodal_history_attention"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-017",
+      "title": "[CDL] Collaborative Deep Learning for Recommender Systems (HKUST, 2015)",
+      "pdf_path": "Deep Learning Recommender System/[CDL] Collaborative Deep Learning for Recommender Systems (HKUST, 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BCDL%5D%20Collaborative%20Deep%20Learning%20for%20Recommender%20Systems%20%28HKUST%2C%202015%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "cdl"
+      ],
+      "family_ids": [
+        "collaborative_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/collaborative_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "content_factor_coupling"
+      ],
+      "training_pattern_ids": [
+        "content_factor_coupling_loss"
+      ]
+    },
+    {
+      "id": "reco-018",
+      "title": "[DSSM in Recsys] A Multi-View Deep Learning Approach for Cross Domain User Modeling in Recommendation Systems (Microsoft 2015)",
+      "pdf_path": "Deep Learning Recommender System/[DSSM in Recsys] A Multi-View Deep Learning Approach for Cross Domain User Modeling in Recommendation Systems (Microsoft 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDSSM%20in%20Recsys%5D%20A%20Multi-View%20Deep%20Learning%20Approach%20for%20Cross%20Domain%20User%20Modeling%20in%20Recommendation%20Systems%20%28Microsoft%202015%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "multi_view_dssm"
+      ],
+      "family_ids": [
+        "two_tower_matching"
+      ],
+      "local_guides": [
+        "knowledge/two_tower_matching.md"
+      ],
+      "structure_pattern_ids": [
+        "independent_retrieval_towers"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-019",
+      "title": "[AFM] Attentional Factorization Machines - Learning the Weight of Feature Interactions via Attention Networks (ZJU 2017)",
+      "pdf_path": "Deep Learning Recommender System/[AFM] Attentional Factorization Machines - Learning the Weight of Feature Interactions via Attention Networks (ZJU 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BAFM%5D%20Attentional%20Factorization%20Machines%20-%20Learning%20the%20Weight%20of%20Feature%20Interactions%20via%20Attention%20Networks%20%28ZJU%202017%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "afm"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "pairwise_feature_interaction"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-020",
+      "title": "[DIEN] Deep Interest Evolution Network for Click-Through Rate Prediction (Alibaba 2019)",
+      "pdf_path": "Deep Learning Recommender System/[DIEN] Deep Interest Evolution Network for Click-Through Rate Prediction (Alibaba 2019).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDIEN%5D%20Deep%20Interest%20Evolution%20Network%20for%20Click-Through%20Rate%20Prediction%20%28Alibaba%202019%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "dien"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "target_conditioned_history"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-021",
+      "title": "[Wide&Deep] Wide & Deep Learning for Recommender Systems (Google 2016)",
+      "pdf_path": "Deep Learning Recommender System/[Wide&Deep] Wide & Deep Learning for Recommender Systems (Google 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BWide%26Deep%5D%20Wide%20%26%20Deep%20Learning%20for%20Recommender%20Systems%20%28Google%202016%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "wide_deep"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "explicit_high_order_cross"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-022",
+      "title": "[DSSM] Learning Deep Structured Semantic Models for Web Search using Clickthrough Data (UIUC 2013)",
+      "pdf_path": "Deep Learning Recommender System/[DSSM] Learning Deep Structured Semantic Models for Web Search using Clickthrough Data (UIUC 2013).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDSSM%5D%20Learning%20Deep%20Structured%20Semantic%20Models%20for%20Web%20Search%20using%20Clickthrough%20Data%20%28UIUC%202013%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "dssm"
+      ],
+      "family_ids": [
+        "two_tower_matching"
+      ],
+      "local_guides": [
+        "knowledge/two_tower_matching.md"
+      ],
+      "structure_pattern_ids": [
+        "independent_retrieval_towers"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-023",
+      "title": "[NCF] Neural Collaborative Filtering (NUS 2017)",
+      "pdf_path": "Deep Learning Recommender System/[NCF] Neural Collaborative Filtering (NUS 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BNCF%5D%20Neural%20Collaborative%20Filtering%20%28NUS%202017%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "neumf"
+      ],
+      "family_ids": [
+        "collaborative_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/collaborative_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "collaborative_signal"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-024",
+      "title": "[FNN] Deep Learning over Multi-field Categorical Data (UCL 2016)",
+      "pdf_path": "Deep Learning Recommender System/[FNN] Deep Learning over Multi-field Categorical Data (UCL 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BFNN%5D%20Deep%20Learning%20over%20Multi-field%20Categorical%20Data%20%28UCL%202016%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "fnn"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "residual_feature_learning"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-025",
+      "title": "[DeepFM] A Factorization-Machine based Neural Network for CTR Prediction (HIT-Huawei 2017)",
+      "pdf_path": "Deep Learning Recommender System/[DeepFM] A Factorization-Machine based Neural Network for CTR Prediction (HIT-Huawei 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BDeepFM%5D%20A%20Factorization-Machine%20based%20Neural%20Network%20for%20CTR%20Prediction%20%28HIT-Huawei%202017%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "deepfm"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "pairwise_feature_interaction"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-026",
+      "title": "[NFM] Neural Factorization Machines for Sparse Predictive Analytics (NUS 2017)",
+      "pdf_path": "Deep Learning Recommender System/[NFM] Neural Factorization Machines for Sparse Predictive Analytics (NUS 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BNFM%5D%20Neural%20Factorization%20Machines%20for%20Sparse%20Predictive%20Analytics%20%28NUS%202017%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "nfm"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "pairwise_feature_interaction"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-027",
+      "title": "[Latent Cross] Latent Cross- Making Use of Context in Recurrent Recommender Systems (Google 2018)",
+      "pdf_path": "Deep Learning Recommender System/[Latent Cross] Latent Cross- Making Use of Context in Recurrent Recommender Systems (Google 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BLatent%20Cross%5D%20Latent%20Cross-%20Making%20Use%20of%20Context%20in%20Recurrent%20Recommender%20Systems%20%28Google%202018%29.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "latent_cross"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "context_hidden_modulation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-028",
+      "title": "[TransAct] Transformer-based Real-time User Action Model for Recommendation at Pinterest",
+      "pdf_path": "Deep Learning Recommender System/[TransAct] Transformer-based Real-time User Action Model for Recommendation at Pinterest.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Deep%20Learning%20Recommender%20System/%5BTransAct%5D%20Transformer-based%20Real-time%20User%20Action%20Model%20for%20Recommendation%20at%20Pinterest.pdf",
+      "category": "Deep Learning Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "transact"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "target_conditioned_history"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-029",
+      "title": "[Negative Sampling] Word2vec Explained Negative-Sampling Word-Embedding Method (2014)",
+      "pdf_path": "Embedding/[Negative Sampling] Word2vec Explained Negative-Sampling Word-Embedding Method (2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BNegative%20Sampling%5D%20Word2vec%20Explained%20Negative-Sampling%20Word-Embedding%20Method%20%282014%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Negative-sampling skip-gram tensor objective shared with Item2Vec; no word corpus processing.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-030",
+      "title": "[SDNE] Structural Deep Network Embedding (THU 2016)",
+      "pdf_path": "Embedding/[SDNE] Structural Deep Network Embedding (THU 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BSDNE%5D%20Structural%20Deep%20Network%20Embedding%20%28THU%202016%29.pdf",
+      "category": "Embedding",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "sdne"
+      ],
+      "family_ids": [
+        "graph_representation"
+      ],
+      "local_guides": [
+        "knowledge/graph_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "graph_embedding_objectives"
+      ],
+      "training_pattern_ids": [
+        "graph_proximity_objective"
+      ]
+    },
+    {
+      "id": "reco-031",
+      "title": "[Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016)",
+      "pdf_path": "Embedding/[Item2Vec] Item2Vec-Neural Item Embedding for Collaborative Filtering (Microsoft 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BItem2Vec%5D%20Item2Vec-Neural%20Item%20Embedding%20for%20Collaborative%20Filtering%20%28Microsoft%202016%29.pdf",
+      "category": "Embedding",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-032",
+      "title": "[Word2Vec] Distributed Representations of Words and Phrases and their Compositionality (Google 2013)",
+      "pdf_path": "Embedding/[Word2Vec] Distributed Representations of Words and Phrases and their Compositionality (Google 2013).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BWord2Vec%5D%20Distributed%20Representations%20of%20Words%20and%20Phrases%20and%20their%20Compositionality%20%28Google%202013%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Shared skip-gram objective only; phrase detection/hierarchical softmax excluded.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-033",
+      "title": "[LSH] Locality-Sensitive Hashing for Finding Nearest Neighbors (IEEE 2008)",
+      "pdf_path": "Embedding/[LSH] Locality-Sensitive Hashing for Finding Nearest Neighbors (IEEE 2008).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BLSH%5D%20Locality-Sensitive%20Hashing%20for%20Finding%20Nearest%20Neighbors%20%28IEEE%202008%29.pdf",
+      "category": "Embedding",
+      "disposition": "excluded",
+      "reason": "Nearest-neighbor hashing/index infrastructure, not a trainable recommendation tensor core.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "index"
+    },
+    {
+      "id": "reco-034",
+      "title": "[Word2Vec] Word2vec Parameter Learning Explained (UMich 2016)",
+      "pdf_path": "Embedding/[Word2Vec] Word2vec Parameter Learning Explained (UMich 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BWord2Vec%5D%20Word2vec%20Parameter%20Learning%20Explained%20%28UMich%202016%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Explanatory derivation; shared skip-gram mechanism, not a separate model.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-035",
+      "title": "[GraphSAGE]Inductive Representation Learning on Large Graphs",
+      "pdf_path": "Embedding/[GraphSAGE]Inductive Representation Learning on Large Graphs.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BGraphSAGE%5DInductive%20Representation%20Learning%20on%20Large%20Graphs.pdf",
+      "category": "Embedding",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "graphsage"
+      ],
+      "family_ids": [
+        "graph_representation"
+      ],
+      "local_guides": [
+        "knowledge/graph_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "neighborhood_message_passing"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-036",
+      "title": "[Node2vec] Node2vec - Scalable Feature Learning for Networks (Stanford 2016)",
+      "pdf_path": "Embedding/[Node2vec] Node2vec - Scalable Feature Learning for Networks (Stanford 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BNode2vec%5D%20Node2vec%20-%20Scalable%20Feature%20Learning%20for%20Networks%20%28Stanford%202016%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Node2Vec contribution is biased random walks; reuse skip-gram over supplied pairs, exclude walk generation.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-037",
+      "title": "[Graph Embedding] DeepWalk- Online Learning of Social Representations (SBU 2014)",
+      "pdf_path": "Embedding/[Graph Embedding] DeepWalk- Online Learning of Social Representations (SBU 2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BGraph%20Embedding%5D%20DeepWalk-%20Online%20Learning%20of%20Social%20Representations%20%28SBU%202014%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "DeepWalk contribution is graph walks; reuse skip-gram over supplied pairs, exclude walk generation.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-038",
+      "title": "[RippleNet] Propagating User Preferences on the Knowledge Graph for Recommender Systems",
+      "pdf_path": "Embedding/[RippleNet] Propagating User Preferences on the Knowledge Graph for Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BRippleNet%5D%20Propagating%20User%20Preferences%20on%20the%20Knowledge%20Graph%20for%20Recommender%20Systems.pdf",
+      "category": "Embedding",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "ripplenet"
+      ],
+      "family_ids": [
+        "knowledge_graph_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/knowledge_graph_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "relation_aware_propagation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-039",
+      "title": "[Airbnb Embedding] Real-time Personalization using Embeddings for Search Ranking at Airbnb (Airbnb 2018)",
+      "pdf_path": "Embedding/[Airbnb Embedding] Real-time Personalization using Embeddings for Search Ranking at Airbnb (Airbnb 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BAirbnb%20Embedding%5D%20Real-time%20Personalization%20using%20Embeddings%20for%20Search%20Ranking%20at%20Airbnb%20%28Airbnb%202018%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Shared embedding objective; Airbnb session construction, explicit negatives and online retrieval are not reproduced.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-040",
+      "title": "[Alibaba Embedding] Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba (Alibaba 2018)",
+      "pdf_path": "Embedding/[Alibaba Embedding] Billion-scale Commodity Embedding for E-commerce Recommendation in Alibaba (Alibaba 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BAlibaba%20Embedding%5D%20Billion-scale%20Commodity%20Embedding%20for%20E-commerce%20Recommendation%20in%20Alibaba%20%28Alibaba%202018%29.pdf",
+      "category": "Embedding",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "eges"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-041",
+      "title": "[KGAT] Knowledge Graph Attention Network for Recommendation",
+      "pdf_path": "Embedding/[KGAT] Knowledge Graph Attention Network for Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BKGAT%5D%20Knowledge%20Graph%20Attention%20Network%20for%20Recommendation.pdf",
+      "category": "Embedding",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "kgat"
+      ],
+      "family_ids": [
+        "knowledge_graph_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/knowledge_graph_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "relation_aware_propagation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-042",
+      "title": "[Word2Vec] Efficient Estimation of Word Representations in Vector Space (Google 2013)",
+      "pdf_path": "Embedding/[Word2Vec] Efficient Estimation of Word Representations in Vector Space (Google 2013).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BWord2Vec%5D%20Efficient%20Estimation%20of%20Word%20Representations%20in%20Vector%20Space%20%28Google%202013%29.pdf",
+      "category": "Embedding",
+      "disposition": "shared_mechanism",
+      "reason": "Skip-gram is shared; CBOW and hierarchical softmax are not claimed.",
+      "method_ids": [
+        "item2vec"
+      ],
+      "family_ids": [
+        "item_representation"
+      ],
+      "local_guides": [
+        "knowledge/item_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "item_context_embedding"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-043",
+      "title": "[Explainable RS]Fairness-aware Explainable Recommendation over Knowledge Graphs",
+      "pdf_path": "Embedding/[Explainable RS]Fairness-aware Explainable Recommendation over Knowledge Graphs.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BExplainable%20RS%5DFairness-aware%20Explainable%20Recommendation%20over%20Knowledge%20Graphs.pdf",
+      "category": "Embedding",
+      "disposition": "excluded",
+      "reason": "Fairness-aware explanation-path reranking requires policy/path-distribution decisions; not claimed by graph layers.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-044",
+      "title": "[LINE] LINE - Large-scale Information Network Embedding (MSRA 2015)",
+      "pdf_path": "Embedding/[LINE] LINE - Large-scale Information Network Embedding (MSRA 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Embedding/%5BLINE%5D%20LINE%20-%20Large-scale%20Information%20Network%20Embedding%20%28MSRA%202015%29.pdf",
+      "category": "Embedding",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "line"
+      ],
+      "family_ids": [
+        "graph_representation"
+      ],
+      "local_guides": [
+        "knowledge/graph_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "graph_embedding_objectives"
+      ],
+      "training_pattern_ids": [
+        "graph_proximity_objective"
+      ]
+    },
+    {
+      "id": "reco-045",
+      "title": "[Attention] Attention is All You Need",
+      "pdf_path": "Famous Machine Learning Papers/[Attention] Attention is All You Need.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Famous%20Machine%20Learning%20Papers/%5BAttention%5D%20Attention%20is%20All%20You%20Need.pdf",
+      "category": "Famous Machine Learning Papers",
+      "disposition": "shared_mechanism",
+      "reason": "Attention blocks are present in recommendation cores; full translation Transformer/training excluded.",
+      "method_ids": [
+        "sasrec",
+        "transact"
+      ],
+      "family_ids": [
+        "interest_retrieval",
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/interest_retrieval.md",
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "ordered_sequence_retrieval",
+        "target_conditioned_history"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-046",
+      "title": "[RNN] Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation (UofM 2014)",
+      "pdf_path": "Famous Machine Learning Papers/[RNN] Learning Phrase Representations using RNN Encoder–Decoder for Statistical Machine Translation (UofM 2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Famous%20Machine%20Learning%20Papers/%5BRNN%5D%20Learning%20Phrase%20Representations%20using%20RNN%20Encoder%E2%80%93Decoder%20for%20Statistical%20Machine%20Translation%20%28UofM%202014%29.pdf",
+      "category": "Famous Machine Learning Papers",
+      "disposition": "shared_mechanism",
+      "reason": "GRU encoding is used by existing cores; translation encoder-decoder task excluded.",
+      "method_ids": [
+        "dien",
+        "sdm"
+      ],
+      "family_ids": [
+        "interest_retrieval",
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/interest_retrieval.md",
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "ordered_sequence_retrieval",
+        "target_conditioned_history"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-047",
+      "title": "[CNN] ImageNet Classification with Deep Convolutional Neural Networks (UofT 2012)",
+      "pdf_path": "Famous Machine Learning Papers/[CNN] ImageNet Classification with Deep Convolutional Neural Networks (UofT 2012).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Famous%20Machine%20Learning%20Papers/%5BCNN%5D%20ImageNet%20Classification%20with%20Deep%20Convolutional%20Neural%20Networks%20%28UofT%202012%29.pdf",
+      "category": "Famous Machine Learning Papers",
+      "disposition": "excluded",
+      "reason": "Generic image-classification backbone; host supplies image representations.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "foundation"
+    },
+    {
+      "id": "reco-048",
+      "title": "[ESMM] Entire Space Multi-task Model- An Effective Approach for Estimating Post-click Conversion Rate",
+      "pdf_path": "Multi-Task/[ESMM] Entire Space Multi-task Model- An Effective Approach for Estimating Post-click Conversion Rate.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Multi-Task/%5BESMM%5D%20Entire%20Space%20Multi-task%20Model-%20An%20Effective%20Approach%20for%20Estimating%20Post-click%20Conversion%20Rate.pdf",
+      "category": "Multi-Task",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "esmm"
+      ],
+      "family_ids": [
+        "multiobjective"
+      ],
+      "local_guides": [
+        "knowledge/multiobjective.md"
+      ],
+      "structure_pattern_ids": [
+        "ordered_task_transfer"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-049",
+      "title": "[MMoE] Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts",
+      "pdf_path": "Multi-Task/[MMoE] Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Multi-Task/%5BMMoE%5D%20Modeling%20Task%20Relationships%20in%20Multi-task%20Learning%20with%20Multi-gate%20Mixture-of-Experts.pdf",
+      "category": "Multi-Task",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "mmoe"
+      ],
+      "family_ids": [
+        "multiobjective"
+      ],
+      "local_guides": [
+        "knowledge/multiobjective.md"
+      ],
+      "structure_pattern_ids": [
+        "shared_multi_task_representation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-050",
+      "title": "[PLE] Progressive Layered Extraction (PLE)- A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations",
+      "pdf_path": "Multi-Task/[PLE] Progressive Layered Extraction (PLE)- A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Multi-Task/%5BPLE%5D%20Progressive%20Layered%20Extraction%20%28PLE%29-%20A%20Novel%20Multi-Task%20Learning%20%28MTL%29%20Model%20for%20Personalized%20Recommendations.pdf",
+      "category": "Multi-Task",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "ple"
+      ],
+      "family_ids": [
+        "multiobjective"
+      ],
+      "local_guides": [
+        "knowledge/multiobjective.md"
+      ],
+      "structure_pattern_ids": [
+        "shared_multi_task_representation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-051",
+      "title": "[Privacy] Privacy-preserving News Recommendation Model Learning",
+      "pdf_path": "Feature Data and Infra/[Privacy] Privacy-preserving News Recommendation Model Learning.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BPrivacy%5D%20Privacy-preserving%20News%20Recommendation%20Model%20Learning.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Federated/privacy-preserving model learning requires a protocol and privacy accounting.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-052",
+      "title": "[EdgeRec] Recommender System on Edge in Mobile Taobao",
+      "pdf_path": "Feature Data and Infra/[EdgeRec] Recommender System on Edge in Mobile Taobao.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BEdgeRec%5D%20Recommender%20System%20on%20Edge%20in%20Mobile%20Taobao.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Edge deployment and server-device lifecycle; no edge serving system included.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-053",
+      "title": "[MMKGs] Multi-modal Knowledge Graphs for Recommender Systems",
+      "pdf_path": "Feature Data and Infra/[MMKGs] Multi-modal Knowledge Graphs for Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BMMKGs%5D%20Multi-modal%20Knowledge%20Graphs%20for%20Recommender%20Systems.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Multimodal knowledge-graph construction/resource rather than one reusable network core.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "data"
+    },
+    {
+      "id": "reco-054",
+      "title": "[Delayed Feedback] Capturing Delayed Feedback in Conversion Rate Prediction via Elapsed-time Sampling",
+      "pdf_path": "Feature Data and Infra/[Delayed Feedback] Capturing Delayed Feedback in Conversion Rate Prediction via Elapsed-time Sampling.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BDelayed%20Feedback%5D%20Capturing%20Delayed%20Feedback%20in%20Conversion%20Rate%20Prediction%20via%20Elapsed-time%20Sampling.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Elapsed-time sampling changes the training examples and feedback observation process.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "data"
+    },
+    {
+      "id": "reco-055",
+      "title": "[Delayed Feedback] Handling Many Conversions Per Click in Modeling Delayed Feedback",
+      "pdf_path": "Feature Data and Infra/[Delayed Feedback] Handling Many Conversions Per Click in Modeling Delayed Feedback.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BDelayed%20Feedback%5D%20Handling%20Many%20Conversions%20Per%20Click%20in%20Modeling%20Delayed%20Feedback.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Multiple delayed conversions require time/label likelihood and feedback construction beyond current tensor inputs.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "data"
+    },
+    {
+      "id": "reco-056",
+      "title": "[ViLBERT] Pretraining Task-agnostic Visiolinguistic Representations for Vision-and-language Tasks",
+      "pdf_path": "Feature Data and Infra/[ViLBERT] Pretraining Task-agnostic Visiolinguistic Representations for Vision-and-language Tasks.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BViLBERT%5D%20Pretraining%20Task-agnostic%20Visiolinguistic%20Representations%20for%20Vision-and-language%20Tasks.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "excluded",
+      "reason": "Vision-language foundation pretraining excluded; MMRec accepts encoded representations.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "foundation"
+    },
+    {
+      "id": "reco-057",
+      "title": "[MM-Rec] Multimodal News Recommendation",
+      "pdf_path": "Feature Data and Infra/[MM-Rec] Multimodal News Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Feature%20Data%20and%20Infra/%5BMM-Rec%5D%20Multimodal%20News%20Recommendation.pdf",
+      "category": "Feature Data and Infra",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "mmrec"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "multimodal_history_attention"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-058",
+      "title": "[MF] Matrix Factorization Techniques for Recommender Systems (Yahoo 2009)",
+      "pdf_path": "Classic Recommender System/[MF] Matrix Factorization Techniques for Recommender Systems (Yahoo 2009).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BMF%5D%20Matrix%20Factorization%20Techniques%20for%20Recommender%20Systems%20%28Yahoo%202009%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "shared_mechanism",
+      "reason": "Surveyed basic matrix-factor score families are present; not every optimization/objective in the article.",
+      "method_ids": [
+        "funksvd",
+        "biassvd"
+      ],
+      "family_ids": [
+        "collaborative_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/collaborative_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "collaborative_signal"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-059",
+      "title": "[Earliest CF] Using Collaborative Filtering to Weave an Information Tapestry (PARC 1992)",
+      "pdf_path": "Classic Recommender System/[Earliest CF] Using Collaborative Filtering to Weave an Information Tapestry (PARC 1992).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BEarliest%20CF%5D%20Using%20Collaborative%20Filtering%20to%20Weave%20an%20Information%20Tapestry%20%28PARC%201992%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "excluded",
+      "reason": "Tapestry collaborative filtering system and user interaction design.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-060",
+      "title": "[Recsys Intro] Recommender Systems Handbook (FRicci 2011)",
+      "pdf_path": "Classic Recommender System/[Recsys Intro] Recommender Systems Handbook (FRicci 2011).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BRecsys%20Intro%5D%20Recommender%20Systems%20Handbook%20%28FRicci%202011%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "excluded",
+      "reason": "Book covering whole recommender systems.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-061",
+      "title": "[Recsys Intro slides] Recommender Systems An introduction (DJannach 2014)",
+      "pdf_path": "Classic Recommender System/[Recsys Intro slides] Recommender Systems An introduction (DJannach 2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BRecsys%20Intro%20slides%5D%20Recommender%20Systems%20An%20introduction%20%28DJannach%202014%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "excluded",
+      "reason": "Introductory lecture material, not a distinct model.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-062",
+      "title": "[CF] Amazon Recommendations Item-to-Item Collaborative Filtering (Amazon 2003)",
+      "pdf_path": "Classic Recommender System/[CF] Amazon Recommendations Item-to-Item Collaborative Filtering (Amazon 2003).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BCF%5D%20Amazon%20Recommendations%20Item-to-Item%20Collaborative%20Filtering%20%28Amazon%202003%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "shared_mechanism",
+      "reason": "Item-item cosine/co-interaction core; excludes the complete Amazon recommendation system.",
+      "method_ids": [
+        "item_cf"
+      ],
+      "family_ids": [
+        "collaborative_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/collaborative_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "collaborative_signal"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-063",
+      "title": "[ItemCF] Item-Based Collaborative Filtering Recommendation Algorithms (UMN 2001)",
+      "pdf_path": "Classic Recommender System/[ItemCF] Item-Based Collaborative Filtering Recommendation Algorithms (UMN 2001).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BItemCF%5D%20Item-Based%20Collaborative%20Filtering%20Recommendation%20Algorithms%20%28UMN%202001%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "shared_mechanism",
+      "reason": "Item-neighbor core only, not every similarity/regression variant in the paper.",
+      "method_ids": [
+        "item_cf"
+      ],
+      "family_ids": [
+        "collaborative_retrieval"
+      ],
+      "local_guides": [
+        "knowledge/collaborative_retrieval.md"
+      ],
+      "structure_pattern_ids": [
+        "collaborative_signal"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-064",
+      "title": "[Bilinear] Personalized Recommendation on Dynamic Content Using Predictive Bilinear Models (Yahoo 2009)",
+      "pdf_path": "Classic Recommender System/[Bilinear] Personalized Recommendation on Dynamic Content Using Predictive Bilinear Models (Yahoo 2009).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Classic%20Recommender%20System/%5BBilinear%5D%20Personalized%20Recommendation%20on%20Dynamic%20Content%20Using%20Predictive%20Bilinear%20Models%20%28Yahoo%202009%29.pdf",
+      "category": "Classic Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "predictive_bilinear"
+      ],
+      "family_ids": [
+        "feature_interactions"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md"
+      ],
+      "structure_pattern_ids": [
+        "pairwise_feature_interaction"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-065",
+      "title": "[Once] Boosting Content-based Recommendation with Both Open-and Closed-source Large Language Models",
+      "pdf_path": "LLM Recommender System/[Once] Boosting Content-based Recommendation with Both Open-and Closed-source Large Language Models.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BOnce%5D%20Boosting%20Content-based%20Recommendation%20with%20Both%20Open-and%20Closed-source%20Large%20Language%20Models.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-066",
+      "title": "[PALR] Personalization Aware LLMs for Recommendation",
+      "pdf_path": "LLM Recommender System/[PALR] Personalization Aware LLMs for Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BPALR%5D%20Personalization%20Aware%20LLMs%20for%20Recommendation.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-067",
+      "title": "[Onesearch] A preliminary exploration of the unified end-to-end generative framework for e-commerce search",
+      "pdf_path": "LLM Recommender System/[Onesearch] A preliminary exploration of the unified end-to-end generative framework for e-commerce search.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BOnesearch%5D%20A%20preliminary%20exploration%20of%20the%20unified%20end-to-end%20generative%20framework%20for%20e-commerce%20search.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-068",
+      "title": "[NoteLLM] A Retrievable Large Language Model for Note Recommendation",
+      "pdf_path": "LLM Recommender System/[NoteLLM] A Retrievable Large Language Model for Note Recommendation.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BNoteLLM%5D%20A%20Retrievable%20Large%20Language%20Model%20for%20Note%20Recommendation.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-069",
+      "title": "[PMG] Personalized Multimodal Generation with Large Language Models",
+      "pdf_path": "LLM Recommender System/[PMG] Personalized Multimodal Generation with Large Language Models.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BPMG%5D%20Personalized%20Multimodal%20Generation%20with%20Large%20Language%20Models.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-070",
+      "title": "[MTGR] Industrial-Scale Generative Recommendation Framework in Meituan",
+      "pdf_path": "LLM Recommender System/[MTGR] Industrial-Scale Generative Recommendation Framework in Meituan.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BMTGR%5D%20Industrial-Scale%20Generative%20Recommendation%20Framework%20in%20Meituan.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-071",
+      "title": "[MoRecl] Where to Go Next for Recommender Systems? Id-vs. Modality-based Recommender Models",
+      "pdf_path": "LLM Recommender System/[MoRecl] Where to Go Next for Recommender Systems? Id-vs. Modality-based Recommender Models.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BMoRecl%5D%20Where%20to%20Go%20Next%20for%20Recommender%20Systems%3F%20Id-vs.%20Modality-based%20Recommender%20Models.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "ID-versus-modality empirical/pretraining comparison; no distinct portable algorithm claimed, and modality backbones remain external.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "study"
+    },
+    {
+      "id": "reco-072",
+      "title": "[GR] Generative Recommendation- Towards Next-generation Recommender Paradigm",
+      "pdf_path": "LLM Recommender System/[GR] Generative Recommendation- Towards Next-generation Recommender Paradigm.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BGR%5D%20Generative%20Recommendation-%20Towards%20Next-generation%20Recommender%20Paradigm.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Generative recommendation paradigm overview, not a single missing tensor core.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-073",
+      "title": "[MetaGR] Actions Speak Louder than Words- Trillion-Parameter Sequential Transducers for Generative Recommendations",
+      "pdf_path": "LLM Recommender System/[MetaGR] Actions Speak Louder than Words- Trillion-Parameter Sequential Transducers for Generative Recommendations.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BMetaGR%5D%20Actions%20Speak%20Louder%20than%20Words-%20Trillion-Parameter%20Sequential%20Transducers%20for%20Generative%20Recommendations.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "hstu"
+      ],
+      "family_ids": [
+        "scaling_architecture"
+      ],
+      "local_guides": [
+        "knowledge/scaling_architecture.md"
+      ],
+      "structure_pattern_ids": [
+        "ordered_sequence_retrieval"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-074",
+      "title": "[OneRec] Unifying Retrieve and Rank with Generative Recommender and Preference Alignment",
+      "pdf_path": "LLM Recommender System/[OneRec] Unifying Retrieve and Rank with Generative Recommender and Preference Alignment.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BOneRec%5D%20Unifying%20Retrieve%20and%20Rank%20with%20Generative%20Recommender%20and%20Preference%20Alignment.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-075",
+      "title": "[ClickPrompt] CTR Models are Strong Prompt Generators for Adapting Language Models to CTR Prediction",
+      "pdf_path": "LLM Recommender System/[ClickPrompt] CTR Models are Strong Prompt Generators for Adapting Language Models to CTR Prediction.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BClickPrompt%5D%20CTR%20Models%20are%20Strong%20Prompt%20Generators%20for%20Adapting%20Language%20Models%20to%20CTR%20Prediction.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-076",
+      "title": "[Tiger] Recommender Systems with Generative Retrieval",
+      "pdf_path": "LLM Recommender System/[Tiger] Recommender Systems with Generative Retrieval.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/LLM%20Recommender%20System/%5BTiger%5D%20Recommender%20Systems%20with%20Generative%20Retrieval.pdf",
+      "category": "LLM Recommender System",
+      "disposition": "excluded",
+      "reason": "Semantic-ID generative retrieval requires catalog quantization/ID assignment and constrained decoding. Not excluded merely because it is generative; its index/data contract lies outside this extension.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "index"
+    },
+    {
+      "id": "reco-077",
+      "title": "[EE Evaluation Intro] Offline Evaluation and Optimization for Interactive Systems (Microsoft 2015)",
+      "pdf_path": "Evaluation/[EE Evaluation Intro] Offline Evaluation and Optimization for Interactive Systems (Microsoft 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BEE%20Evaluation%20Intro%5D%20Offline%C2%A0Evaluation%C2%A0and%C2%A0Optimization%20for%C2%A0Interactive%C2%A0Systems%20%28Microsoft%202015%29.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Offline evaluation methodology outside model component implementation.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-078",
+      "title": "[Bootstrapped Replay] Improving offline evaluation of contextual bandit algorithms via bootstrapping techniques (Ulille 2014)",
+      "pdf_path": "Evaluation/[Bootstrapped Replay] Improving offline evaluation of contextual bandit algorithms via bootstrapping techniques (Ulille 2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BBootstrapped%20Replay%5D%20Improving%20offline%20evaluation%20of%20contextual%20bandit%20algorithms%20via%20bootstrapping%20techniques%20%28Ulille%202014%29.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Bootstrap replay evaluator, not a model structure.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-079",
+      "title": "[InterLeaving] Large-Scale Validation and Analysis of Interleaved Search Evaluation (Yahoo 2012)",
+      "pdf_path": "Evaluation/[InterLeaving] Large-Scale Validation and Analysis of Interleaved Search Evaluation (Yahoo 2012).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BInterLeaving%5D%20Large-Scale%20Validation%20and%20Analysis%20of%20Interleaved%20Search%20Evaluation%20%28Yahoo%202012%29.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Online interleaving experiment/evaluation protocol.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-080",
+      "title": "[RecSim] A Configurable Simulation Platform for Recommender Systems",
+      "pdf_path": "Evaluation/[RecSim] A Configurable Simulation Platform for Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BRecSim%5D%20A%20Configurable%20Simulation%20Platform%20for%20Recommender%20Systems.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Simulation platform and user/environment dynamics.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-081",
+      "title": "[Replay] Unbiased Offline Evaluation of Contextual-bandit-based News Article Recommendation Algorithms (Yahoo 2012)",
+      "pdf_path": "Evaluation/[Replay] Unbiased Offline Evaluation of Contextual-bandit-based News Article Recommendation Algorithms (Yahoo 2012).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BReplay%5D%20Unbiased%20Offline%20Evaluation%20of%20Contextual-bandit-based%20News%20Article%20Recommendation%20Algorithms%20%28Yahoo%202012%29.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Contextual-bandit replay evaluation protocol.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-082",
+      "title": "[Eval Agent] User Behavior Simulation with Large Language Model based Agents",
+      "pdf_path": "Evaluation/[Eval Agent] User Behavior Simulation with Large Language Model based Agents.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BEval%20Agent%5D%20User%20Behavior%20Simulation%20with%20Large%20Language%20Model%20based%20Agents.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Large-model/generative/pretraining recommendation scope excluded by request.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "large_model"
+    },
+    {
+      "id": "reco-083",
+      "title": "[Classic Metrics] A Survey of Accuracy Evaluation Metrics of Recommendation Tasks (Microsoft 2009)",
+      "pdf_path": "Evaluation/[Classic Metrics] A Survey of Accuracy Evaluation Metrics of Recommendation Tasks (Microsoft 2009).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Evaluation/%5BClassic%20Metrics%5D%20A%20Survey%20of%20Accuracy%20Evaluation%20Metrics%20of%20Recommendation%20Tasks%20%28Microsoft%202009%29.pdf",
+      "category": "Evaluation",
+      "disposition": "excluded",
+      "reason": "Metrics survey, not a missing neural module.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "evaluation"
+    },
+    {
+      "id": "reco-084",
+      "title": "[Active Learning] Active Learning in Collaborative Filtering Recommender Systems(UNIBZ 2014)",
+      "pdf_path": "Reinforcement Learning in Reco/[Active Learning] Active Learning in Collaborative Filtering Recommender Systems(UNIBZ 2014).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Reinforcement%20Learning%20in%20Reco/%5BActive%20Learning%5D%20Active%20Learning%20in%20Collaborative%20Filtering%20Recommender%20Systems%28UNIBZ%202014%29.pdf",
+      "category": "Reinforcement Learning in Reco",
+      "disposition": "excluded",
+      "reason": "Active feedback acquisition changes the data collection policy.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-085",
+      "title": "[RL Music] Exploration in Interactive Personalized Music Recommendation- A Reinforcement Learning Approach (NUS 2013)",
+      "pdf_path": "Reinforcement Learning in Reco/[RL Music] Exploration in Interactive Personalized Music Recommendation- A Reinforcement Learning Approach (NUS 2013).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Reinforcement%20Learning%20in%20Reco/%5BRL%20Music%5D%20Exploration%20in%20Interactive%20Personalized%20Music%20Recommendation-%20A%20Reinforcement%20Learning%20Approach%20%28NUS%202013%29.pdf",
+      "category": "Reinforcement Learning in Reco",
+      "disposition": "excluded",
+      "reason": "Interactive exploration/RL requires environment and sequential policy evaluation.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-086",
+      "title": "[Active Learning] A survey of active learning in collaborative filtering recommender systems (POLIMI 2016)",
+      "pdf_path": "Reinforcement Learning in Reco/[Active Learning] A survey of active learning in collaborative filtering recommender systems (POLIMI 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Reinforcement%20Learning%20in%20Reco/%5BActive%20Learning%5D%20A%20survey%20of%20active%20learning%20in%20collaborative%20filtering%20recommender%20systems%20%28POLIMI%202016%29.pdf",
+      "category": "Reinforcement Learning in Reco",
+      "disposition": "excluded",
+      "reason": "Active-learning survey and collection policies.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-087",
+      "title": "[DRN] A Deep Reinforcement Learning Framework for News Recommendation (MSRA 2018)",
+      "pdf_path": "Reinforcement Learning in Reco/[DRN] A Deep Reinforcement Learning Framework for News Recommendation (MSRA 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Reinforcement%20Learning%20in%20Reco/%5BDRN%5D%20A%20Deep%20Reinforcement%20Learning%20Framework%20for%20News%20Recommendation%20%28MSRA%202018%29.pdf",
+      "category": "Reinforcement Learning in Reco",
+      "disposition": "excluded",
+      "reason": "DQN news recommendation requires policy interaction/reward and replay system; generic MLP is not a faithful substitute.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-088",
+      "title": "[Pinterest] Personalized content blending In the Pinterest home feed (Pinterest 2016)",
+      "pdf_path": "Industry Recommender System/[Pinterest] Personalized content blending In the Pinterest home feed (Pinterest 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BPinterest%5D%20Personalized%20content%20blending%20In%20the%20Pinterest%20home%20feed%20%28Pinterest%202016%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Feed blending policy and allocation of content sources.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-089",
+      "title": "[Pinterest] Graph Convolutional Neural Networks for Web-Scale Recommender Systems (Pinterest 2018)",
+      "pdf_path": "Industry Recommender System/[Pinterest] Graph Convolutional Neural Networks for Web-Scale Recommender Systems (Pinterest 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BPinterest%5D%20Graph%20Convolutional%20Neural%20Networks%20for%20Web-Scale%20Recommender%20Systems%20%28Pinterest%202018%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "pinsage"
+      ],
+      "family_ids": [
+        "graph_representation"
+      ],
+      "local_guides": [
+        "knowledge/graph_representation.md"
+      ],
+      "structure_pattern_ids": [
+        "neighborhood_message_passing"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-090",
+      "title": "[Airbnb] Search Ranking and Personalization at Airbnb Slides (Airbnb 2018)",
+      "pdf_path": "Industry Recommender System/[Airbnb] Search Ranking and Personalization at Airbnb Slides (Airbnb 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAirbnb%5D%20Search%20Ranking%20and%20Personalization%20at%20Airbnb%20Slides%20%28Airbnb%202018%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Broad Airbnb ranking/personalization slides; no separate architecture is claimed.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-091",
+      "title": "[Baidu slides] DNN in Baidu Ads (Baidu 2017)",
+      "pdf_path": "Industry Recommender System/[Baidu slides] DNN in Baidu Ads (Baidu 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BBaidu%20slides%5D%20DNN%20in%20Baidu%20Ads%20%28Baidu%202017%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Broad ads system/model presentation; no distinct paper-specific module claimed.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-092",
+      "title": "[Quora] Building a Machine Learning Platform at Quora (Quora 2016)",
+      "pdf_path": "Industry Recommender System/[Quora] Building a Machine Learning Platform at Quora (Quora 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BQuora%5D%20Building%20a%20Machine%20Learning%20Platform%20at%20Quora%20%28Quora%202016%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Machine-learning platform engineering.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-093",
+      "title": "[Airbnb] Optimizing Airbnb Search Journey with Multi-task Learning",
+      "pdf_path": "Industry Recommender System/[Airbnb] Optimizing Airbnb Search Journey with Multi-task Learning.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAirbnb%5D%20Optimizing%20Airbnb%20Search%20Journey%20with%20Multi-task%20Learning.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "shared_mechanism",
+      "reason": "Reusable multi-task sharing/expert patterns exist; journey labels and business objectives remain outside scope.",
+      "method_ids": [
+        "mmoe",
+        "ple",
+        "shared_bottom"
+      ],
+      "family_ids": [
+        "multiobjective"
+      ],
+      "local_guides": [
+        "knowledge/multiobjective.md"
+      ],
+      "structure_pattern_ids": [
+        "shared_multi_task_representation"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-094",
+      "title": "[Alibaba] Search-based User Interest Modeling with Lifelong Sequential Behavior Data for CTR Prediction",
+      "pdf_path": "Industry Recommender System/[Alibaba] Search-based User Interest Modeling with Lifelong Sequential Behavior Data for CTR Prediction.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAlibaba%5D%20Search-based%20User%20Interest%20Modeling%20with%20Lifelong%20Sequential%20Behavior%20Data%20for%20CTR%20Prediction.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "SIM lifelong-history search requires a retrieval/selection pipeline; reuse of attention alone is not SIM.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "index"
+    },
+    {
+      "id": "reco-095",
+      "title": "[Alibaba Star] One Model to Serve All- Star Topology Adaptive Recommender for Multi-domain CTR Prediction",
+      "pdf_path": "Industry Recommender System/[Alibaba Star] One Model to Serve All- Star Topology Adaptive Recommender for Multi-domain CTR Prediction.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAlibaba%20Star%5D%20One%20Model%20to%20Serve%20All-%20Star%20Topology%20Adaptive%20Recommender%20for%20Multi-domain%20CTR%20Prediction.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "star"
+      ],
+      "family_ids": [
+        "multiscenario"
+      ],
+      "local_guides": [
+        "knowledge/multiscenario.md"
+      ],
+      "structure_pattern_ids": [
+        "scenario_conditioned_parameters"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-096",
+      "title": "[Netflix] The Netflix Recommender System- Algorithms, Business Value, and Innovation (Netflix 2015)",
+      "pdf_path": "Industry Recommender System/[Netflix] The Netflix Recommender System- Algorithms, Business Value, and Innovation (Netflix 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BNetflix%5D%20The%20Netflix%20Recommender%20System-%20Algorithms%2C%20Business%20Value%2C%20and%20Innovation%20%28Netflix%202015%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Netflix system overview and business experimentation.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "system"
+    },
+    {
+      "id": "reco-097",
+      "title": "[Youtube] Deep Neural Networks for YouTube Recommendations (Youtube 2016)",
+      "pdf_path": "Industry Recommender System/[Youtube] Deep Neural Networks for YouTube Recommendations (Youtube 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BYoutube%5D%20Deep%20Neural%20Networks%20for%20YouTube%20Recommendations%20%28Youtube%202016%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "existing_core",
+      "reason": "Existing mechanism reference retained; paper-level experimental reproduction is not claimed.",
+      "method_ids": [
+        "youtubednn"
+      ],
+      "family_ids": [
+        "two_tower_matching"
+      ],
+      "local_guides": [
+        "knowledge/two_tower_matching.md"
+      ],
+      "structure_pattern_ids": [
+        "independent_retrieval_towers"
+      ],
+      "training_pattern_ids": []
+    },
+    {
+      "id": "reco-098",
+      "title": "[Alibaba] Capturing Conversion Rate Fluctuation During Sales Promotions- A Novel Historical Data Reuse Approach",
+      "pdf_path": "Industry Recommender System/[Alibaba] Capturing Conversion Rate Fluctuation During Sales Promotions- A Novel Historical Data Reuse Approach.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAlibaba%5D%20Capturing%20Conversion%20Rate%20Fluctuation%20During%20Sales%20Promotions-%20A%20Novel%20Historical%20Data%20Reuse%20Approach.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "excluded",
+      "reason": "Promotion data reuse and distribution treatment require reconstruction of training data.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "data"
+    },
+    {
+      "id": "reco-099",
+      "title": "[Airbnb] Applying Deep Learning To Airbnb Search (Airbnb 2018)",
+      "pdf_path": "Industry Recommender System/[Airbnb] Applying Deep Learning To Airbnb Search (Airbnb 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAirbnb%5D%20Applying%20Deep%20Learning%20To%20Airbnb%20Search%20%28Airbnb%202018%29.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "shared_mechanism",
+      "reason": "Reusable dense/residual ranking and pairwise loss ingredients; Airbnb-specific full architecture and system are not replicated.",
+      "method_ids": [
+        "deepcrossing",
+        "ranknet"
+      ],
+      "family_ids": [
+        "feature_interactions",
+        "learning_to_rank"
+      ],
+      "local_guides": [
+        "knowledge/feature_interactions.md",
+        "knowledge/learning_to_rank.md"
+      ],
+      "structure_pattern_ids": [
+        "query_ranking_objective",
+        "residual_feature_learning"
+      ],
+      "training_pattern_ids": [
+        "query_delta_ndcg"
+      ]
+    },
+    {
+      "id": "reco-100",
+      "title": "[Alibaba] Image Matters- Visually Modeling User Behaviors Using Advanced Model Server",
+      "pdf_path": "Industry Recommender System/[Alibaba] Image Matters- Visually Modeling User Behaviors Using Advanced Model Server.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Industry%20Recommender%20System/%5BAlibaba%5D%20Image%20Matters-%20Visually%20Modeling%20User%20Behaviors%20Using%20Advanced%20Model%20Server.pdf",
+      "category": "Industry Recommender System",
+      "disposition": "duplicate",
+      "reason": "Same Image Matters paper as reco-016 in another directory; one shared implementation.",
+      "method_ids": [
+        "dicm"
+      ],
+      "family_ids": [
+        "sequence_ranking"
+      ],
+      "local_guides": [
+        "knowledge/sequence_ranking.md"
+      ],
+      "structure_pattern_ids": [
+        "multimodal_history_attention"
+      ],
+      "training_pattern_ids": [],
+      "duplicate_of": "reco-016"
+    },
+    {
+      "id": "reco-101",
+      "title": "[EE in Ads] Customer Acquisition via Display Advertising Using MultiArmed Bandit Experiments (UMich 2015)",
+      "pdf_path": "Exploration and Exploitation/[EE in Ads] Customer Acquisition via Display Advertising Using MultiArmed Bandit Experiments (UMich 2015).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BEE%20in%20Ads%5D%20Customer%20Acquisition%20via%20Display%20Advertising%20Using%20MultiArmed%20Bandit%20Experiments%20%28UMich%202015%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-102",
+      "title": "[EE in Ads] Exploitation and Exploration in a Performance based Contextual Advertising System (Yahoo 2010)",
+      "pdf_path": "Exploration and Exploitation/[EE in Ads] Exploitation and Exploration in a Performance based Contextual Advertising System (Yahoo 2010).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BEE%20in%20Ads%5D%20Exploitation%20and%20Exploration%20in%20a%20Performance%20based%20Contextual%20Advertising%20System%20%28Yahoo%202010%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-103",
+      "title": "[EE in AlphaGo]Mastering the game of Go with deep neural networks and tree search (Deepmind 2016)",
+      "pdf_path": "Exploration and Exploitation/[EE in AlphaGo]Mastering the game of Go with deep neural networks and tree search (Deepmind 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BEE%20in%20AlphaGo%5DMastering%20the%20game%20of%20Go%20with%20deep%20neural%20networks%20and%20tree%20search%20%28Deepmind%202016%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-104",
+      "title": "[UCB1] Bandit Algorithms Continued - UCB1 (Noel Welsh 2010)",
+      "pdf_path": "Exploration and Exploitation/[UCB1] Bandit Algorithms Continued - UCB1 (Noel Welsh 2010).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BUCB1%5D%20Bandit%20Algorithms%20Continued%20-%20UCB1%20%28Noel%20Welsh%202010%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-105",
+      "title": "[Spotify] Explore, Exploit, and Explain- Personalizing Explainable Recommendations with Bandits (Spotify 2018)",
+      "pdf_path": "Exploration and Exploitation/[Spotify] Explore, Exploit, and Explain- Personalizing Explainable Recommendations with Bandits (Spotify 2018).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BSpotify%5D%20Explore%2C%20Exploit%2C%20and%20Explain-%20Personalizing%20Explainable%20Recommendations%20with%20Bandits%20%28Spotify%202018%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-106",
+      "title": "[TS Intro] Thompson Sampling Slides (Berkeley 2010)",
+      "pdf_path": "Exploration and Exploitation/[TS Intro] Thompson Sampling Slides (Berkeley 2010).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BTS%20Intro%5D%20Thompson%20Sampling%20Slides%20%28Berkeley%202010%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-107",
+      "title": "[Thompson Sampling] An Empirical Evaluation of Thompson Sampling (Yahoo 2011)",
+      "pdf_path": "Exploration and Exploitation/[Thompson Sampling] An Empirical Evaluation of Thompson Sampling (Yahoo 2011).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BThompson%20Sampling%5D%20An%20Empirical%20Evaluation%20of%20Thompson%20Sampling%20%28Yahoo%202011%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-108",
+      "title": "[UCT] Exploration exploitation in Go UCT for Monte-Carlo Go (UPSUD 2016)",
+      "pdf_path": "Exploration and Exploitation/[UCT] Exploration exploitation in Go UCT for Monte-Carlo Go (UPSUD 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BUCT%5D%20Exploration%20exploitation%20in%20Go%20UCT%20for%20Monte-Carlo%20Go%20%28UPSUD%202016%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-109",
+      "title": "[LinUCB] A Contextual-Bandit Approach to Personalized News Article Recommendation (Yahoo 2010)",
+      "pdf_path": "Exploration and Exploitation/[LinUCB] A Contextual-Bandit Approach to Personalized News Article Recommendation (Yahoo 2010).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BLinUCB%5D%20A%20Contextual-Bandit%20Approach%20to%20Personalized%20News%20Article%20Recommendation%20%28Yahoo%202010%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-110",
+      "title": "[RF in MAB]Random Forest for the Contextual Bandit Problem (Orange 2016)",
+      "pdf_path": "Exploration and Exploitation/[RF in MAB]Random Forest for the Contextual Bandit Problem (Orange 2016).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BRF%20in%20MAB%5DRandom%20Forest%20for%20the%20Contextual%20Bandit%20Problem%20%28Orange%202016%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-111",
+      "title": "[EE Intro] Exploration and Exploitation Problem Introduction by Wang Zhe (Hulu 2017)",
+      "pdf_path": "Exploration and Exploitation/[EE Intro] Exploration and Exploitation Problem Introduction by Wang Zhe (Hulu 2017).pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Exploration%20and%20Exploitation/%5BEE%20Intro%5D%20Exploration%20and%20Exploitation%20Problem%20Introduction%20by%20Wang%20Zhe%20%28Hulu%202017%29.pdf",
+      "category": "Exploration and Exploitation",
+      "disposition": "excluded",
+      "reason": "Bandit/tree-search/exploration algorithms require online decisions, rewards or simulators beyond the model snippet scope.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "policy"
+    },
+    {
+      "id": "reco-112",
+      "title": "[RS Bias] Bias and Debias in Recommender System- A Survey and Future Directions",
+      "pdf_path": "Cold Start and Debias/[RS Bias] Bias and Debias in Recommender System- A Survey and Future Directions.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BRS%20Bias%5D%20Bias%20and%20Debias%20in%20Recommender%20System-%20A%20Survey%20and%20Future%20Directions.pdf",
+      "category": "Cold Start and Debias",
+      "disposition": "excluded",
+      "reason": "Bias taxonomy and mitigation survey; individual supported cores are separately mapped.",
+      "method_ids": [],
+      "family_ids": [],
+      "local_guides": [],
+      "structure_pattern_ids": [],
+      "training_pattern_ids": [],
+      "exclusion_category": "survey"
+    },
+    {
+      "id": "reco-113",
+      "title": "[Meta Emb]Warm Up Cold-start Advertisements- Improving CTR Predictions via Learning to Learn ID Embeddings",
+      "pdf_path": "Cold Start and Debias/[Meta Emb]Warm Up Cold-start Advertisements- Improving CTR Predictions via Learning to Learn ID Embeddings.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BMeta%20Emb%5DWarm%20Up%20Cold-start%20Advertisements-%20Improving%20CTR%20Predictions%20via%20Learning%20to%20Learn%20ID%20Embeddings.pdf",
+      "category": "Cold Start and Debias",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "meta_embedding"
+      ],
+      "family_ids": [
+        "cold_start"
+      ],
+      "local_guides": [
+        "knowledge/cold_start.md"
+      ],
+      "structure_pattern_ids": [
+        "attribute_embedding_initialization"
+      ],
+      "training_pattern_ids": [
+        "embedding_meta_objective"
+      ]
+    },
+    {
+      "id": "reco-114",
+      "title": "[PAL] A Position-Bias Aware Learning Framework for CTR Prediction in Live Recommender Systems",
+      "pdf_path": "Cold Start and Debias/[PAL] A Position-Bias Aware Learning Framework for CTR Prediction in Live Recommender Systems.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BPAL%5D%20A%20Position-Bias%20Aware%20Learning%20Framework%20for%20CTR%20Prediction%20in%20Live%20Recommender%20Systems.pdf",
+      "category": "Cold Start and Debias",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "pal"
+      ],
+      "family_ids": [
+        "feedback_factorization"
+      ],
+      "local_guides": [
+        "knowledge/feedback_factorization.md"
+      ],
+      "structure_pattern_ids": [
+        "bias_factorization"
+      ],
+      "training_pattern_ids": [
+        "joint_examination_bce"
+      ]
+    },
+    {
+      "id": "reco-115",
+      "title": "[DICE] Disentangling User Interest and Conformity for Recommendation with Causal Embedding",
+      "pdf_path": "Cold Start and Debias/[DICE] Disentangling User Interest and Conformity for Recommendation with Causal Embedding.pdf",
+      "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Cold%20Start%20and%20Debias/%5BDICE%5D%20Disentangling%20User%20Interest%20and%20Conformity%20for%20Recommendation%20with%20Causal%20Embedding.pdf",
+      "category": "Cold Start and Debias",
+      "disposition": "added_core",
+      "reason": "Implemented portable tensor computation only; see method-specific boundaries.",
+      "method_ids": [
+        "dice"
+      ],
+      "family_ids": [
+        "feedback_factorization"
+      ],
+      "local_guides": [
+        "knowledge/feedback_factorization.md"
+      ],
+      "structure_pattern_ids": [
+        "bias_factorization"
+      ],
+      "training_pattern_ids": [
+        "masked_interest_conformity"
+      ]
+    }
+  ]
+}

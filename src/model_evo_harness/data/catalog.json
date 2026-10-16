@@ -231,7 +231,8 @@
       "name": "Behavior sequence ranking",
       "stages": [
         "ranking",
-        "policy"
+        "policy",
+        "advertising"
       ],
       "requires": [
         "event_sequence"
@@ -260,7 +261,8 @@
       "stages": [
         "ranking",
         "policy",
-        "advertising"
+        "advertising",
+        "retrieval"
       ],
       "requires": [
         "multiple_outcomes"

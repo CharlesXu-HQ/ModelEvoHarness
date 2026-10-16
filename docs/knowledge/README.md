@@ -1,6 +1,6 @@
 # Local technical knowledge
 
-These 22 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 44 method cards also have direct PyTorch and TensorFlow [model cores](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links provide attribution, not the guide content or copied code.
+These 25 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 69 method cards also have direct PyTorch and TensorFlow [model cores](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links provide attribution, not the guide content or copied code.
 
 ## Catalog families
 
@@ -26,6 +26,10 @@ These 22 substantive, independently written family guides are packaged with Mode
 - [Adaptive piecewise response models](../../src/model_evo_harness/knowledge/adaptive_segmentation.md)
 - [Prediction-to-decision mapping](../../src/model_evo_harness/knowledge/decision_mapping.md)
 - [Typed knowledge-graph retrieval](../../src/model_evo_harness/knowledge/knowledge_graph_retrieval.md)
+
+- [Graph neighborhood and proximity representations](../../src/model_evo_harness/knowledge/graph_representation.md)
+- [Logged-feedback factorization](../../src/model_evo_harness/knowledge/feedback_factorization.md)
+- [Query-group ranking objectives](../../src/model_evo_harness/knowledge/learning_to_rank.md)
 
 ## Cross-cutting training and interpretation
 
