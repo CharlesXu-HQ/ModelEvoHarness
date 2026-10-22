@@ -3793,6 +3793,238 @@
       },
       "local_guide": "knowledge/feature_interactions.md",
       "structure_pattern": "cross_layer_interaction_readout"
+    },
+    {
+      "id": "queryformer_co_transformer",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_queryformer:CoTransformerBlock",
+      "file": "models/pytorch/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Two stages per layer: separate user/item self-attention, then user-query/item-key-value cross-attention. There is no reverse item-query/user-key-value update. The paper uses two layers; num_layers is an explicit experiment control.",
+        "Residual post-LayerNorm, sigmoid(Dense(concat(user, cross_delta))) gating, affine biases, no dropout and no extra FFN are engineering choices where the paper omits details.",
+        "Field-only component; no event history, tokenizer, readout, prediction head or full champion-model reproduction.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "user_item_token_representations",
+        "shape": "(updated_user [B,U,D], updated_item [B,I,D])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "queryformer_field_interaction"
+    },
+    {
+      "id": "queryformer_co_transformer",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_queryformer:CoTransformerBlock",
+      "file": "models/tensorflow/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Two stages per layer: separate user/item self-attention, then user-query/item-key-value cross-attention. There is no reverse item-query/user-key-value update. The paper uses two layers; num_layers is an explicit experiment control.",
+        "Residual post-LayerNorm, sigmoid(Dense(concat(user, cross_delta))) gating, affine biases, no dropout and no extra FFN are engineering choices where the paper omits details.",
+        "Field-only component; no event history, tokenizer, readout, prediction head or full champion-model reproduction.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "user_item_token_representations",
+        "shape": "(updated_user [B,U,D], updated_item [B,I,D])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "queryformer_field_interaction"
+    },
+    {
+      "id": "queryformer_history_retrieval",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_queryformer:QuerySeqCrossAttn",
+      "file": "models/pytorch/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Item-token masked mean aggregation and independent per-domain standard multihead attention are explicit engineering choices; this is not an author-code port.",
+        "Returns zero and false for a domain when the item side or that history is empty. Domain number/order are fixed at construction; token and history lengths may vary.",
+        "Item-conditioned outputs need recomputation for changed candidates. No sequence evolution, temporal features or final ranking score.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "retrieved_domain_tokens",
+        "shape": "(retrieved [B,S,D], valid_domains [B,S])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "queryformer_history_retrieval",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_queryformer:QuerySeqCrossAttn",
+      "file": "models/tensorflow/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Item-token masked mean aggregation and independent per-domain standard multihead attention are explicit engineering choices; this is not an author-code port.",
+        "Returns zero and false for a domain when the item side or that history is empty. Domain number/order are fixed at construction; token and history lengths may vary.",
+        "Item-conditioned outputs need recomputation for changed candidates. No sequence evolution, temporal features or final ranking score.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "retrieved_domain_tokens",
+        "shape": "(retrieved [B,S,D], valid_domains [B,S])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "queryformer_query_generator",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_queryformer:SeqQueryCrossAttn",
+      "file": "models/pytorch/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Probe order is mean then max. History summaries initialize queries directly, with no extra probe projection beyond the attention query projection; keys/values are context tokens, not histories.",
+        "Independent per-domain attention follows the domain-indexed operator. Direct pooling, affine biases, no dropout and no extra FFN are declared engineering choices. Query generation adds no residual or LayerNorm after attention.",
+        "An empty domain or empty context returns two zero probes with false masks. No downstream query-to-sequence encoding, token mixing or scoring head.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "domain_query_probes",
+        "shape": "(queries [B,S,2,D], query_mask [B,S,2])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "queryformer_query_generator",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_queryformer:SeqQueryCrossAttn",
+      "file": "models/tensorflow/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Probe order is mean then max. History summaries initialize queries directly, with no extra probe projection beyond the attention query projection; keys/values are context tokens, not histories.",
+        "Independent per-domain attention follows the domain-indexed operator. Direct pooling, affine biases, no dropout and no extra FFN are declared engineering choices. Query generation adds no residual or LayerNorm after attention.",
+        "An empty domain or empty context returns two zero probes with false masks. No downstream query-to-sequence encoding, token mixing or scoring head.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "domain_query_probes",
+        "shape": "(queries [B,S,2,D], query_mask [B,S,2])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "queryformer_query_bridge",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.paper_queryformer:QueryFormerQueryBridge",
+      "file": "models/pytorch/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Single-view composition of equations 2-4 only. Context ordering is updated user tokens, updated item tokens, then retrieved domain tokens in supplied domain order.",
+        "Inherits the standalone components' pooling, Co-Transformer gate/residual/LayerNorm and empty-input engineering choices; query generation adds no residual or LayerNorm. Every returned mask uses True=valid.",
+        "Equation 5 sequence encoding/mixing/readout, H>1 views, packed shared-parameter attention, tokenizer, training recipe and prediction head are excluded. No TensorFlow 1.15, full champion reproduction, throughput or business-gain claim.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "query_bridge_representations",
+        "shape": "{queries: [B,S,2,D], query_mask: [B,S,2], context_tokens: [B,U+I+S,D], context_mask: [B,U+I+S]}"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "queryformer_query_bridge",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.paper_queryformer:QueryFormerQueryBridge",
+      "file": "models/tensorflow/paper_queryformer.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "embedding_adapter",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Single-view composition of equations 2-4 only. Context ordering is updated user tokens, updated item tokens, then retrieved domain tokens in supplied domain order.",
+        "Inherits the standalone components' pooling, Co-Transformer gate/residual/LayerNorm and empty-input engineering choices; query generation adds no residual or LayerNorm. Every returned mask uses True=valid.",
+        "Equation 5 sequence encoding/mixing/readout, H>1 views, packed shared-parameter attention, tokenizer, training recipe and prediction head are excluded. No TensorFlow 1.15, full champion reproduction, throughput or business-gain claim.",
+        "Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+      ],
+      "output_contract": {
+        "kind": "query_bridge_representations",
+        "shape": "{queries: [B,S,2,D], query_mask: [B,S,2], context_tokens: [B,U+I+S,D], context_mask: [B,U+I+S]}"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "queryformer_query_generation"
     }
   ]
 }

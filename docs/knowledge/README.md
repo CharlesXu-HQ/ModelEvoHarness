@@ -1,6 +1,6 @@
 # Local technical knowledge
 
-These 25 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 73 method cards also have direct PyTorch and TensorFlow [model cores](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
+These 25 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 77 method cards also have direct PyTorch and TensorFlow [model cores](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
 
 ## Catalog families
 
@@ -48,3 +48,5 @@ The complete original-source path mapping and reuse boundary are in [source attr
 - [Additional structural hypotheses](../../src/model_evo_harness/knowledge/structure_extensions.md): non-overlapping field, sequence and interest mechanisms; explicitly marked design-only.
 - [Randomized marketing experiments](../../src/model_evo_harness/knowledge/causal_policy_experiments.md): estimator vs network changes, cross-fitting, observable cost and policy contracts.
 - [Horizontal subnetwork composition](../../src/model_evo_harness/knowledge/horizontal_composition.md): semantic field groups, arbitrary parallel instances, sharing and fusion, controlled ablations and evidence limits. See the [declaration and source API](../horizontal-composition.md).
+
+For QueryFormer field-only interaction, history retrieval or context-aware query probes, read the [component contracts and integration example](../queryformer-components.md). The four methods use the existing feature-interaction and sequence-ranking guides; they add no new family.

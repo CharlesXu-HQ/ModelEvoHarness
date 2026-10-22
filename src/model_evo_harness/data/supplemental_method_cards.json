@@ -743,6 +743,74 @@
       "comparison": "Keep input tensors, head, data split and training budget fixed; ablate this component and report held-out quality, parameters, latency and memory. Compare token counts and widths separately.",
       "failure_signals": "No reproducible held-out improvement, missing input semantics, masking errors, unstable gradients or cost beyond the host budget.",
       "implementation_boundary": "Core of author FMHighway at pinned commit, without the paper aggregated Gram or fused-domain variant. Inputs stack post-fusion user/item states across K layers. Optional raw domain dots use separately supplied pre-residual queries and aligned domain readouts. Every normalized scalar bundle must contain at least two values. The host must concatenate returned terms into its head; this component has no classifier. Field-only mode uses S=0 and requires no sequence; domain_interactions uses True=valid domain masks before the final bundle normalization."
+    },
+    {
+      "id": "queryformer_co_transformer",
+      "family_id": "feature_interactions",
+      "source_repo": "queryformer-paper",
+      "source_model": "QueryFormer section 4.2.3 and Table 2",
+      "source_url": "https://arxiv.org/html/2609.16548v1#S4.SS2",
+      "source_references": [],
+      "mechanism": "Refine user and item tokens separately with self-attention, then update only user tokens with gated attention to item keys/values.",
+      "requires": [
+        "user_tokens",
+        "item_tokens"
+      ],
+      "comparison": "Keep fields, head, split and training budget fixed; separately ablate within-side self-attention and user-query/item-key-value cross-attention, and compare with field-only RankMixer at matched cost.",
+      "failure_signals": "No reproducible held-out improvement; dependence on future events or padded values; collapsed probes, unstable gradients, or unacceptable parameter/latency/memory cost.",
+      "implementation_boundary": "Two stages per layer: separate user/item self-attention, then user-query/item-key-value cross-attention. There is no reverse item-query/user-key-value update. The paper uses two layers; num_layers is an explicit experiment control. Residual post-LayerNorm, sigmoid(Dense(concat(user, cross_delta))) gating, affine biases, no dropout and no extra FFN are engineering choices where the paper omits details. Field-only component; no event history, tokenizer, readout, prediction head or full champion-model reproduction. Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+    },
+    {
+      "id": "queryformer_history_retrieval",
+      "family_id": "sequence_ranking",
+      "source_repo": "queryformer-paper",
+      "source_model": "QueryFormer equation 3 and section 4.2.4",
+      "source_url": "https://arxiv.org/html/2609.16548v1#S4.SS2",
+      "source_references": [],
+      "mechanism": "A masked mean of item tokens queries each domain history through independent multihead attention, returning one item-relevant token and availability flag per domain.",
+      "requires": [
+        "item_tokens",
+        "domain_histories",
+        "sequence_mask"
+      ],
+      "comparison": "Compare with masked mean history pooling on the same candidate, domains, masks and downstream head; isolate target conditioning while holding the training budget fixed.",
+      "failure_signals": "No reproducible held-out improvement; dependence on future events or padded values; collapsed probes, unstable gradients, or unacceptable parameter/latency/memory cost.",
+      "implementation_boundary": "Item-token masked mean aggregation and independent per-domain standard multihead attention are explicit engineering choices; this is not an author-code port. Returns zero and false for a domain when the item side or that history is empty. Domain number/order are fixed at construction; token and history lengths may vary. Item-conditioned outputs need recomputation for changed candidates. No sequence evolution, temporal features or final ranking score. Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+    },
+    {
+      "id": "queryformer_query_generator",
+      "family_id": "sequence_ranking",
+      "source_repo": "queryformer-paper",
+      "source_model": "QueryFormer equations 4 and 6, section 4.2.5",
+      "source_url": "https://arxiv.org/html/2609.16548v1#S4.SS2",
+      "source_references": [],
+      "mechanism": "Direct masked mean and max of each domain history initialize two probes, which attend to context keys/values through independent per-domain attention.",
+      "requires": [
+        "context_tokens",
+        "domain_histories",
+        "sequence_mask"
+      ],
+      "comparison": "Compare context cross-attention with a parameter-budgeted projection-only query generator on identical pooled histories and context; isolate mean/max probe contributions without changing the host evaluator.",
+      "failure_signals": "No reproducible held-out improvement; dependence on future events or padded values; collapsed probes, unstable gradients, or unacceptable parameter/latency/memory cost.",
+      "implementation_boundary": "Probe order is mean then max. History summaries initialize queries directly, with no extra probe projection beyond the attention query projection; keys/values are context tokens, not histories. Independent per-domain attention follows the domain-indexed operator. Direct pooling, affine biases, no dropout and no extra FFN are declared engineering choices. Query generation adds no residual or LayerNorm after attention. An empty domain or empty context returns two zero probes with false masks. No downstream query-to-sequence encoding, token mixing or scoring head. Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+    },
+    {
+      "id": "queryformer_query_bridge",
+      "family_id": "sequence_ranking",
+      "source_repo": "queryformer-paper",
+      "source_model": "QueryFormer equations 2-4 and section 4.2",
+      "source_url": "https://arxiv.org/html/2609.16548v1#S4.SS2",
+      "source_references": [],
+      "mechanism": "Compose field interaction, item-conditioned history retrieval, and context-attending history-initialized probes; expose both generated queries and the masked context.",
+      "requires": [
+        "user_tokens",
+        "item_tokens",
+        "domain_histories",
+        "sequence_mask"
+      ],
+      "comparison": "Add the bridge to the same host backbone/head and compare with its removal; separately ablate Co-Transformer, retrieval and query generation under the same data, optimization and cost reporting.",
+      "failure_signals": "No reproducible held-out improvement; dependence on future events or padded values; collapsed probes, unstable gradients, or unacceptable parameter/latency/memory cost.",
+      "implementation_boundary": "Single-view composition of equations 2-4 only. Context ordering is updated user tokens, updated item tokens, then retrieved domain tokens in supplied domain order. Inherits the standalone components' pooling, Co-Transformer gate/residual/LayerNorm and empty-input engineering choices; query generation adds no residual or LayerNorm. Every returned mask uses True=valid. Equation 5 sequence encoding/mixing/readout, H>1 views, packed shared-parameter attention, tokenizer, training recipe and prediction head are excluded. No TensorFlow 1.15, full champion reproduction, throughput or business-gain claim. Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
     }
   ]
 }

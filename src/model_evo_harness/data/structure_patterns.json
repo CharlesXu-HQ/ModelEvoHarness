@@ -315,6 +315,32 @@
       "required_evidence": "Layer-aligned user/item states; optional pre-residual domain dots with explicit query/readout alignment.",
       "controlled_comparison": "Use identical tensors, head and training budget; ablate the added mechanism and measure quality and cost separately.",
       "reject_if": "No held-out improvement, invalid feature timing/masks, or unacceptable parameter, latency or memory cost."
+    },
+    {
+      "id": "queryformer_field_interaction",
+      "name": "User-query item-context field interaction",
+      "method_ids": [
+        "queryformer_co_transformer"
+      ],
+      "structural_change": "Apply separate within-side self-attention, then gated user-query/item-key-value attention; return both token sets for host composition.",
+      "when_to_try": "Observed residuals suggest user-item field relations are lost before the host head, and both field-token sides are available.",
+      "required_evidence": "Declared user/item token semantics, availability masks and a field-only control. Event histories are not required.",
+      "controlled_comparison": "Keep fields, head and training budget fixed; ablate self and cross stages separately, and measure quality and cost against a simpler field mixer.",
+      "reject_if": "Improvement depends on padding or future fields, vanishes on held-out data, or exceeds the host cost budget."
+    },
+    {
+      "id": "queryformer_query_generation",
+      "name": "History-initialized context-aware query generation",
+      "method_ids": [
+        "queryformer_history_retrieval",
+        "queryformer_query_generator",
+        "queryformer_query_bridge"
+      ],
+      "structural_change": "Retrieve per-domain history evidence from item tokens, append it to field context, and use history-initialized mean/max probes to query that context.",
+      "when_to_try": "A measured ranking bottleneck concerns how field context selects behavior evidence or constructs queries for an existing host sequence block.",
+      "required_evidence": "Time-safe domain histories and masks, declared item/context or user/item tokens, and a downstream host consumer for returned representations.",
+      "controlled_comparison": "Hold data, head and training budget fixed; compare retrieval with mean pooling and query generation with a projection-only control, then ablate each composed stage.",
+      "reject_if": "Probes collapse without useful task signal, gains require leakage or padded content, or memory/latency cost outweighs reproducible held-out gains."
     }
   ]
 }
