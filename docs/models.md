@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness includes a tensor implementation of **each of its 69 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
+ModelEvoHarness includes a tensor implementation of **each of its 77 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks: 156 implementation entries in total. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
 
 The frameworks are isolated under [`models/pytorch`](../src/model_evo_harness/models/pytorch/) and [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Each module imports only its own deep-learning framework and Python's standard library; there is no DeepCTR, Torch-RecHub, RecBole or other model-wrapper dependency. Importing `model_evo_harness` itself does not import PyTorch or TensorFlow. Install the framework you intend to use separately.
 
@@ -16,6 +16,9 @@ The same method IDs have corresponding classes in both framework directories. Im
 | [`sequence.py`](../src/model_evo_harness/models/pytorch/sequence.py) | `mind`, `sasrec`, `sdm`, `narm`, `hstu`, `dien`, `dsin` | Interest vectors, ordered histories, session intent and target-aware behavior ranking. |
 | [`multitask.py`](../src/model_evo_harness/models/pytorch/multitask.py) | `shared_bottom`, `esmm`, `ple`, `aitm`, `m2m`, `apg`, `hmoe`, `pepnet`, `star`, `prm`, `prs` | Multiple outcomes, scenario adaptation and slate interaction. |
 | [`segmentation.py`](../src/model_evo_harness/models/pytorch/segmentation.py) | `mlr` | Soft mixture of local response functions. |
+| [`paper_interactions.py`](../src/model_evo_harness/models/pytorch/paper_interactions.py) | `rankmixer`, `unidot_fm_highway` | Token subspace mixing and explicit cross-layer user/candidate interactions. |
+| [`paper_unified_sequence.py`](../src/model_evo_harness/models/pytorch/paper_unified_sequence.py) | `unidot_conditioned_gate`, `unidot_multichannel_pool` | Condition-only gates and masked per-domain sigmoid pooling. |
+| [`paper_queryformer.py`](../src/model_evo_harness/models/pytorch/paper_queryformer.py) | `queryformer_co_transformer`, `queryformer_history_retrieval`, `queryformer_query_generator`, `queryformer_query_bridge` | Masked user/item interaction, history retrieval and context-aware query probes; single-view equations 2–4 only. |
 | [`training.py`](../src/model_evo_harness/models/pytorch/training.py) | Training helpers, not method cards | `focal_loss`, `bpr_loss`, `listwise_loss`, `hard_negative_indices`. |
 
 The TensorFlow files use the same names under [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Some multi-input Keras models accept multiple tensors through their `call` signature; generic Keras `TwoTower` takes `(user_features, item_features)` as one tuple, while PyTorch `TwoTower` takes two positional tensors.
@@ -26,7 +29,7 @@ A returned tensor is **not always a probability**. Check the model's docstring a
 
 | Return type | Implementations | Host responsibility |
 | --- | --- | --- |
-| Raw binary logits `[B]` | FM/DeepFM/DCN and the feature-interaction classes; DIN/DIEN/DSIN; APG/HMoE/STAR | Apply a logits-aware binary loss and calibrate before using expected value. |
+| Raw binary logits `[B]` | FM/DeepFM/DCN and the categorical interaction heads; DIN/DIEN/DSIN; APG/HMoE/STAR | Apply a logits-aware binary loss and calibrate before using expected value. |
 | Raw task logits `[B,T]` | MMoE, SharedBottom, PLE, AITM, M2M, PEPNet | Supply actual labels and missingness masks for every observed task; define primary metric and loss weights. |
 | Pair or candidate scores | FunkSVD, BiasSVD, EGES, Item2Vec, DSSM, FMRecall, YouTubeDNN, YouTubeSBC, generic TwoTower | Define positive/negative provenance, candidate universe, sampling correction and ranking loss. DSSM is a cosine similarity; YouTubeSBC applies only the supplied item-sampling correction. |
 | Neighbor score matrices | ItemCF, UserCF, Swing (`fit` then `scores`) | Provide positive interaction matrices, eligibility filtering and a production-scale neighbor/index strategy. These are direct tensor algorithms, not gradient-trained networks. |
@@ -69,8 +72,16 @@ The host constructs `allowed_negative_mask`, excludes positives, unexposed or fu
 - Sequence and multi-task references isolate their main computational idea. SDM accepts `short_history, short_mask` and optional `long_history, long_mask, user_context`; with only two arguments it reuses the short history as long history and derives user context from its masked mean. Its short branch uses an LSTM and self-attention before user attention, then gates it with the long branch. DIEN omits the auxiliary next-behavior training objective; HSTU is a sequence block, not an end-to-end generative recommender; ordered-funnel methods require real ordered labels. PRS beam search is not a global optimum or an unbiased slate evaluator.
 - MLR's soft regions are predictive segments, not causal treatment effects. No architecture here establishes coupon uplift or net-value improvement without the host's randomized evaluation and cost definition.
 
-Every method has a [local technical guide](knowledge/README.md) explaining its data prerequisites, controlled comparison and rejection signals. The [source attribution record](research/source-attribution.md) lists pinned materials that informed those original explanations and implementations; upstream prose and code were not copied into this Apache-2.0 repository. No task-level performance improvement is claimed by having these implementations available.
+Every method has a [local technical guide](knowledge/README.md) explaining its data prerequisites, controlled comparison and rejection signals. The [source attribution record](research/source-attribution.md) lists pinned materials that informed those original explanations and implementations; adapted code portions retain their upstream notices in the distributed source and THIRD_PARTY_NOTICES.md. No task-level performance improvement is claimed by having these implementations available.
 
 ## Reco-papers components
 
 The [component map](reco-papers-coverage.md#new-implementation-map) lists the 25 additions and all method/guide/structure links. `paper_inventory` records source-level dispositions; `paper_coverage_report` and `catalog-check` validate and summarize them.
+
+## TAAC2026 components
+
+The [TAAC component map](taac-components.md) documents the four new method IDs, exact tensor interfaces, source versions and mask/fidelity boundaries. Their outputs are token representations or interaction features, not prediction logits; the host supplies the downstream head and loss. Reco-papers coverage remains a separate 115-PDF inventory.
+
+## QueryFormer query-generation components
+
+The [QueryFormer component map](queryformer-components.md) gives the four method IDs, shared framework signatures, tensor masks, a minimal call, source attribution and controlled comparisons. The bridge returns query probes and masked context; the host supplies downstream sequence processing and the task head. This addition preserves the 25 families and separate 115-PDF Reco-papers inventory.

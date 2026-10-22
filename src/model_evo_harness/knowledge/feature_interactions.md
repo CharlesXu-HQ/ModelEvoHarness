@@ -45,6 +45,20 @@ Local source is available through `read_reference` with `include_interactions: t
 | xDeepFM | Creates explicit vector-wise higher-order interactions. | Ablate the interaction network with the same deep branch. |
 | AutoInt | Uses self-attention to let fields condition on each other. | Compare with a supported explicit-cross or FM baseline. |
 
+## Token mixing and cross-layer readout
+
+Use `rankmixer` when the host provides stable field tokens and the bottleneck concerns communication between their subspaces. Its dense `RankMixerBlock` requires width divisible by token count; compare the same tokens and head against a simpler mixer, then isolate independent versus shared FFNs. Choose token grouping using available field semantics and evidence, not the assumption that every token is a semantic ID. Width and token count are separate experimental axes.
+
+Use `unidot_fm_highway` when useful user/candidate interactions may disappear through depth. Supply aligned user/item states from every declared layer; connect the resulting explicit interaction vector into the host head. Its field-only mode requires no event sequence. If adding domain dots, separately supply actual pre-residual queries and aligned retrieval outputs; post-fusion item states are not interchangeable with those queries. Compare the added evidence with its ablation at the same head and training budget. The pinned author-code subset omits aggregated Gram, and single-scalar normalized bundles are rejected because their signal would vanish.
+
+Both methods are available through the normal method-ID source retrieval. Inspect their API contracts and limitations before composition. Source lineage: [RankMixer equations 1, 3–8](https://arxiv.org/html/2507.15551v3), [UniDot FMHighway](https://github.com/linrongc/kdd26_unidot/blob/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d/unified_model.py#L2455). These are portable tensor mechanisms, not evidence of industrial throughput or an improved task score.
+
+## QueryFormer field interaction
+
+Use `queryformer_co_transformer` when separately encoded user and item fields need a candidate-aware interaction before the host head. This field-only method needs `tabular_features`, `user_tokens` and `item_tokens`; it does not require histories. Each layer refines each side with self-attention, then only user queries attend to item keys/values with gated residual fusion. The item output receives its self-attention stage. Compare against the same fields/head without cross-side fusion, then isolate within-side refinement and compare with a cost-matched RankMixer control.
+
+Both framework modules expose `CoTransformerBlock(dim, num_heads, num_layers=2)` over user/item embeddings and True=valid masks. Padded inputs, including NaNs, are sanitized; padded outputs remain zero. Read the extracted module for residual/LayerNorm and sigmoid-concatenation gate choices. The two-layer setting and attention direction follow [QueryFormer section 4.2](https://arxiv.org/html/2609.16548v1#S4.SS2); normalization, biases and empty-side behavior are explicit engineering choices. This independent paper implementation adds no tokenizer or task head and establishes no task gain. For history retrieval and generated probes, use the related methods in the [sequence-ranking guide](sequence_ranking.md).
+
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/1.wide_and_deep.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/1.wide_and_deep.html), [docs/chapter_2_ranking/2.feature_crossing/1.second_order.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/2.feature_crossing/1.second_order.html), [src/funrec/models/wide_deep.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/wide_deep.py), [src/funrec/models/fm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/fm.py).

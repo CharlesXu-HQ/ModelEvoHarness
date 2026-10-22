@@ -166,7 +166,7 @@ class CatalogTests(unittest.TestCase):
     def test_model_manifest_distinguishes_code_from_guidance(self):
         implementations = self.catalog["model_implementations"]
         card_ids = {card["id"] for card in self.catalog["method_cards"]}
-        self.assertEqual(len(card_ids), 69)
+        self.assertEqual(len(card_ids), 77)
         self.assertEqual(len(implementations), 2 * (len(card_ids) + 1))
         self.assertEqual({item["id"] for item in implementations}, card_ids | {"two_tower"})
         for method_id in card_ids:
