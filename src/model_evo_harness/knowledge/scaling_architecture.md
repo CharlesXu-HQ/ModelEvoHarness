@@ -12,6 +12,10 @@ Build a learning curve over history length and model capacity for a simple basel
 
 ## Interpretation and feature needs
 
+When considering token expansion, declare whether each token contains a new available input, an independent view of an existing input, or a learned empty vector. Compare informative-token expansion, width-only expansion and empty-token controls on the same split and training budget. Match parameters and FLOPs in separate controls when both cannot be matched simultaneously. Fix the candidate sequence and stopping rule before inspecting holdout results; use paired/multi-seed evidence to check whether marginal gains persist. Extra token count alone is not evidence of new information.
+
+For `rankmixer`, width must remain divisible by token count. Its standalone dense block supports controlled interaction experiments; it does not reproduce the paper's GPU utilization. Record batch, dtype, actual length distributions, warm-up and timing boundary with latency and peak memory. The source report behind the token expansion hypothesis is the [TAAC2026 overview](https://mp.weixin.qq.com/s/Unf7RyTnIwP2F8tPPfNrMg); the CoSFormer original paper was not obtained, so treat this as an experiment design hypothesis rather than an established general scaling law.
+
 A gain that requires infeasible serving cost is not a deployable improvement. If truncation harms quality only for long-history users, consider compression or retrieval over histories. Request richer event semantics only when the existing events are known to omit relevant behavior or controlled models repeatedly cannot distinguish the observed sequence states.
 
 ## Method choice

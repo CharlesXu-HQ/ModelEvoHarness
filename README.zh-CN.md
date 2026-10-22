@@ -79,6 +79,10 @@ model-evo-harness run \
 
 [CouponEvo](https://github.com/CharlesXu-HQ/CouponEvo) 是首个接入方，提供随机发券任务、候选执行和策略评估。引入 Harness 或模型参考实现本身不构成 uplift 或净收益提升的证据。
 
+## TAAC2026 张量组件
+
+已加入 RankMixer 字段交互、UniDot 条件 SwiGLU、多通道历史池化和跨层显式交互 Highway，均提供独立 PyTorch / TensorFlow-Keras 实现，并映射到方法卡、结构模式及知识指南。输入为已有 embedding 张量，不要求 SID，也不接管数据构造或训练流程。接口、mask 约定、作者代码差异与来源见[组件说明](docs/taac-components.md)。这些实现不代表 TF1.15 兼容或业务收益已经得到验证。
+
 ## 许可证
 
 本项目采用 [Apache-2.0](LICENSE)。[来源署名与复用边界](docs/research/source-attribution.md)说明与 FunRec、DeepCTR、Torch-RecHub、RecBole 等研究资料的关系。

@@ -278,6 +278,43 @@
       "required_evidence": "teacher_logits, student_logits, impression_click_and_read_labels, pre-decision provenance and matched evaluation data.",
       "controlled_comparison": "Keep the backbone, input availability, labels, split and evaluation budget fixed; change this component only and report its cost.",
       "reject_if": "The required inputs or assumptions are unsupported, held-out gain is absent, or a task guardrail regresses."
+    },
+    {
+      "id": "token_subspace_mixing",
+      "name": "Token subspace mixing",
+      "method_ids": [
+        "rankmixer"
+      ],
+      "structural_change": "Feature tokens are partitioned into heads, rewired across tokens, and processed by independent per-token GELU FFNs with post-residual LayerNorm.",
+      "when_to_try": "A supported residual suggests information is lost by the current interaction or aggregation path.",
+      "required_evidence": "Field tokens with stable positions and a declared width/token budget.",
+      "controlled_comparison": "Use identical tensors, head and training budget; ablate the added mechanism and measure quality and cost separately.",
+      "reject_if": "No held-out improvement, invalid feature timing/masks, or unacceptable parameter, latency or memory cost."
+    },
+    {
+      "id": "state_conditioned_history",
+      "name": "State-conditioned history gating and pooling",
+      "method_ids": [
+        "unidot_conditioned_gate",
+        "unidot_multichannel_pool"
+      ],
+      "structural_change": "Condition history gates or independent pooling channels on available candidate or field representations.",
+      "when_to_try": "A supported residual suggests information is lost by the current interaction or aggregation path.",
+      "required_evidence": "Time-safe domain histories, valid-position masks and the declared conditioning tensors.",
+      "controlled_comparison": "Use identical tensors, head and training budget; ablate the added mechanism and measure quality and cost separately.",
+      "reject_if": "No held-out improvement, invalid feature timing/masks, or unacceptable parameter, latency or memory cost."
+    },
+    {
+      "id": "cross_layer_interaction_readout",
+      "name": "Cross-layer explicit interaction readout",
+      "method_ids": [
+        "unidot_fm_highway"
+      ],
+      "structural_change": "LayerNormed user/candidate states form full cross-bus dot products at every layer; accumulated cross-bus and optional pre-residual domain dots are separately normalized and returned to the host head.",
+      "when_to_try": "A supported residual suggests information is lost by the current interaction or aggregation path.",
+      "required_evidence": "Layer-aligned user/item states; optional pre-residual domain dots with explicit query/readout alignment.",
+      "controlled_comparison": "Use identical tensors, head and training budget; ablate the added mechanism and measure quality and cost separately.",
+      "reject_if": "No held-out improvement, invalid feature timing/masks, or unacceptable parameter, latency or memory cost."
     }
   ]
 }

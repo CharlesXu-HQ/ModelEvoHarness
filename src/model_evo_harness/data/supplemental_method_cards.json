@@ -652,6 +652,97 @@
       "comparison": "On identical inputs, labels, split and evaluation budget, ablate dmtl_distillation against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
       "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
       "implementation_boundary": "Host supplies MMoE teacher and two-tower student. No duration discretization or training schedule. CTR helper follows click labels in prose/Figure 1, resolving apparent Eq.8 typo."
+    },
+    {
+      "id": "rankmixer",
+      "family_id": "feature_interactions",
+      "source_repo": "rankmixer-paper",
+      "source_model": "RankMixer dense block, equations 1 and 3-8",
+      "source_url": "https://arxiv.org/html/2507.15551v3",
+      "source_references": [],
+      "mechanism": "Feature tokens are partitioned into heads, rewired across tokens, and processed by independent per-token GELU FFNs with post-residual LayerNorm.",
+      "requires": [
+        "field_tokens"
+      ],
+      "comparison": "Keep input tensors, head, data split and training budget fixed; ablate this component and report held-out quality, parameters, latency and memory. Compare token counts and widths separately.",
+      "failure_signals": "No reproducible held-out improvement, missing input semantics, masking errors, unstable gradients or cost beyond the host budget.",
+      "implementation_boundary": "Dense RankMixer block only; D must be divisible by T and every input field token must be defined. No tokenizer, sequence encoder, prediction head, sparse MoE or hardware throughput claim."
+    },
+    {
+      "id": "unidot_conditioned_gate",
+      "family_id": "sequence_ranking",
+      "source_repo": "taac2026-unidot",
+      "source_model": "common.py",
+      "source_url": "https://arxiv.org/html/2608.16797v1",
+      "source_references": [
+        {
+          "repository": "https://github.com/linrongc/kdd26_unidot",
+          "commit_sha": "1399702006a1fc2f86329c8c6133f3f3ac1e6d0d",
+          "path": "common.py",
+          "url": "https://github.com/linrongc/kdd26_unidot/blob/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d/common.py",
+          "license": "MIT",
+          "use": "adapted tensor core; TensorFlow port; retained notice; explicit input and masking contracts"
+        }
+      ],
+      "mechanism": "The history-only value projection is multiplied by SiLU of a history-plus-condition gate, then projected back to a sequence representation.",
+      "requires": [
+        "history_embeddings",
+        "candidate_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "Keep input tensors, head, data split and training budget fixed; ablate this component and report held-out quality, parameters, latency and memory. Compare token counts and widths separately.",
+      "failure_signals": "No reproducible held-out improvement, missing input semantics, masking errors, unstable gradients or cost beyond the host budget.",
+      "implementation_boundary": "UniDot CondGatedSwiGLU subset; condition [B,C] is broadcast internally. No Hadamard or time-feature variants. True means valid. Padded inputs are sanitized and outputs zeroed; these mask semantics extend the author component. Candidate-conditioned results cannot be reused across different candidates without recomputation."
+    },
+    {
+      "id": "unidot_multichannel_pool",
+      "family_id": "sequence_ranking",
+      "source_repo": "taac2026-unidot",
+      "source_model": "unified_model.py",
+      "source_url": "https://arxiv.org/html/2608.16797v1",
+      "source_references": [
+        {
+          "repository": "https://github.com/linrongc/kdd26_unidot",
+          "commit_sha": "1399702006a1fc2f86329c8c6133f3f3ac1e6d0d",
+          "path": "unified_model.py",
+          "url": "https://github.com/linrongc/kdd26_unidot/blob/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d/unified_model.py",
+          "license": "MIT",
+          "use": "adapted tensor core; TensorFlow port; retained notice; explicit input and masking contracts"
+        }
+      ],
+      "mechanism": "Current field tokens condition per-domain independent sigmoid scorers; weighted sums are L2-normalized, projected and LayerNormed into channel tokens.",
+      "requires": [
+        "field_tokens",
+        "domain_histories",
+        "sequence_mask"
+      ],
+      "comparison": "Keep input tensors, head, data split and training budget fixed; ablate this component and report held-out quality, parameters, latency and memory. Compare token counts and widths separately.",
+      "failure_signals": "No reproducible held-out improvement, missing input semantics, masking errors, unstable gradients or cost beyond the host budget.",
+      "implementation_boundary": "UniDot MultiChannelSeqPool content-only subset; no temporal features, data loaders or Wukong bus. True means valid. Empty domains return zero even after affine projections; this deliberately differs from upstream bias-only empty outputs. L2 normalization uses float32 accumulation for half types and defines zero-vector direction and normalization gradient as zero. The number and ordering of domains and state tokens are fixed at construction; history lengths may vary."
+    },
+    {
+      "id": "unidot_fm_highway",
+      "family_id": "feature_interactions",
+      "source_repo": "taac2026-unidot",
+      "source_model": "unified_model.py",
+      "source_url": "https://arxiv.org/html/2608.16797v1",
+      "source_references": [
+        {
+          "repository": "https://github.com/linrongc/kdd26_unidot",
+          "commit_sha": "1399702006a1fc2f86329c8c6133f3f3ac1e6d0d",
+          "path": "unified_model.py",
+          "url": "https://github.com/linrongc/kdd26_unidot/blob/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d/unified_model.py",
+          "license": "MIT",
+          "use": "adapted tensor core; TensorFlow port; retained notice; explicit input and masking contracts"
+        }
+      ],
+      "mechanism": "LayerNormed user/candidate states form full cross-bus dot products at every layer; accumulated cross-bus and optional pre-residual domain dots are separately normalized and returned to the host head.",
+      "requires": [
+        "layer_user_item_tokens"
+      ],
+      "comparison": "Keep input tensors, head, data split and training budget fixed; ablate this component and report held-out quality, parameters, latency and memory. Compare token counts and widths separately.",
+      "failure_signals": "No reproducible held-out improvement, missing input semantics, masking errors, unstable gradients or cost beyond the host budget.",
+      "implementation_boundary": "Core of author FMHighway at pinned commit, without the paper aggregated Gram or fused-domain variant. Inputs stack post-fusion user/item states across K layers. Optional raw domain dots use separately supplied pre-residual queries and aligned domain readouts. Every normalized scalar bundle must contain at least two values. The host must concatenate returned terms into its head; this component has no classifier. Field-only mode uses S=0 and requires no sequence; domain_interactions uses True=valid domain masks before the final bundle normalization."
     }
   ]
 }

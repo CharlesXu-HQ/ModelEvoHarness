@@ -22,6 +22,16 @@ A DIN gain with no DIEN gain suggests relevance to the candidate but weak increm
 | DIEN | Models behavior-state evolution before candidate activation. | Ablate evolution and auxiliary behavior loss separately. |
 | DSIN | Encodes within-session and between-session behavior. | Compare with DIN only when reliable session boundaries exist. |
 
+## State-conditioned gates and pooling
+
+Use `unidot_conditioned_gate` to test whether the candidate should select history content through the gate while leaving the value projection history-only. The API takes existing history embeddings, a per-sample condition and a bool valid-position mask. Use `unidot_multichannel_pool` when a fixed history average may lose state-dependent evidence: current field tokens condition independent sigmoid channels for each supplied domain. It returns a fixed set of domain/channel vectors for a host-defined downstream block. Domain count is explicit, not fixed to the competition's four domains.
+
+For both components, True means valid and padded values are sanitized before arithmetic. Pool outputs for entirely absent domains are zero even after affine transforms; preserve domain/channel order and masks when combining them. The host must supply real, time-safe behavior histories; static field groups do not establish this capability. The conditioned representations depend on the current candidate or state and cannot be reused across changed conditions without recomputation.
+
+First compare the gate with the same sequence encoder without conditioning, or pool with a masked mean on the same histories. Fix token counts, downstream head and training budget. Then isolate channel count and conditioning with matched cost controls. Reject improvements that depend on future events, unknown field semantics or unacceptable latency. Tensor shape and gradient tests establish implementation behavior, not task benefit.
+
+The source is the [UniDot author version](https://github.com/linrongc/kdd26_unidot/tree/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d); the extracted modules carry its MIT notice. They omit temporal variants, auxiliary training recipes and embedding/data construction. The manifest's output contracts describe representations, so the host supplies a prediction head and task loss.
+
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/3.sequence.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/3.sequence.html), [src/funrec/models/din.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/din.py), [src/funrec/models/dien.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/dien.py).

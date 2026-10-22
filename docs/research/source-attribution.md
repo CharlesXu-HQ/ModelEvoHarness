@@ -1,6 +1,6 @@
 # Source attribution and reuse boundary
 
-This repository contains original explanations and independent code, not copies of the prose or implementations listed below. Links name the material that informed the research map. Pinning a commit fixes the attribution context; it does not make any upstream license disappear. FunRec declares CC BY-NC-SA 4.0, so its prose and model code are not incorporated into this Apache-2.0 work.
+This repository contains original explanations and independent implementations, plus explicitly attributed code adaptations listed in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md). Links name the material that informed the research map. Pinning a commit fixes the attribution context; it does not make any upstream license disappear. FunRec declares CC BY-NC-SA 4.0, so its prose and model code are not incorporated into this Apache-2.0 work.
 
 - FunRec snapshot: [5f7bd84d4403b5f92b6bedbd31e3984ef00a4572](https://github.com/datawhalechina/fun-rec/commit/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572)
 - DeepCTR snapshot: [1b5fe40](https://github.com/shenweichen/DeepCTR/tree/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136)
@@ -157,3 +157,7 @@ This repository contains original explanations and independent code, not copies 
 - `narm` in `interest_retrieval`: [torch_rechub/models/matching/narm.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/narm.py)
 - `youtube_sbc` in `two_tower_matching`: [torch_rechub/models/matching/youtube_sbc.py](https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/youtube_sbc.py)
 Further non-overlapping mechanisms and source boundaries are explained in [the multi-source guidance](../multi-source-guidance.md) and the [DeepCTR/Torch-RecHub](deepctr-torch-rechub-review.md) and [RecBole/Wang](recbole-wang-review.md) reviews.
+
+## TAAC2026 component sources
+
+The [component map](../taac-components.md) records the four added mechanisms and their adaptation boundaries. `rankmixer` is independently implemented from [RankMixer v3, equations 1 and 3–8](https://arxiv.org/html/2507.15551v3). `unidot_conditioned_gate`, `unidot_multichannel_pool` and `unidot_fm_highway` adapt the [MIT author snapshot](https://github.com/linrongc/kdd26_unidot/tree/1399702006a1fc2f86329c8c6133f3f3ac1e6d0d); exact source paths and SHA are carried by their method cards. Author-code differences from the paper and changes to masks/empty-domain behavior are explicit. Other candidates from the [TAAC investigation](taac2026-integration-2026-10-21.md) are not registered as implemented.
