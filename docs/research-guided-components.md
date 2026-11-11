@@ -2,9 +2,10 @@
 
 These five additions provide native PyTorch and TensorFlow mechanisms for four
 research questions. They retain the current backbone and experiment protocol;
-the Agent chooses a local intervention using measured evidence. Each method is
-discoverable through `model_api` and whole-module `read_references` and has an
-input contract, a controlled comparison and explicit limitations.
+the Agent chooses a local intervention using measured evidence. The two analysis
+tools are discoverable through `analysis_api`; the three model components use
+`model_api`. Both support whole-module `read_references` and include input
+contracts, controlled comparisons and explicit limitations.
 
 | Method ID | Class | Purpose |
 | --- | --- | --- |
@@ -14,10 +15,33 @@ input contract, a controlled comparison and explicit limitations.
 | `contextual_history_encoding` | `ContextualHistoryEncoder` | Preserve supplied per-event item and context information in historical tokens. |
 | `relation_history_attention` | `RelationHistoryAttention` | Independently normalize user-to-history, target-to-history and target-to-user relations. |
 
+The catalog retains 82 unified method cards: 80 model methods and 2 analysis
+tools. Their implementation and pattern records are separate:
+
+```text
+src/model_evo_harness/
+├── analysis/{pytorch,tensorflow}/research_diagnostics.py
+├── models/{pytorch,tensorflow}/
+│   ├── progressive_interaction.py
+│   └── contextual_history.py
+└── data/
+    ├── model_implementations.json     # 162 entries, including both TwoTower implementations
+    ├── analysis_implementations.json  # 4 entries for 2 tools in both frameworks
+    ├── structure_patterns.json       # model changes: structural_change
+    └── analysis_patterns.json        # measurements and screening: operation
+```
+
+The host calls analysis tools explicitly while diagnosing a baseline or completed
+trial, using captured activations and training gradients. The Agent can use the
+resulting evidence to propose a change; the host integrates model components in
+the candidate's forward pass and trains and evaluates it. Discovery and source
+reading install no hooks and execute no tools or training. An analysis tool ID
+cannot serve as an experiment's standalone `research.method_id`.
+
 ## Measure before changing the network
 
 ```python
-from model_evo_harness.models.pytorch.research_diagnostics import (
+from model_evo_harness.analysis.pytorch.research_diagnostics import (
     RepresentationDiagnostics, GradientFeatureSelector,
 )
 
@@ -34,6 +58,8 @@ kept = selector.select(
 )
 ```
 
+TensorFlow exposes the same tools under
+`model_evo_harness.analysis.tensorflow.research_diagnostics`.
 The caller captures actual activations and gradients. The diagnostics detach
 their results and do not modify predictions. Ranks use each sample's token ×
 channel matrix; output variance measures variation over valid tokens, averaged

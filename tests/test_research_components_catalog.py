@@ -4,7 +4,7 @@ import ast
 
 import pytest
 
-from model_evo_harness import load_catalog, model_api, read_references
+from model_evo_harness import load_catalog, model_api, analysis_api, read_references
 from model_evo_harness.catalog import common_knowledge, method_applicability
 from model_evo_harness.provider import OpenAICompatibleAgent
 
@@ -14,26 +14,30 @@ METHODS = {
     "progressive_interaction", "contextual_history_encoding",
     "relation_history_attention",
 }
+ANALYSIS = {"representation_diagnostics", "gradient_feature_selection"}
 
 
 def test_research_components_are_registered_with_native_sources_and_boundaries():
     catalog = load_catalog()
     assert METHODS <= {card["id"] for card in catalog["method_cards"]}
     for framework in ("pytorch", "tensorflow"):
-        apis = model_api(catalog, framework=framework, method_ids=METHODS)
+        apis = {**model_api(catalog, framework=framework, method_ids=METHODS),
+                **analysis_api(catalog, framework=framework, method_ids=METHODS)}
         assert set(apis) == METHODS
         for method in sorted(METHODS):
             refs = read_references(catalog, {"framework": framework, "method_ids": [method]})
             api = apis[method]
             if method != "gradient_feature_selection":
                 assert api["constructor"] != "inherited"
-            if method in {"representation_diagnostics", "gradient_feature_selection"}:
+            if method in ANALYSIS:
                 assert "__call__" in api["methods"]
-            assert api["local_guide"] and api["structure_pattern"]
+            assert api["local_guide"]
+            assert api["analysis_pattern" if method in ANALYSIS else "structure_pattern"]
             assert refs["contracts"][method]["limitations"]
             assert refs["contracts"][method]["output_contract"] == api["output_contract"]
             for path, entry in refs["files"].items():
-                assert path.startswith(f"models/{framework}/")
+                directory = "analysis" if method in ANALYSIS else "models"
+                assert path.startswith(f"{directory}/{framework}/")
                 ast.parse(entry["content"])
 
 
@@ -53,6 +57,9 @@ def test_missing_observations_and_histories_are_explicit_prerequisites():
         "event_sequence", "aligned_event_context", "sequence_mask", "user_tokens", "item_tokens"]
     state = {x["method_id"]: x for x in method_applicability(task, catalog)}
     assert all(state[method]["status"] == "ready" for method in METHODS)
+    for method in METHODS:
+        assert state[method]["kind"] == ("analysis" if method in ANALYSIS else "model")
+        assert state[method]["frameworks"] == ["pytorch", "tensorflow"]
 
 
 def test_diagnostics_are_available_across_task_stages():
@@ -73,7 +80,7 @@ def test_agent_receives_diagnostic_reasoning_and_feature_protection_guidance():
         assert required in guide
 
 
-@pytest.mark.parametrize("method", sorted(METHODS))
+@pytest.mark.parametrize("method", sorted(METHODS - ANALYSIS))
 def test_declared_method_supplies_real_source_before_final_proposal(method):
     catalog = load_catalog()
     agent = OpenAICompatibleAgent("https://example.test/v1", "test", "model")

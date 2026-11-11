@@ -1,12 +1,14 @@
 # Direct-framework model references
 
-ModelEvoHarness includes a tensor implementation of **each of its 82 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks: 166 implementation entries in total. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
+ModelEvoHarness keeps **82 method cards: 80 model methods and 2 analysis tools**. Each has a native PyTorch and TensorFlow implementation. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 162 entries: the 80 model methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for `representation_diagnostics` and `gradient_feature_selection`.
+
+`model_api` exposes model constructors and contracts; `analysis_api` exposes analysis tools. Both include class paths, `reference_scope`, `training_support`, `output_contract`, and `limitations`, and both support whole-module `read_references`. These are compact mechanism references for controlled experiments; the host supplies the remaining data, training and evaluation code.
 
 The frameworks are isolated under [`models/pytorch`](../src/model_evo_harness/models/pytorch/) and [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Each module imports only its own deep-learning framework and Python's standard library; there is no DeepCTR, Torch-RecHub, RecBole or other model-wrapper dependency. Importing `model_evo_harness` itself does not import PyTorch or TensorFlow. Install the framework you intend to use separately.
 
 ## Find a model
 
-The same method IDs have corresponding classes in both framework directories. Import from the named submodule; the manifest is the exact method-ID-to-symbol contract.
+The same model method IDs have corresponding classes in both framework directories. Import from the named submodule; the model manifest is the exact method-ID-to-symbol contract.
 
 | Module in each framework | Method-card IDs | Input or modeling focus |
 | --- | --- | --- |
@@ -19,6 +21,8 @@ The same method IDs have corresponding classes in both framework directories. Im
 | [`paper_interactions.py`](../src/model_evo_harness/models/pytorch/paper_interactions.py) | `rankmixer`, `unidot_fm_highway` | Token subspace mixing and explicit cross-layer user/candidate interactions. |
 | [`paper_unified_sequence.py`](../src/model_evo_harness/models/pytorch/paper_unified_sequence.py) | `unidot_conditioned_gate`, `unidot_multichannel_pool` | Condition-only gates and masked per-domain sigmoid pooling. |
 | [`paper_queryformer.py`](../src/model_evo_harness/models/pytorch/paper_queryformer.py) | `queryformer_co_transformer`, `queryformer_history_retrieval`, `queryformer_query_generator`, `queryformer_query_bridge` | Masked user/item interaction, history retrieval and context-aware query probes; single-view equations 2–4 only. |
+| [`progressive_interaction.py`](../src/model_evo_harness/models/pytorch/progressive_interaction.py) | `progressive_interaction` | Initial-affinity edge order with increasing interaction budgets across layers. |
+| [`contextual_history.py`](../src/model_evo_harness/models/pytorch/contextual_history.py) | `contextual_history_encoding`, `relation_history_attention` | Aligned event context and independently normalized user/history/target reads. |
 | [`training.py`](../src/model_evo_harness/models/pytorch/training.py) | Training helpers, not method cards | `focal_loss`, `bpr_loss`, `listwise_loss`, `hard_negative_indices`. |
 
 The TensorFlow files use the same names under [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Some multi-input Keras models accept multiple tensors through their `call` signature; generic Keras `TwoTower` takes `(user_features, item_features)` as one tuple, while PyTorch `TwoTower` takes two positional tensors.
@@ -88,10 +92,14 @@ The [QueryFormer component map](queryformer-components.md) gives the four method
 
 ## Research-guided diagnostics and local components
 
-The [component guide](research-guided-components.md) documents five additions:
-`RepresentationDiagnostics`, `GradientFeatureSelector`, `ProgressiveInteraction`,
-`ContextualHistoryEncoder` and `RelationHistoryAttention`. The first two return
-detached measurements or selected indices, not prediction logits; the other
-three return intermediate representations. All are independently extractable in
-both frameworks. Their contracts distinguish observations, screening and
-trainable structure, without adding a new trainer or promising task gain.
+The [component guide](research-guided-components.md) documents the three model
+components above and two analysis tools. `RepresentationDiagnostics` and
+`GradientFeatureSelector` live in `analysis/{pytorch,tensorflow}/research_diagnostics.py`
+and return detached measurements or selected indices. The host invokes them on
+captured activations and training gradients when diagnosing an experiment, then
+uses the evidence to choose a model change. They appear in `analysis_api` and
+cannot be an experiment's standalone `method_id`.
+
+Model components live under `models/{pytorch,tensorflow}` and participate in the
+candidate's forward computation. All five additions are independently extractable.
+Discovery and source reading install no hooks and execute no tools or training.

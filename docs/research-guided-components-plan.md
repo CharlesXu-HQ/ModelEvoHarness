@@ -19,12 +19,22 @@ Rejected alternatives: a new experiment runner would duplicate the existing engi
 
 ## Files and ownership
 
-- Diagnostics/selection worker: `models/{pytorch,tensorflow}/research_diagnostics.py`, `tests/test_research_diagnostics.py`.
+- Diagnostics/selection worker: `analysis/{pytorch,tensorflow}/research_diagnostics.py`, `tests/test_research_diagnostics.py`.
 - Interaction worker: `models/{pytorch,tensorflow}/progressive_interaction.py`, `tests/test_progressive_interaction.py`.
 - History worker: `models/{pytorch,tensorflow}/contextual_history.py`, `tests/test_contextual_history.py`.
 - Integrator: method/implementation/structure registry entries, shared knowledge, bilingual README, documentation, reference integration tests and final validation.
 
-All `models/` paths are relative to `src/model_evo_harness/`. Workers do not edit shared registries.
+All component paths are relative to `src/model_evo_harness/`. Workers do not edit shared registries.
+
+### Role separation follow-up
+
+The user's follow-up separates observation/screening from model computation.
+Move the two tools to `analysis/` unchanged, give them separate implementation
+and pattern registries plus `analysis_api`, and preserve shared source delivery.
+Verify that the Agent sees only applicable tools, analysis references cannot be
+model components or standalone optimization trials, and both framework modules
+remain independently executable. Model structure and existing training helpers
+retain their current locations.
 
 ## Verification
 

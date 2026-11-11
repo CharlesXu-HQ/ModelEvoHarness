@@ -1,0 +1,114 @@
+{
+  "analysis_implementations": [
+    {
+      "id": "representation_diagnostics",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.analysis.pytorch.research_diagnostics:RepresentationDiagnostics",
+      "file": "analysis/pytorch/research_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "activation_capture",
+          "validity_masks",
+          "checkpoint_and_split_provenance",
+          "task_metric_comparison"
+        ]
+      },
+      "limitations": [
+        "Detached diagnostics only; no parameters, loss, automatic hooks or automatic collapse classification. Caller explicitly supplies intermediate states.",
+        "Ranks use each sample token-by-channel matrix; variance uses valid-token population variance averaged over channels. Optional centering changes rank and cosine semantics.",
+        "Zero input has rank zero by convention. Paired branch cosine requires aligned shapes; missing observations are not evidence of a bottleneck."
+      ],
+      "output_contract": {
+        "kind": "diagnostic_mapping",
+        "shape": "{effective_rank, stable_rank, output_variance, valid_tokens: [B]; optional branch_similarity: [B]}"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "observed_representation_quality"
+    },
+    {
+      "id": "representation_diagnostics",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.analysis.tensorflow.research_diagnostics:RepresentationDiagnostics",
+      "file": "analysis/tensorflow/research_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "activation_capture",
+          "validity_masks",
+          "checkpoint_and_split_provenance",
+          "task_metric_comparison"
+        ]
+      },
+      "limitations": [
+        "Detached diagnostics only; no parameters, loss, automatic hooks or automatic collapse classification. Caller explicitly supplies intermediate states.",
+        "Ranks use each sample token-by-channel matrix; variance uses valid-token population variance averaged over channels. Optional centering changes rank and cosine semantics.",
+        "Zero input has rank zero by convention. Paired branch cosine requires aligned shapes; missing observations are not evidence of a bottleneck."
+      ],
+      "output_contract": {
+        "kind": "diagnostic_mapping",
+        "shape": "{effective_rank, stable_rank, output_variance, valid_tokens: [B]; optional branch_similarity: [B]}"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "observed_representation_quality"
+    },
+    {
+      "id": "gradient_feature_selection",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.analysis.pytorch.research_diagnostics:GradientFeatureSelector",
+      "file": "analysis/pytorch/research_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "training_activation_and_gradient_capture",
+          "cross_and_field_lineage",
+          "protected_interaction_groups",
+          "ablation_and_retraining"
+        ]
+      },
+      "limitations": [
+        "First-order diagnostic inspired by feature screening, not a complete TayFCS or LO-FAR reproduction; no automatic cross enumeration or causal-importance claim.",
+        "Redundancy is absolute cosine over common valid observations, not a removal decision. Score rows may represent fields or explicit crosses; source-field lineage is caller-owned.",
+        "select is eager/offline, uses stable index tie breaking, retains every protected group member, and rejects budgets below protected requirements. Protection must be supplied explicitly.",
+        "Single-feature saliency can miss interaction-only value. Training-only screening must be followed by ablation and retraining; do not use final holdout labels for selection."
+      ],
+      "output_contract": {
+        "kind": "feature_screening_diagnostics",
+        "shape": "{saliency, valid_counts: [F]; redundancy, overlap_counts: [F,F]}; select -> retained index tuple"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "protected_gradient_screening"
+    },
+    {
+      "id": "gradient_feature_selection",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.analysis.tensorflow.research_diagnostics:GradientFeatureSelector",
+      "file": "analysis/tensorflow/research_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "training_activation_and_gradient_capture",
+          "cross_and_field_lineage",
+          "protected_interaction_groups",
+          "ablation_and_retraining"
+        ]
+      },
+      "limitations": [
+        "First-order diagnostic inspired by feature screening, not a complete TayFCS or LO-FAR reproduction; no automatic cross enumeration or causal-importance claim.",
+        "Redundancy is absolute cosine over common valid observations, not a removal decision. Score rows may represent fields or explicit crosses; source-field lineage is caller-owned.",
+        "select is eager/offline, uses stable index tie breaking, retains every protected group member, and rejects budgets below protected requirements. Protection must be supplied explicitly.",
+        "Single-feature saliency can miss interaction-only value. Training-only screening must be followed by ablation and retraining; do not use final holdout labels for selection."
+      ],
+      "output_contract": {
+        "kind": "feature_screening_diagnostics",
+        "shape": "{saliency, valid_counts: [F]; redundancy, overlap_counts: [F,F]}; select -> retained index tuple"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "protected_gradient_screening"
+    }
+  ]
+}

@@ -12,6 +12,8 @@ def test_each_method_has_explicit_framework_boundaries():
     cards += json.loads((DATA / "supplemental_method_cards.json").read_text())["method_cards"]
     implementations = json.loads((DATA / "model_implementations.json").read_text())[
         "model_implementations"]
+    implementations += json.loads((DATA / "analysis_implementations.json").read_text())[
+        "analysis_implementations"]
     by_method = {}
     for entry in implementations:
         assert entry["reference_scope"] == "mechanism_reference"

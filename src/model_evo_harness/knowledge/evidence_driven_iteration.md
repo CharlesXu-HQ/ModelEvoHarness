@@ -5,6 +5,14 @@ from the current task, dataset version, existing backbone and measured residuals
 Preserve a promising backbone while testing a falsifiable local change. Diagnostics
 do not justify switching families or requesting human feature work by themselves.
 
+Observation and screening tools live under `analysis/` and are exposed through
+`analysis_api` and `analysis_patterns`. The host explicitly runs them on captured
+activations/gradients; reading their source does not execute a diagnostic. Use
+their results as evidence for a model or training change. Their IDs cannot be an
+experiment's `research.method_id` or a model component reference. A candidate
+that uses screened inputs must be retrained and evaluated as the changed model;
+it may name that model method or omit the ID for a custom experiment.
+
 ## Observe, distinguish, intervene
 
 1. Identify the observed evidence and its source: checkpoint, split, layer/field

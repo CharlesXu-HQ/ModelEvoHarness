@@ -340,6 +340,34 @@ class EngineTests(unittest.TestCase):
         self.assertIn("fm", api["pytorch"])
         self.assertNotIn("tensorflow", api)
         self.assertIn("cardinalities", api["pytorch"]["fm"]["constructor"])
+        self.assertEqual(agent.contexts[0]["analysis_api"], {"pytorch": {}})
+
+    def test_agent_sees_analysis_tools_separately_and_only_with_declared_observations(self):
+        class AnalysisTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "framework": "pytorch", "capabilities": [
+                    "intermediate_representations"]}
+
+        agent = Agent([{"action": "stop", "reason": "Inspect the supplied checkpoint activations"}])
+        run_search(AnalysisTask(), agent, output=self.output, catalog=load_catalog(), max_steps=1)
+        context = agent.contexts[0]
+        self.assertEqual(set(context["analysis_api"]), {"pytorch"})
+        self.assertEqual(set(context["analysis_api"]["pytorch"]), {"representation_diagnostics"})
+        self.assertNotIn("representation_diagnostics", context["model_api"]["pytorch"])
+
+    def test_analysis_only_proposal_is_rejected_before_model_evaluation(self):
+        class AnalysisTask(Task):
+            def snapshot(self):
+                return {**super().snapshot(), "framework": "pytorch", "capabilities": [
+                    "intermediate_representations"]}
+
+        task = AnalysisTask()
+        proposal = experiment()
+        proposal["research"]["method_id"] = "representation_diagnostics"
+        with self.assertRaisesRegex(ValueError, "analysis tool"):
+            run_search(task, Agent([proposal]), output=self.output, catalog=load_catalog(), max_steps=1)
+        self.assertEqual(task.evaluated, [])
+        self.assertEqual(json.loads((self.output / "journal.json").read_text())["steps"], [])
 
     def test_unknown_field_is_rejected_before_evaluation(self):
         task = Task()

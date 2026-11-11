@@ -9,7 +9,7 @@ import pytest
 
 def _module(framework):
     return importlib.import_module(
-        f"model_evo_harness.models.{framework}.research_diagnostics")
+        f"model_evo_harness.analysis.{framework}.research_diagnostics")
 
 
 def _tensor(framework, values):
@@ -218,7 +218,7 @@ def test_framework_agreement_for_centered_masked_inputs():
 
 @pytest.mark.parametrize("framework", ["pytorch", "tensorflow"])
 def test_standalone_source_exec_without_package_imports(framework):
-    path = Path(__file__).resolve().parents[1] / "src/model_evo_harness/models" / framework / "research_diagnostics.py"
+    path = Path(__file__).resolve().parents[1] / "src/model_evo_harness/analysis" / framework / "research_diagnostics.py"
     namespace = {"__name__": "standalone_research_diagnostics"}
     exec(compile(path.read_text(), str(path), "exec"), namespace)
     x = _tensor(framework, np.array([[[1., 0.], [0., 1.]]], np.float32))

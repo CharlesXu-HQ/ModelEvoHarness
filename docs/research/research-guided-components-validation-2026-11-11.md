@@ -67,3 +67,30 @@ explicit simplifications. It does not reproduce full RankUp, TayFCS, MGDIN, SIF
 or CCFormer systems. The last two user annotations asked for stage explanations;
 new sample-bag losses, gradient-conflict optimizers and adaptive inference
 policies are not included in this implementation.
+
+## Follow-up: separate analysis from model components
+
+The user's directory correction moves both native diagnostic modules unchanged
+from `models/<framework>/` to `analysis/<framework>/`. The 82 method cards now
+map to 162 model entries (80 methods plus TwoTower, each in both frameworks)
+and 4 analysis entries (2 tools, each in both frameworks). Model and analysis
+APIs and patterns are separate; complete-source reading and its hash ledger
+support both. No consumer project was changed.
+
+- Before implementation, all 10 initial boundary tests failed: no separate
+  registry/API/patterns existed and an analysis ID could name an optimization trial.
+- After the split, the full suite returned **382 passed, 21 skipped,
+  340 subtests passed**, exit 0, in 25.64 seconds. The same 3,094 warnings and
+  GPU-only skips remain.
+- Two additional model-component-reference rejection cases were then added;
+  the final targeted boundary suite returned **12 passed**, exit 0. The control
+  model reference succeeds and each analysis reference is rejected.
+- Coverage CLI reports no missing implementation files, guides or card/framework
+  implementations. Both APIs and source reading remain independent of DL imports.
+- Review verified separate Agent context, mixed model/analysis source reads and
+  framework boundaries. Diagnostic tensor source code was moved without changes.
+
+These are interface, numerical and catalog checks. This directory follow-up
+does not add automatic activation hooks, a tool executor, GPU training or a live
+Agent experiment. Analysis-only proposals are rejected before candidate evaluation;
+screened-and-retrained models remain valid model/custom experiment proposals.

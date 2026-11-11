@@ -23,8 +23,10 @@ def load_catalog(*, extra_families: list[dict] | None = None) -> dict:
     catalog["method_cards"].extend(_bundled("supplemental_method_cards.json")["method_cards"])
     catalog["decision_checks"] = _bundled("decision_checks.json")["decision_checks"]
     catalog["structure_patterns"] = _bundled("structure_patterns.json")["structure_patterns"]
+    catalog["analysis_patterns"] = _bundled("analysis_patterns.json")["analysis_patterns"]
     catalog["training_patterns"] = _bundled("training_patterns.json")["training_patterns"]
     catalog["model_implementations"] = _bundled("model_implementations.json")["model_implementations"]
+    catalog["analysis_implementations"] = _bundled("analysis_implementations.json")["analysis_implementations"]
     catalog["paper_inventory"] = _bundled("reco_papers.json")
     catalog["experience_schema_version"] = 2
     if extra_families:
@@ -54,8 +56,12 @@ def common_knowledge() -> dict[str, str]:
         "causal_policy_experiments", "horizontal_composition", "evidence_driven_iteration")}
 
 
+def _implementations(catalog: dict) -> list[dict]:
+    return catalog.get("model_implementations", []) + catalog.get("analysis_implementations", [])
+
+
 def read_references(catalog: dict, request: dict) -> dict:
-    """Read complete bundled modules by model ID; never execute or fetch code.
+    """Read complete bundled model or analysis modules; never execute or fetch code.
 
     Whole modules preserve shared helpers and base classes. The bundled modules
     use only their framework and stdlib, so their imports need no other sources.
@@ -72,7 +78,7 @@ def read_references(catalog: dict, request: dict) -> dict:
             not isinstance(training, bool) or not isinstance(composition, bool) or not isinstance(interactions, bool) or
             (not methods and not training and not composition and not interactions)):
         raise ValueError("reference needs up to four method_ids or include_training/include_composition/include_interactions=true")
-    entries = {entry["id"]: entry for entry in catalog.get("model_implementations", [])
+    entries = {entry["id"]: entry for entry in _implementations(catalog)
                if entry["framework"] == framework}
     if set(methods) - entries.keys():
         raise ValueError("reference method_ids must exist in the implementation manifest")
@@ -88,15 +94,15 @@ def read_references(catalog: dict, request: dict) -> dict:
     for path in sorted(paths):
         # Paths are bundled identifiers, not arbitrary filesystem access.
         parts = path.split("/")
-        if (len(parts) != 3 or parts[:2] != ["models", framework] or
+        if (len(parts) != 3 or parts[0] not in ("models", "analysis") or parts[1] != framework or
                 not parts[2].endswith(".py") or not parts[2][:-3].isidentifier()):
-            raise ValueError("reference file must be a framework model module")
+            raise ValueError("reference file must be a framework model or analysis module")
         content = package.joinpath(path).read_text(encoding="utf-8")
         result[path] = {"content": content,
                         "sha256": hashlib.sha256(content.encode()).hexdigest()}
     contracts = {item: {key: entries[item][key] for key in (
         "reference_scope", "training_support", "output_contract", "limitations",
-        "paper_ids", "local_guide", "structure_pattern")
+        "paper_ids", "local_guide", "structure_pattern", "analysis_pattern")
         if key in entries[item]} for item in sorted(set(methods))}
     _record_reference_read(result)
     return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
@@ -105,11 +111,20 @@ def read_references(catalog: dict, request: dict) -> dict:
 
 def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
     """Expose local model constructors and public operations without importing a DL runtime."""
+    return _component_api(catalog.get("model_implementations", []), framework, method_ids)
+
+
+def analysis_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
+    """Expose observation/screening tools separately, without importing a DL runtime."""
+    return _component_api(catalog.get("analysis_implementations", []), framework, method_ids)
+
+
+def _component_api(implementations: list[dict], framework: str, method_ids: set[str]) -> dict:
     if framework not in ("pytorch", "tensorflow"):
         raise ValueError("framework must be pytorch or tensorflow")
     package = files("model_evo_harness")
     result = {}
-    for entry in catalog.get("model_implementations", []):
+    for entry in implementations:
         if entry["framework"] != framework or entry["id"] not in method_ids:
             continue
         name = entry["symbol"].split(":", 1)[1]
@@ -117,7 +132,7 @@ def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
         model = next((node for node in tree.body if isinstance(node, ast.ClassDef)
                       and node.name == name), None)
         if model is None:
-            raise ValueError(f"model symbol missing: {entry['symbol']}")
+            raise ValueError(f"component symbol missing: {entry['symbol']}")
         public = {node.name: f"{node.name}({ast.unparse(node.args)})"
                   for node in model.body if isinstance(node, (ast.FunctionDef,
                                                                  ast.AsyncFunctionDef))
@@ -130,7 +145,7 @@ def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
             "methods": public,
             **{key: entry[key] for key in ("reference_scope", "training_support",
                                           "output_contract", "limitations", "paper_ids",
-                                          "local_guide", "structure_pattern") if key in entry},
+                                          "local_guide", "structure_pattern", "analysis_pattern") if key in entry},
         }
     return result
 
@@ -231,27 +246,34 @@ def validate_catalog(catalog: dict) -> None:
             if not isinstance(check.get(key), list) or any(
                     not isinstance(value, str) or not value for value in check[key]):
                 raise ValueError(f"decision check {check['id']} needs string list {key}")
-    patterns = catalog.get("structure_patterns", [])
-    if not isinstance(patterns, list):
-        raise ValueError("structure_patterns must be a list")
+    patterns = []
+    for registry, operation in (("structure_patterns", "structural_change"),
+                                ("analysis_patterns", "operation")):
+        entries = catalog.get(registry, [])
+        if not isinstance(entries, list):
+            raise ValueError(f"{registry} must be a list")
+        for pattern in entries:
+            if not isinstance(pattern, dict) or not isinstance(pattern.get(operation), str) or not pattern[operation].strip():
+                raise ValueError(f"{registry} needs nonempty {operation}")
+        patterns.extend(entries)
     pattern_ids = set()
     linked_methods = set()
     for pattern in patterns:
         if not isinstance(pattern, dict):
             raise ValueError("structure pattern must be an object")
-        for key in ("id", "name", "structural_change", "when_to_try",
+        for key in ("id", "name", "when_to_try",
                     "required_evidence", "controlled_comparison", "reject_if"):
             if not isinstance(pattern.get(key), str) or not pattern[key].strip():
-                raise ValueError(f"structure pattern needs nonempty {key}")
+                raise ValueError(f"research pattern needs nonempty {key}")
         if pattern["id"] in pattern_ids:
-            raise ValueError(f"duplicate structure pattern id: {pattern['id']}")
+            raise ValueError(f"duplicate research pattern id: {pattern['id']}")
         pattern_ids.add(pattern["id"])
         method_ids = pattern.get("method_ids")
         if not isinstance(method_ids, list) or not method_ids or any(
                 not isinstance(value, str) or value not in card_ids for value in method_ids):
-            raise ValueError(f"structure pattern {pattern['id']} needs known method_ids")
+            raise ValueError(f"research pattern {pattern['id']} needs known method_ids")
         if linked_methods.intersection(method_ids) or len(set(method_ids)) != len(method_ids):
-            raise ValueError("a method cannot belong to duplicate structure patterns")
+            raise ValueError("a method cannot belong to duplicate research patterns")
         linked_methods.update(method_ids)
     training = catalog.get("training_patterns", [])
     if not isinstance(training, list):
@@ -271,21 +293,26 @@ def validate_catalog(catalog: dict) -> None:
             if not isinstance(pattern.get(key), list) or any(
                     not isinstance(value, str) or not value for value in pattern[key]):
                 raise ValueError(f"training pattern {pattern['id']} needs string list {key}")
-    implementations = catalog.get("model_implementations", [])
-    if not isinstance(implementations, list):
-        raise ValueError("model_implementations must be a list")
     implementation_keys = set()
-    for entry in implementations:
-        if not isinstance(entry, dict) or any(
-                not isinstance(entry.get(key), str) or not entry[key].strip()
-                for key in ("id", "framework", "symbol", "file")):
-            raise ValueError("model implementation needs id, framework, symbol, file")
-        if entry["framework"] not in ("pytorch", "tensorflow"):
-            raise ValueError("model implementation framework must be pytorch or tensorflow")
-        key = (entry["id"], entry["framework"])
-        if key in implementation_keys:
-            raise ValueError("duplicate model implementation")
-        implementation_keys.add(key)
+    for registry, directory in (("model_implementations", "models"),
+                                ("analysis_implementations", "analysis")):
+        implementations = catalog.get(registry, [])
+        if not isinstance(implementations, list):
+            raise ValueError(f"{registry} must be a list")
+        for entry in implementations:
+            if not isinstance(entry, dict) or any(
+                    not isinstance(entry.get(key), str) or not entry[key].strip()
+                    for key in ("id", "framework", "symbol", "file")):
+                raise ValueError("implementation needs id, framework, symbol, file")
+            if entry["framework"] not in ("pytorch", "tensorflow"):
+                raise ValueError("implementation framework must be pytorch or tensorflow")
+            if (not entry["file"].startswith(f"{directory}/{entry['framework']}/") or
+                    not entry["symbol"].startswith(f"model_evo_harness.{directory}.{entry['framework']}.")):
+                raise ValueError(f"{registry} needs matching {directory} paths and symbols")
+            key = (entry["id"], entry["framework"])
+            if key in implementation_keys:
+                raise ValueError("duplicate implementation")
+            implementation_keys.add(key)
     inventory = catalog.get("paper_inventory")
     if inventory is not None:
         papers = inventory.get("papers", [])
@@ -380,7 +407,7 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
                                        if family.get("local_guide") and not package.joinpath(
                                            family["local_guide"]).is_file()),
         "missing_implementation_files": sorted({entry["file"] for entry in
-                                                catalog.get("model_implementations", [])
+                                                _implementations(catalog)
                                                 if not package.joinpath(entry["file"]).is_file()}),
         "missing_card_implementations": sorted(
             f"{card['id']}:{framework}"
@@ -388,7 +415,7 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
             for framework in ("pytorch", "tensorflow")
             if (card["id"], framework) not in {
                 (entry["id"], entry["framework"])
-                for entry in catalog.get("model_implementations", [])
+                for entry in _implementations(catalog)
             }),
     }
 
@@ -412,12 +439,13 @@ def applicability(snapshot: dict, catalog: dict) -> list[dict]:
 
 
 def method_applicability(snapshot: dict, catalog: dict) -> list[dict]:
-    """Screen model-specific experiments against stage and declared data contracts."""
+    """Screen model methods and analysis tools against declared task contracts."""
     family_status = {item["family_id"]: item for item in applicability(snapshot, catalog)}
     capabilities = set(snapshot.get("capabilities", []))
     implemented = {}
-    for item in catalog.get("model_implementations", []):
+    for item in _implementations(catalog):
         implemented.setdefault(item["id"], []).append(item["framework"])
+    analysis_ids = {item["id"] for item in catalog.get("analysis_implementations", [])}
     result = []
     for card in catalog.get("method_cards", []):
         family = family_status[card["family_id"]]
@@ -426,6 +454,7 @@ def method_applicability(snapshot: dict, catalog: dict) -> list[dict]:
                   "needs_data" if family["status"] == "needs_data" or missing else "ready")
         missing = sorted(set(missing) | set(family["missing_capabilities"])) if status == "needs_data" else []
         result.append({"method_id": card["id"], "family_id": card["family_id"],
+                       "kind": "analysis" if card["id"] in analysis_ids else "model",
                        "status": status, "missing_capabilities": missing,
                        "frameworks": sorted(implemented.get(card["id"], [])),
                        "reason": family["reason"] if status == "other_stage" else
@@ -520,6 +549,9 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
         if method_id not in methods:
             raise ValueError("unknown method_id; omit it for a new research direction")
         entry = methods[method_id]
+        if entry["kind"] == "analysis":
+            raise ValueError("analysis tool cannot be an optimization trial method_id; "
+                             "use its observations to propose a model or training change")
         if entry["status"] != "ready":
             raise ValueError(f"method {method_id} is {entry['status']}: {entry['reason']}")
         if family_id is not None and entry["family_id"] != family_id:
