@@ -51,7 +51,7 @@ def common_knowledge() -> dict[str, str]:
         "training_objectives", "sampling_and_hard_examples",
         "optimization_and_regularization", "feature_gap_decisions",
         "business_insight_synthesis", "exploration_strategy", "structure_extensions",
-        "causal_policy_experiments", "horizontal_composition")}
+        "causal_policy_experiments", "horizontal_composition", "evidence_driven_iteration")}
 
 
 def read_references(catalog: dict, request: dict) -> dict:
@@ -121,7 +121,7 @@ def model_api(catalog: dict, *, framework: str, method_ids: set[str]) -> dict:
         public = {node.name: f"{node.name}({ast.unparse(node.args)})"
                   for node in model.body if isinstance(node, (ast.FunctionDef,
                                                                  ast.AsyncFunctionDef))
-                  and (not node.name.startswith("_") or node.name == "__init__")}
+                  and (not node.name.startswith("_") or node.name in ("__init__", "__call__"))}
         result[entry["id"]] = {
             "symbol": entry["symbol"], "file": entry["file"],
             "description": ast.get_docstring(model) or "",

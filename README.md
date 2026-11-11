@@ -8,13 +8,24 @@ ModelEvoHarness is an **Agent-led offline experiment harness** for recommendatio
 
 | Component | Purpose |
 | --- | --- |
-| [25 family guides and 9 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
-| 77 method cards and [structure patterns](docs/multi-source-guidance.md) | State *when* a method may address a measured bottleneck. A `ready` data contract is not a recommendation or an implementation claim. |
+| [26 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
+| 82 method cards and [structure patterns](docs/multi-source-guidance.md) | State *when* a method may address a measured bottleneck. A `ready` data contract is not a recommendation or an implementation claim. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
-| [77 direct-framework model cores](docs/models.md) | Every method card has self-contained PyTorch and TensorFlow code, with generic TwoTower as one additional structure. The [manifest](src/model_evo_harness/data/model_implementations.json) gives exact class paths. Outputs include logits, retrieval scores, probabilities, representations, scalar objectives and selected indices; the host supplies the appropriate loss and evaluator. No model wrapper is required. |
+| [82 direct-framework model and diagnostic components](docs/models.md) | Every method card has self-contained PyTorch and TensorFlow code, with generic TwoTower as one additional structure. The [manifest](src/model_evo_harness/data/model_implementations.json) gives exact class paths. Outputs include logits, retrieval scores, probabilities, representations, scalar objectives and selected indices; the host supplies the appropriate loss and evaluator. No model wrapper is required. |
 | Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 
 The [source attribution](docs/research/source-attribution.md) records the upstream work that informed the research map. The explanations are independently written; model code includes original implementations and explicitly attributed adaptations with retained [license notices](THIRD_PARTY_NOTICES.md). Coverage is explained in [research source coverage](docs/source-coverage.md).
+
+## Diagnose before changing a backbone
+
+[Research-guided components](docs/research-guided-components.md) expose layer rank,
+variance and branch similarity, protected gradient-based feature screening,
+progressive interaction masks, contextual history encoding and independently
+normalized user/history/target relations. All five have standalone PyTorch and
+TensorFlow source. The Agent receives input prerequisites and controlled
+comparisons; diagnostics suggest hypotheses, while task metrics and ablations
+determine whether a change helps. Feature screening preserves declared
+interaction groups and requires retraining before removing inputs.
 
 ## The experiment loop
 
@@ -33,7 +44,7 @@ The first target is more executable, informative hypotheses per fixed experiment
 
 Promotion defaults to exploratory score comparison, excluding host-contradicted implementations. Hosts can enable `require_verified_implementation=True` (`--require-verified-implementation` in the CLI) to promote only host-verified candidates. Unverified trials remain available for diagnosis and follow-up. Every evaluated trial records eligibility and its promotion reason; the policy is fixed for resume. Implementation verification is separate from statistical confirmation and component attribution, so strict mode does not require an ablation for every experiment.
 
-The built-in provider supports bounded `read_reference` requests for complete PyTorch or TensorFlow modules and training helpers. Selected method IDs trigger a source read if the Agent skipped it; the engine records host-observed source hashes and separate delivery events to the completion callback, ignoring Agent-supplied citation records. Custom adapters use `read_references` and `call_with_references` for the same ledger. Reading and delivery do not prove correct source use. A source read is not a training trial. Each implementation declares its output contract, host training responsibilities and omitted paper mechanisms. These are reference cores, not 77 complete training pipelines.
+The built-in provider supports bounded `read_reference` requests for complete PyTorch or TensorFlow modules and training helpers. Selected method IDs trigger a source read if the Agent skipped it; the engine records host-observed source hashes and separate delivery events to the completion callback, ignoring Agent-supplied citation records. Custom adapters use `read_references` and `call_with_references` for the same ledger. Reading and delivery do not prove correct source use. A source read is not a training trial. Each implementation declares its output contract, host training responsibilities and omitted paper mechanisms. These are reference cores, not 82 complete training pipelines.
 
 See the [audit and remaining gaps](docs/research/harness-audit-2026-10-05.md) and [exploration strategy](src/model_evo_harness/knowledge/exploration_strategy.md).
 

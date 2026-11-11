@@ -8,13 +8,17 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 | 内容 | 作用 |
 | --- | --- |
-| [25 篇方向指南与 9 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 77 张 method card 和[结构选择模式](docs/multi-source-guidance.md) | 根据实际观察到的问题判断何时值得试某种方法。数据条件为 `ready` 只表示具备输入，不代表已有实现或预计收益。 |
+| [26 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
+| 82 张 method card 和[结构选择模式](docs/multi-source-guidance.md) | 根据实际观察到的问题判断何时值得试某种方法。数据条件为 `ready` 只表示具备输入，不代表已有实现或预计收益。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [77 种直接基于框架的模型核心实现](docs/models.md) | 每张 method card 都有独立编写的 PyTorch 和 TensorFlow 代码，另附通用 TwoTower。 [实现清单](src/model_evo_harness/data/model_implementations.json)给出准确类路径。输出可能是 logit、检索分数、概率或表示向量；对应 loss 与评估器由业务方提供。不依赖其他模型包装库。 |
+| [82 种直接基于框架的模型与诊断组件](docs/models.md) | 每张 method card 都有独立编写的 PyTorch 和 TensorFlow 代码，另附通用 TwoTower。 [实现清单](src/model_evo_harness/data/model_implementations.json)给出准确类路径。输出可能是 logit、检索分数、概率或表示向量；对应 loss 与评估器由业务方提供。不依赖其他模型包装库。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 
 [来源署名](docs/research/source-attribution.md)记录研究目录参考的原始资料。仓库内的说明和模型代码均为原创，没有镜像上游正文或源码。[研究覆盖说明](docs/source-coverage.md)列出具体范围。
+
+## 根据内部观测选择 backbone 内的改动
+
+新增[研究组件](docs/research-guided-components.md)：逐层有效秩、方差与分支相似性诊断；保护交互字段的梯度特征筛选；逐层开放的交互边；历史事件上下文编码；用户、历史、候选之间独立归一化的注意力。五个组件均有独立 PyTorch 和 TensorFlow 源码。Agent 会同时读取输入条件、对照方式和实现边界：诊断用于提出假设，消融和任务指标用于判断效果。特征筛选保留声明的交互组，删字段前仍需重训验证。
 
 ## 显式特征交叉：先判断关系，再选择结构
 
@@ -39,7 +43,7 @@ PyTorch 与 TensorFlow 的独立原生 `NumericFieldEmbedding`、`GroupedFM` 提
 
 默认按分数比较候选，并排除宿主确认实现矛盾的候选。宿主可通过 `require_verified_implementation=True`（CLI 为 `--require-verified-implementation`）启用严格晋级，只允许宿主核验通过的候选成为优胜者；未核验实验仍保留，供诊断和后续探索。每轮记录晋级资格与原因，策略随运行身份固定，恢复运行时不能切换。实现核验、统计确认和组件归因分别判断，严格模式不要求每轮都完成消融。
 
-内置供应商接口支持有限轮次的 `read_reference`，读取完整 PyTorch 或 TensorFlow 模块及训练辅助代码。Agent 声明选用已收录方法却未读源码时，框架先提供源码，再要求生成候选；引擎保存宿主实际读取的内容哈希，并独立记录向 completion 回调交付源码的事件，忽略 Agent 自报的引用记录。自定义适配器通过 `read_references` 与 `call_with_references` 接入同一记录流程。读取和交付均不证明候选已正确使用源码。读取不占训练试验次数。每个实现声明输出契约、宿主训练责任和原方法中未实现的部分；当前提供的是机制参考核心，尚不是 77 套完整训练流水线。
+内置供应商接口支持有限轮次的 `read_reference`，读取完整 PyTorch 或 TensorFlow 模块及训练辅助代码。Agent 声明选用已收录方法却未读源码时，框架先提供源码，再要求生成候选；引擎保存宿主实际读取的内容哈希，并独立记录向 completion 回调交付源码的事件，忽略 Agent 自报的引用记录。自定义适配器通过 `read_references` 与 `call_with_references` 接入同一记录流程。读取和交付均不证明候选已正确使用源码。读取不占训练试验次数。每个实现声明输出契约、宿主训练责任和原方法中未实现的部分；当前提供的是机制参考核心，尚不是 82 套完整训练流水线。
 
 参见[本轮审计与剩余缺口](docs/research/harness-audit-2026-10-05.md)及[探索策略](src/model_evo_harness/knowledge/exploration_strategy.md)。
 

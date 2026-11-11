@@ -341,6 +341,66 @@
       "required_evidence": "Time-safe domain histories and masks, declared item/context or user/item tokens, and a downstream host consumer for returned representations.",
       "controlled_comparison": "Hold data, head and training budget fixed; compare retrieval with mean pooling and query generation with a projection-only control, then ablate each composed stage.",
       "reject_if": "Probes collapse without useful task signal, gains require leakage or padded content, or memory/latency cost outweighs reproducible held-out gains."
+    },
+    {
+      "id": "observed_representation_quality",
+      "name": "RankUp representation diagnosis, original masked tensor probes",
+      "method_ids": [
+        "representation_diagnostics"
+      ],
+      "structural_change": "Measure per-sample entropy effective rank, stable rank, token-axis output variance and optional paired-branch cosine similarity on supplied intermediate layers.",
+      "when_to_try": "Named layer activations, valid-token masks, dataset/split/checkpoint identity and declared centering; repeated observed residuals or branch similarity, not guesses from architecture names.",
+      "required_evidence": "Named layer activations, valid-token masks, dataset/split/checkpoint identity and declared centering; repeated observed residuals or branch similarity, not guesses from architecture names.",
+      "controlled_comparison": "First collect diagnostics without changing predictions. Then compare one grouping, projection, sharing or interaction change against the same backbone using task quality and resource guardrails; do not maximize rank alone.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "protected_gradient_screening",
+      "name": "TayFCS-inspired first-order saliency and protected screening, original implementation",
+      "method_ids": [
+        "gradient_feature_selection"
+      ],
+      "structural_change": "Measure mean absolute activation-times-gradient scores and pairwise-common-valid cosine redundancy for supplied field or explicit-cross tensors; select deterministically under a budget while retaining protected indices and interaction groups.",
+      "when_to_try": "Training-split activations and aligned gradients from a declared objective, group/cross-to-source-field mapping, valid counts and protected interaction groups. Use repeated estimates before screening.",
+      "required_evidence": "Training-split activations and aligned gradients from a declared objective, group/cross-to-source-field mapping, valid counts and protected interaction groups. Use repeated estimates before screening.",
+      "controlled_comparison": "Keep all source fields of protected interactions. Compare full-input and screened candidates after matched retraining; ablate nominated groups and report slices, uncertainty and cost. Correlation alone never drops a field.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "progressive_interaction_edges",
+      "name": "MGDIN-inspired initial-affinity progressive edge masks",
+      "method_ids": [
+        "progressive_interaction"
+      ],
+      "structural_change": "Rank directed field-token edges once by initial affinity, then allow nondecreasing edge counts across learned attention and FFN layers. The original ranking is reused throughout the forward pass.",
+      "when_to_try": "Defined field/group token axis, valid masks, observed unsupported/noisy early interactions or persistent pair residuals, and fixed parameter and edge-compute budgets.",
+      "required_evidence": "Defined field/group token axis, valid masks, observed unsupported/noisy early interactions or persistent pair residuals, and fixed parameter and edge-compute budgets.",
+      "controlled_comparison": "Using the same weights, dimensions and inputs, compare full-edge, fixed-sparse and progressive schedules. Keep downstream head, data split and optimizer fixed; ablate the schedule separately from width or depth.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "context_rich_history",
+      "name": "SIF-inspired per-event contextual representation, original continuous adapter",
+      "method_ids": [
+        "contextual_history_encoding"
+      ],
+      "structural_change": "Project aligned event item and context features into a common space and combine them at each historical event, preserving event order and sanitizing padding.",
+      "when_to_try": "Existing aligned per-event attributes and history masks with pre-prediction availability. Confirm the context already exists and is unused before requesting new dataset fields.",
+      "required_evidence": "Existing aligned per-event attributes and history masks with pre-prediction availability. Confirm the context already exists and is unused before requesting new dataset fields.",
+      "controlled_comparison": "Compare item-only and item-plus-context encodings with the same history length, downstream encoder/head and training budget. Include context-shuffle or context-ablation controls.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "separate_history_relations",
+      "name": "CCFormer-inspired independently normalized user/history/target relations",
+      "method_ids": [
+        "relation_history_attention"
+      ],
+      "structural_change": "Use independent learned Q/K/V/output projections and separate softmax normalization for user-to-history, target-to-history and target-to-user attention.",
+      "when_to_try": "Explicit user, ordered history and target token meanings and masks; evidence that joint normalization or candidate-independent history pooling loses useful relational signals.",
+      "required_evidence": "Explicit user, ordered history and target token meanings and masks; evidence that joint normalization or candidate-independent history pooling loses useful relational signals.",
+      "controlled_comparison": "Hold encoders, head and training budget fixed; compare separate relation normalization with joint pooling and ablate one relation at a time. Keep target candidates independent.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
     }
   ]
 }

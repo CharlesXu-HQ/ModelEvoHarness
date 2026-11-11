@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness includes a tensor implementation of **each of its 77 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks: 156 implementation entries in total. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
+ModelEvoHarness includes a tensor implementation of **each of its 82 method cards in both PyTorch and TensorFlow**, plus a generic `TwoTower` example in both frameworks: 166 implementation entries in total. The [implementation manifest](../src/model_evo_harness/data/model_implementations.json) maps every method ID to its class and file, `reference_scope`, `training_support`, `output_contract`, and `limitations`. These contracts reach the Agent through `model_api` and source retrieval. These are compact mechanism references for controlled experiments, not exact reproductions of every layer, loss, data pipeline or serving system in the original papers.
 
 The frameworks are isolated under [`models/pytorch`](../src/model_evo_harness/models/pytorch/) and [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Each module imports only its own deep-learning framework and Python's standard library; there is no DeepCTR, Torch-RecHub, RecBole or other model-wrapper dependency. Importing `model_evo_harness` itself does not import PyTorch or TensorFlow. Install the framework you intend to use separately.
 
@@ -85,3 +85,13 @@ The [TAAC component map](taac-components.md) documents the four new method IDs, 
 ## QueryFormer query-generation components
 
 The [QueryFormer component map](queryformer-components.md) gives the four method IDs, shared framework signatures, tensor masks, a minimal call, source attribution and controlled comparisons. The bridge returns query probes and masked context; the host supplies downstream sequence processing and the task head. This addition preserves the 25 families and separate 115-PDF Reco-papers inventory.
+
+## Research-guided diagnostics and local components
+
+The [component guide](research-guided-components.md) documents five additions:
+`RepresentationDiagnostics`, `GradientFeatureSelector`, `ProgressiveInteraction`,
+`ContextualHistoryEncoder` and `RelationHistoryAttention`. The first two return
+detached measurements or selected indices, not prediction logits; the other
+three return intermediate representations. All are independently extractable in
+both frameworks. Their contracts distinguish observations, screening and
+trainable structure, without adding a new trainer or promising task gain.

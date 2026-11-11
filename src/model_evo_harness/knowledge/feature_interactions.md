@@ -59,6 +59,19 @@ Use `queryformer_co_transformer` when separately encoded user and item fields ne
 
 Both framework modules expose `CoTransformerBlock(dim, num_heads, num_layers=2)` over user/item embeddings and True=valid masks. Padded inputs, including NaNs, are sanitized; padded outputs remain zero. Read the extracted module for residual/LayerNorm and sigmoid-concatenation gate choices. The two-layer setting and attention direction follow [QueryFormer section 4.2](https://arxiv.org/html/2609.16548v1#S4.SS2); normalization, biases and empty-side behavior are explicit engineering choices. This independent paper implementation adds no tokenizer or task head and establishes no task gain. For history retrieval and generated probes, use the related methods in the [sequence-ranking guide](sequence_ranking.md).
 
+## Progressive interaction schedule
+
+`progressive_interaction` keeps a field/group token axis and ranks directed edges
+once from scaled initial raw dot products. Each successive learned attention/FFN
+layer opens a nondecreasing edge budget using that original ranking. Try it when
+observed residuals or early noisy mixing justify controlling when interactions
+occur. Compare full, fixed-sparse and progressive schedules with the same fields,
+parameters, head and training budget; inspect task metrics and cost. Self edges
+count in the budget; empty rows get zero context. This is an original local
+[MGDIN-inspired mechanism](https://arxiv.org/html/2603.12586v1), without learned
+initial Q0/K0, multigranularity branches or semantic-ID preprocessing. Read the
+exact native source and use observed evidence; readiness is not expected gain.
+
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/1.wide_and_deep.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/1.wide_and_deep.html), [docs/chapter_2_ranking/2.feature_crossing/1.second_order.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/2.feature_crossing/1.second_order.html), [src/funrec/models/wide_deep.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/wide_deep.py), [src/funrec/models/fm.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/fm.py).
