@@ -36,7 +36,7 @@ def test_each_added_method_reaches_api_source_guide_and_training_maps():
             assert len(files("model_evo_harness").joinpath(api["local_guide"]).read_text().split()) > 150
     for pattern in catalog["training_patterns"]:
         for method_id in pattern.get("method_ids", []):
-            assert any(card["id"] == method_id for card in new)
+            assert any(card["id"] == method_id for card in catalog["method_cards"])
 
 
 @pytest.mark.parametrize("mutation", ["unknown_method", "unknown_guide", "missing_pdf", "bad_disposition"])

@@ -8,10 +8,10 @@ ModelEvoHarness is an **Agent-led offline experiment harness** for recommendatio
 
 | Component | Purpose |
 | --- | --- |
-| [26 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
-| 82 method cards | Cover 80 model methods and 2 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` data contract means the inputs are declared. |
+| [27 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
+| 84 method cards | Cover 82 model methods and 2 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` data contract means the inputs are declared. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
-| [80 model methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 162 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
+| [82 model methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 166 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
 | [2 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for representation diagnostics and gradient feature screening. `analysis_api` exposes their classes and contracts for explicit host invocation. |
 | Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 
@@ -40,6 +40,16 @@ trains and evaluates the candidate. Both APIs support `read_references`; source
 discovery installs no hooks and runs no tools or training. Analysis tools cannot
 serve as an experiment's standalone `method_id`. Feature screening preserves
 declared interaction groups and requires retraining before removing inputs.
+
+## Discount-aware marketing
+
+[Discount preference and auxiliary supervision](docs/danet-components.md) add a
+calendar-discount branch, target-conditioned purchase attributes and promotion
+context to an existing interest backbone. A separate conversion/discount head
+provides purchase-only regression with explicit label masks. The Agent checks
+historical inputs separately from realized-label availability and can isolate
+structure from objective changes. These response components require the host’s
+causal evaluation before any coupon-incrementality claim.
 
 ## The experiment loop
 

@@ -120,6 +120,25 @@
       "source_models": [],
       "source_support": [],
       "source_project": []
+    },
+    {
+      "id": "discount_response",
+      "name": "Discount-aware marketing and conversion response",
+      "source_repo": "danet-paper",
+      "source_url": "https://arxiv.org/html/2607.12578v1",
+      "stages": [
+        "ranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [],
+      "question": "Does pre-decision discount history or purchase preference explain residual response variation within the current backbone?",
+      "experiment": "Use the existing interest representation; isolate a discount branch, its history/user/context components, and a separately weighted purchase-only regression objective under a fixed evaluation protocol.",
+      "pitfalls": "Realized current-order discounts are labels, not serving inputs. Missing or future histories, mixed ratio definitions and conversion-to-uplift claims invalidate conclusions.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
     }
   ]
 }

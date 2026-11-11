@@ -15,7 +15,7 @@ contracts, controlled comparisons and explicit limitations.
 | `contextual_history_encoding` | `ContextualHistoryEncoder` | Preserve supplied per-event item and context information in historical tokens. |
 | `relation_history_attention` | `RelationHistoryAttention` | Independently normalize user-to-history, target-to-history and target-to-user relations. |
 
-The catalog retains 82 unified method cards: 80 model methods and 2 analysis
+The catalog retains 84 unified method cards: 82 model methods and 2 analysis
 tools. Their implementation and pattern records are separate:
 
 ```text
@@ -25,7 +25,7 @@ src/model_evo_harness/
 │   ├── progressive_interaction.py
 │   └── contextual_history.py
 └── data/
-    ├── model_implementations.json     # 162 entries, including both TwoTower implementations
+    ├── model_implementations.json     # 166 entries, including both TwoTower implementations
     ├── analysis_implementations.json  # 4 entries for 2 tools in both frameworks
     ├── structure_patterns.json       # model changes: structural_change
     └── analysis_patterns.json        # measurements and screening: operation

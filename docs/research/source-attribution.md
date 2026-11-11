@@ -179,3 +179,7 @@ mechanism implementations, not copied paper text/code or full reproductions.
 The shared guide also explains the stages of [VarBPR](https://arxiv.org/html/2503.11067v3)
 and [UTTSI](https://arxiv.org/html/2605.24989v1); these two methods are not added
 to the implementation manifest by this change.
+
+## Discount-aware marketing components
+
+Independent explanations and native implementations are informed by [DANet](https://arxiv.org/html/2607.12578v1). The [author repository](https://github.com/tangrc/DANet) was inspected to identify underspecified FFT, attention, gate and objective details; no source code was copied. The [component contract](../danet-components.md) declares the choices and differences, and [implementation plan](../danet-components-plan.md) records scope. These two mechanisms retain the host backbone and do not implement an uplift estimator or reproduce the production system.

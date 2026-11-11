@@ -4203,6 +4203,124 @@
       },
       "local_guide": "knowledge/sequence_ranking.md",
       "structure_pattern": "separate_history_relations"
+    },
+    {
+      "id": "danet_discount_preference",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.discount_aware:DiscountPreferenceBranch",
+      "file": "models/pytorch/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "predecision_feature_adapter",
+          "ratio_definition",
+          "validity_masks",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent DANet-inspired DPN core, not the production IPN, tokenizer or full Tmall system. Caller supplies target/item embeddings and aligned purchase discount/category/price attributes.",
+        "Uses the declared history length for rFFT/irFFT; packed real/imaginary MLP, one FFN masked-softmax attention and a sigmoid context gate are explicit engineering choices. No silent 400/32/97 conversion, multihead DCM reproduction or guaranteed low-pass property.",
+        "Calendar-aligned history slots are zero-filled for filtering and remasked afterward. Missing slots remain unknown business observations; host owns cutoff, missingness interpretation and sensitivity checks.",
+        "Observed discount ratios must use a consistent [0,1] convention. Invalid padding is sanitized before operations, including NaNs; empty purchase or history signals contribute zero. No treatment-effect or causal debiasing guarantee."
+      ],
+      "output_contract": {
+        "kind": "discount_preference_representation",
+        "shape": "{representation: [B,H+2N], user_preference: [B,H], filtered_history: [B,N], residual_history: [B,N], attention: [B,L]}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_discount_preference",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.discount_aware:DiscountPreferenceBranch",
+      "file": "models/tensorflow/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "predecision_feature_adapter",
+          "ratio_definition",
+          "validity_masks",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent DANet-inspired DPN core, not the production IPN, tokenizer or full Tmall system. Caller supplies target/item embeddings and aligned purchase discount/category/price attributes.",
+        "Uses the declared history length for rFFT/irFFT; packed real/imaginary MLP, one FFN masked-softmax attention and a sigmoid context gate are explicit engineering choices. No silent 400/32/97 conversion, multihead DCM reproduction or guaranteed low-pass property.",
+        "Calendar-aligned history slots are zero-filled for filtering and remasked afterward. Missing slots remain unknown business observations; host owns cutoff, missingness interpretation and sensitivity checks.",
+        "Observed discount ratios must use a consistent [0,1] convention. Invalid padding is sanitized before operations, including NaNs; empty purchase or history signals contribute zero. No treatment-effect or causal debiasing guarantee."
+      ],
+      "output_contract": {
+        "kind": "discount_preference_representation",
+        "shape": "{representation: [B,H+2N], user_preference: [B,H], filtered_history: [B,N], residual_history: [B,N], attention: [B,L]}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_conversion_head",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.discount_aware:DiscountAwareConversionHead",
+      "file": "models/pytorch/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "interest_and_discount_representation_producers",
+          "binary_labels",
+          "realized_discount_labels_and_mask_for_auxiliary",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer.",
+        "objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper.",
+        "Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels.",
+        "Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
+      ],
+      "output_contract": {
+        "kind": "conversion_and_discount_prediction",
+        "shape": "{conversion_logit: [B], discount_prediction: [B]}; objective -> {loss, conversion_loss, discount_loss, discount_count: scalar}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_conversion_head",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.discount_aware:DiscountAwareConversionHead",
+      "file": "models/tensorflow/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "interest_and_discount_representation_producers",
+          "binary_labels",
+          "realized_discount_labels_and_mask_for_auxiliary",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer.",
+        "objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper.",
+        "Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels.",
+        "Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
+      ],
+      "output_contract": {
+        "kind": "conversion_and_discount_prediction",
+        "shape": "{conversion_logit: [B], discount_prediction: [B]}; objective -> {loss, conversion_loss, discount_loss, discount_count: scalar}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
     }
   ]
 }

@@ -377,6 +377,19 @@
       "required_evidence": "Explicit user, ordered history and target token meanings and masks; evidence that joint normalization or candidate-independent history pooling loses useful relational signals.",
       "controlled_comparison": "Hold encoders, head and training budget fixed; compare separate relation normalization with joint pooling and ablate one relation at a time. Keep target candidates independent.",
       "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "discount_conditioned_response",
+      "name": "Discount preference inside the existing response backbone",
+      "method_ids": [
+        "danet_discount_preference",
+        "danet_conversion_head"
+      ],
+      "structural_change": "Add a discount-conditioned representation and an optional supervised discount head to the existing interest representation.",
+      "when_to_try": "Observed response residuals vary across supported historical discount/price/category or promotion slices and pre-decision purchase and calendar inputs are available.",
+      "required_evidence": "Input timing/ratio definitions, history coverage, aligned purchase attributes, a fixed backbone control and realized-label coverage for any auxiliary objective.",
+      "controlled_comparison": "Preserve the host objective and splits. Isolate the branch from auxiliary supervision, then ablate a component whose failure hypothesis is supported by observed evidence; record capacity and compute.",
+      "reject_if": "Missing histories are fabricated, current-order discounts leak, response gains are labeled uplift without causal evaluation, or held-out quality/resource guardrails fail."
     }
   ]
 }

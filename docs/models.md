@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness keeps **82 method cards: 80 model methods and 2 analysis tools**. Each has a native PyTorch and TensorFlow implementation. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 162 entries: the 80 model methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for `representation_diagnostics` and `gradient_feature_selection`.
+ModelEvoHarness keeps **84 method cards: 82 model methods and 2 analysis tools**. Each has a native PyTorch and TensorFlow implementation. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 166 entries: the 82 model methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for `representation_diagnostics` and `gradient_feature_selection`.
 
 `model_api` exposes model constructors and contracts; `analysis_api` exposes analysis tools. Both include class paths, `reference_scope`, `training_support`, `output_contract`, and `limitations`, and both support whole-module `read_references`. These are compact mechanism references for controlled experiments; the host supplies the remaining data, training and evaluation code.
 
@@ -23,6 +23,7 @@ The same model method IDs have corresponding classes in both framework directori
 | [`paper_queryformer.py`](../src/model_evo_harness/models/pytorch/paper_queryformer.py) | `queryformer_co_transformer`, `queryformer_history_retrieval`, `queryformer_query_generator`, `queryformer_query_bridge` | Masked user/item interaction, history retrieval and context-aware query probes; single-view equations 2–4 only. |
 | [`progressive_interaction.py`](../src/model_evo_harness/models/pytorch/progressive_interaction.py) | `progressive_interaction` | Initial-affinity edge order with increasing interaction budgets across layers. |
 | [`contextual_history.py`](../src/model_evo_harness/models/pytorch/contextual_history.py) | `contextual_history_encoding`, `relation_history_attention` | Aligned event context and independently normalized user/history/target reads. |
+| [`discount_aware.py`](../src/model_evo_harness/models/pytorch/discount_aware.py) | `danet_discount_preference`, `danet_conversion_head` | [Discount history, purchase preferences, promotion context and purchase-only auxiliary supervision](danet-components.md). |
 | [`training.py`](../src/model_evo_harness/models/pytorch/training.py) | Training helpers, not method cards | `focal_loss`, `bpr_loss`, `listwise_loss`, `hard_negative_indices`. |
 
 The TensorFlow files use the same names under [`models/tensorflow`](../src/model_evo_harness/models/tensorflow/). Some multi-input Keras models accept multiple tensors through their `call` signature; generic Keras `TwoTower` takes `(user_features, item_features)` as one tuple, while PyTorch `TwoTower` takes two positional tensors.

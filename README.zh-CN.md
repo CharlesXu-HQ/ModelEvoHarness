@@ -8,10 +8,10 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 | 内容 | 作用 |
 | --- | --- |
-| [26 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 82 张 method card | 统一记录 80 种模型方法与 2 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明所需输入。 |
+| [27 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
+| 84 张 method card | 统一记录 82 种模型方法与 2 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明所需输入。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [80 种双框架模型方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 162 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；对应 loss 与评估器由业务方提供。 |
+| [82 种双框架模型方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 166 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；对应 loss 与评估器由业务方提供。 |
 | [2 个双框架分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 4 项，包含表示诊断与梯度特征筛选。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 
@@ -30,6 +30,10 @@ src/model_evo_harness/
 ```
 
 宿主诊断基线或已完成实验时，显式把采集的激活和训练梯度交给分析工具。Agent 据此提出模型改动，宿主接入模型组件后训练并评估候选。两类源码均可通过 `read_references` 读取；发现接口和源码读取不会自动安装 hook、执行工具或训练。分析工具不能作为独立模型实验的 `method_id`。特征筛选保留声明的交互组，删字段前仍需重训验证。
+
+## 折扣感知的营销模型迭代
+
+新增 [DANet 机制组件](docs/danet-components.md)：商品折扣历史滤波、候选商品条件下的购买属性注意力、促销上下文门控，以及仅在有效购买样本上监督的折扣辅助回归。组件可以接入现有兴趣 backbone；Agent 分别检查历史输入和真实折扣标签是否具备，并能独立消融结构与 loss。优惠券增量效果仍由接入方的因果评估验证。
 
 ## 显式特征交叉：先判断关系，再选择结构
 
