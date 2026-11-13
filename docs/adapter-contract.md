@@ -13,7 +13,7 @@ class Task:
             "task_id": "my-ranking-task-v1",
             "dataset_digest": "sha256-of-frozen-data-and-split",
             "stage": "ranking",  # e.g. retrieval, ranking, reranking, policy
-            "framework": "pytorch",  # or tensorflow; selects model API examples for the Agent
+            "framework": "pytorch",  # or tensorflow; selects model and analysis APIs for the Agent
             "fields": ["user_age", "item_category"],
             "capabilities": ["tabular_features", "observed_outcome_labels"],
             "objective": {"name": "ndcg_at_10", "direction": "max"},
@@ -85,7 +85,11 @@ class Agent:
     def reflect(self, observation: dict) -> dict: ...
 ```
 
-`context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. The catalog includes 22 research families, 44 method cards, structural patterns, training patterns and a model implementation manifest. `method_applicability.frameworks` reports direct PyTorch/TensorFlow code for each card. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both. The generic `two_tower` example is in the implementation manifest but is not one of the 44 method cards. A `ready` method means its inputs are declared; it does not prove that the method helps.
+`context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` and `analysis_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. `model_api` contains model components; `analysis_api` contains diagnostic and screening tools. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both.
+
+The catalog includes 27 research families and 84 unified method cards: 82 model methods and 2 analysis tools. `model_implementations.json` has 166 entries, including generic `two_tower` in both frameworks; `analysis_implementations.json` has 4 entries. TwoTower remains outside the method cards. `method_applicability.frameworks` reports native PyTorch/TensorFlow availability for either kind. Model changes use `structure_patterns` with `structural_change`; analysis uses `analysis_patterns` with `operation`. A `ready` status means the inputs are declared; it does not establish effectiveness.
+
+Analysis tools live in `analysis/<framework>/research_diagnostics.py`. The host explicitly invokes them on captured activations and training gradients while diagnosing a baseline or completed trial, and may report the observations as host evidence. Model components under `models/<framework>` are integrated into the candidate's forward computation. API discovery and source retrieval install no hooks, invoke no analysis tools and run no training.
 
 A base proposal has the following shape. This fragment omits `research.model_design`, which is required when either design flag is enabled, and evidence fields required when the host supplies facts. Combine it with the [complete design example](horizontal-composition.md#complete-model-design-example) and the relevant host evidence; it is not a complete built-in-provider proposal on its own.
 
@@ -109,7 +113,7 @@ A base proposal has the following shape. This fragment omits `research.model_des
 }
 ```
 
-`family_id` and `method_id` are optional; omit them for a justified new direction. Known IDs are checked against stage and capabilities, and a method must belong to its named family. `input_fields` names only fields in the snapshot; it may be empty for a decision-rule experiment over existing predictions. Training changes such as focal loss or hard-negative mining are first-class [training patterns](../src/model_evo_harness/data/training_patterns.json); the proposal still names one mechanism and a controlled comparison. Alternatives are considered options, not completed trials.
+`family_id` and `method_id` are optional; omit them for a justified new direction. Known IDs are checked against stage and capabilities, and a method must belong to its named family. Analysis tool IDs (`representation_diagnostics` and `gradient_feature_selection`) cannot be an experiment's standalone `method_id`; use their observations to justify the actual model or training change. `input_fields` names only fields in the snapshot; it may be empty for a decision-rule experiment over existing predictions. Training changes such as focal loss or hard-negative mining are first-class [training patterns](../src/model_evo_harness/data/training_patterns.json); the proposal still names one mechanism and a controlled comparison. Alternatives are considered options, not completed trials.
 
 The Agent may instead return `{"action":"stop","reason":"..."}` or a terminal `request_data`. A data request names absent `fields`, `source`, `as_of`, `reason`, `evidence` and `validation_plan`, then uses one of two `basis` values:
 
@@ -152,10 +156,10 @@ The journal is stored in `output/journal.json` through an atomic replace. Failed
 The built-in API provider understands a preparatory JSON action:
 
 ```json
-{"action":"read_reference","framework":"pytorch","method_ids":["fm","deepfm"],"include_training":true,"include_composition":true}
+{"action":"read_reference","framework":"pytorch","method_ids":["fm","representation_diagnostics"],"include_training":true,"include_composition":true}
 ```
 
-This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four model IDs. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled `method_id` automatically gets its module before a final experiment if it was not already read.
+This loads complete bundled modules, including shared helper classes; no filesystem path, network URL or import execution is accepted. A request selects up to four IDs across the model and analysis manifests. Analysis IDs resolve to `analysis/<framework>` and model IDs to `models/<framework>`; reading either returns source and contracts without executing it. The two-round, 100,000-character bound applies per proposal, and repeated modules are deduplicated. Framework selection follows the task when declared. The next call receives `reference_material` and `reference_contracts`; source contents never become system instructions. A declared bundled model `method_id` automatically gets its module before a final experiment if it was not already read.
 
 Within `run_search`, the engine creates a separate reference ledger for each `agent.propose()` invocation. Only `read_references(catalog, request)` populates official `reference_reads` (path to SHA-256). The engine ignores Agent-returned `reference_reads` and `reference_events`. The journal's ordered `reference_events` distinguishes actual `read` events from `delivered` events: source material supplied to a host completion callback. Both events record a `files` path/hash mapping; the enclosing trial and run identity identify the proposal and installed source version. Delivery does not attest to a successful API response, model understanding, or candidate correctness. Trusted Python host adapters remain responsible for forwarding context to the provider; this is not isolation from malicious in-process code.
 

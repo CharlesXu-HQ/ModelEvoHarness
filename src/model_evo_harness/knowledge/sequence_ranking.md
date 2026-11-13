@@ -42,6 +42,23 @@ First compare history retrieval with masked mean pooling, and query generation w
 
 The independent implementation follows the query-generation portion of [QueryFormer section 4.2](https://arxiv.org/html/2609.16548v1#S4.SS2), with exact constructors and engineering boundaries available through `model_api` and whole-module `read_references`. It covers single-view equations 2–4 only. The host supplies downstream sequence encoding/mixing/readout, a prediction head and training; H>1 views and packed shared-parameter execution are unavailable. Mean/max initialization is direct, with no extra probe projection before attention; per-domain parameters, Co-Transformer residual post-LayerNorm, biases and empty-input behavior are declared in the source. Query generation adds no residual or LayerNorm after attention. The author repository/license is unconfirmed and no third-party code was copied.
 
+## Context-rich events and separate relation normalization
+
+`contextual_history_encoding` fuses aligned per-event item and context features
+before the downstream sequence encoder. Use it when the dataset already contains
+pre-decision event attributes that current tokens omit; compare with item-only
+and context-shuffled controls. It preserves order but adds no chronology, codebook
+or data. `relation_history_attention` separately normalizes user-to-history,
+target-to-history and target-to-user attention, with disjoint learned projections.
+Compare this local branch with joint pooling and ablate relations independently;
+keep the same task head and training budget. Masked NaNs are sanitized and absent
+relations remain zero with false availability. Candidate targets do not attend
+to one another. These original components draw on
+[SIF](https://arxiv.org/html/2604.15650v3) and
+[CCFormer](https://arxiv.org/html/2607.28070v2); they omit SIF quantization and the
+CCFormer hierarchical compression pipeline. Event context must exist at the
+historical cutoff; outcome or future exposure information is not a valid input.
+
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_2_ranking/3.sequence.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_2_ranking/3.sequence.html), [src/funrec/models/din.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/din.py), [src/funrec/models/dien.py](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/models/dien.py).

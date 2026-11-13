@@ -12,6 +12,8 @@ def test_each_method_has_explicit_framework_boundaries():
     cards += json.loads((DATA / "supplemental_method_cards.json").read_text())["method_cards"]
     implementations = json.loads((DATA / "model_implementations.json").read_text())[
         "model_implementations"]
+    implementations += json.loads((DATA / "analysis_implementations.json").read_text())[
+        "analysis_implementations"]
     by_method = {}
     for entry in implementations:
         assert entry["reference_scope"] == "mechanism_reference"
@@ -32,7 +34,8 @@ def test_each_method_has_explicit_framework_boundaries():
         assert frameworks["pytorch"]["output_contract"] == frameworks["tensorflow"][
             "output_contract"]
         for entry in frameworks.values():
-            if method_id in {"item_cf", "user_cf", "swing", "dpp_greedy"}:
+            if method_id in {"item_cf", "user_cf", "swing", "dpp_greedy",
+                             "representation_diagnostics", "gradient_feature_selection"}:
                 assert entry["training_support"]["mode"] == "closed_form"
                 assert "trainer" not in entry["training_support"]["requires_host"]
             else:

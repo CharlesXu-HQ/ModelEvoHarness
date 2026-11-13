@@ -165,3 +165,21 @@ The [component map](../taac-components.md) records the four added mechanisms and
 ## QueryFormer component source
 
 `queryformer_co_transformer`, `queryformer_history_retrieval`, `queryformer_query_generator` and `queryformer_query_bridge` are independent implementations informed by [QueryFormer v1, section 4.2](https://arxiv.org/html/2609.16548v1#S4.SS2). The [component contract](../queryformer-components.md) distinguishes the paper mechanisms from pooling, gate, residual/LayerNorm, parameter-sharing and empty-input engineering choices. The author repository and code license have not been confirmed; no third-party code was copied. The [introductory article](https://mp.weixin.qq.com/s/FNdUKN6dkCtIuufu4uQa3g) is a discovery source only. The implemented scope is single-view equations 2–4, with downstream sequence processing, packed views and the full training recipe excluded.
+
+## Research-guided components (2026-11-11)
+
+Sources discovered through [step-by-step-learning-ai](https://github.com/lmxhappy/step-by-step-learning-ai/tree/fb3a35da6671a13ba71a074b68e20574c5525e98) and checked against the papers:
+[RankUp v3](https://arxiv.org/html/2604.17878v3),
+[TayFCS v1](https://arxiv.org/html/2507.03895v1),
+[MGDIN v1](https://arxiv.org/html/2603.12586v1),
+[SIF v3](https://arxiv.org/html/2604.15650v3),
+[CCFormer v2](https://arxiv.org/html/2607.28070v2).
+The five [native components](../research-guided-components.md) are original
+mechanism implementations, not copied paper text/code or full reproductions.
+The shared guide also explains the stages of [VarBPR](https://arxiv.org/html/2503.11067v3)
+and [UTTSI](https://arxiv.org/html/2605.24989v1); these two methods are not added
+to the implementation manifest by this change.
+
+## Discount-aware marketing components
+
+Independent explanations and native implementations are informed by [DANet](https://arxiv.org/html/2607.12578v1). The [author repository](https://github.com/tangrc/DANet) was inspected to identify underspecified FFT, attention, gate and objective details; no source code was copied. The [component contract](../danet-components.md) declares the choices and differences, and [implementation plan](../danet-components-plan.md) records scope. These two mechanisms retain the host backbone and do not implement an uplift estimator or reproduce the production system.

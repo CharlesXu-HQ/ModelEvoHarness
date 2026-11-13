@@ -3,7 +3,7 @@ import unittest
 
 from model_evo_harness.catalog import (applicability, catalog_digest, coverage_report,
                                        decision_applicability, implementation_digest, load_catalog,
-                                       load_inventory, load_guide, model_api, method_applicability,
+                                       load_inventory, load_guide, model_api, analysis_api, method_applicability,
                                        training_applicability,
                                        validate_research)
 
@@ -35,7 +35,8 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(sum(card.get("source_repo", "funrec") == "funrec"
                              for card in self.catalog["method_cards"]), 38)
         self.assertGreater(len(self.catalog["method_cards"]), 38)
-        linked = [method_id for pattern in self.catalog["structure_patterns"]
+        linked = [method_id for pattern in (self.catalog["structure_patterns"] +
+                                            self.catalog["analysis_patterns"])
                   for method_id in pattern["method_ids"]]
         self.assertEqual(set(linked), {card["id"] for card in self.catalog["method_cards"]})
         self.assertEqual(len(linked), len(set(linked)))
@@ -165,19 +166,24 @@ class CatalogTests(unittest.TestCase):
 
     def test_model_manifest_distinguishes_code_from_guidance(self):
         implementations = self.catalog["model_implementations"]
+        analysis = self.catalog["analysis_implementations"]
+        analysis_ids = {item["id"] for item in analysis}
         card_ids = {card["id"] for card in self.catalog["method_cards"]}
-        self.assertEqual(len(card_ids), 77)
-        self.assertEqual(len(implementations), 2 * (len(card_ids) + 1))
-        self.assertEqual({item["id"] for item in implementations}, card_ids | {"two_tower"})
+        self.assertEqual(len(card_ids), 84)
+        self.assertEqual(len(analysis), 4)
+        self.assertEqual(len(implementations), 166)
+        self.assertEqual({item["id"] for item in implementations}, (card_ids - analysis_ids) | {"two_tower"})
         for method_id in card_ids:
             with self.subTest(method=method_id):
-                self.assertEqual({item["framework"] for item in implementations
+                self.assertEqual({item["framework"] for item in implementations + analysis
                                   if item["id"] == method_id}, {"pytorch", "tensorflow"})
         for framework in ("pytorch", "tensorflow"):
             with self.subTest(framework=framework):
                 self.assertEqual(set(model_api(self.catalog, framework=framework,
                                                method_ids=card_ids | {"two_tower"})),
-                                 card_ids | {"two_tower"})
+                                 (card_ids - analysis_ids) | {"two_tower"})
+                self.assertEqual(set(analysis_api(self.catalog, framework=framework,
+                                                  method_ids=card_ids)), analysis_ids)
 
     def test_agent_can_read_local_model_api_without_importing_frameworks(self):
         pytorch = model_api(self.catalog, framework="pytorch",

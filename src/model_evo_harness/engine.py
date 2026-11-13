@@ -396,7 +396,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
         raise ValueError("require_verified_implementation must be a bool")
     promotion_policy = {"require_verified_implementation": require_verified_implementation}
 
-    from .catalog import (applicability, catalog_digest, common_knowledge, decision_applicability,
+    from .catalog import (applicability, analysis_api, catalog_digest, common_knowledge, decision_applicability,
                           implementation_digest, load_guide, model_api, method_applicability,
                           training_applicability)
 
@@ -421,6 +421,9 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
     model_apis = {framework: model_api(catalog, framework=framework,
                                       method_ids=ready_methods)
                   for framework in frameworks}
+    analysis_apis = {framework: analysis_api(catalog, framework=framework,
+                                            method_ids=ready_methods)
+                     for framework in frameworks}
     structured = catalog.get("experience_schema_version") == 2
     identity = {
         "task_id": snapshot["task_id"],
@@ -475,6 +478,7 @@ def run_search(task: object, agent: object, *, output: Path, catalog: dict,
             "training_applicability": training_report,
             "knowledge": knowledge,
             "model_api": model_apis,
+            "analysis_api": analysis_apis,
             "baseline": state["baseline"],
             "steps": state["steps"],
             "best_id": state["best_id"],

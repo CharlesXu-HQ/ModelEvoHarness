@@ -254,6 +254,28 @@
       "required_evidence": "Explicit tensor and label provenance; losses are not permission to rebuild production data or infer missing labels.",
       "controlled_comparison": "Use the same examples and backbone with the original objective as control; change one loss term or weight.",
       "reject_if": "Assumptions fail, gradients are unstable, or held-out task utility or calibration regresses."
+    },
+    {
+      "id": "purchase_discount_auxiliary",
+      "category": "loss",
+      "method_ids": [
+        "danet_conversion_head"
+      ],
+      "stages": [
+        "ranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [
+        "observed_outcome_labels",
+        "realized_discount_labels",
+        "discount_prediction"
+      ],
+      "mechanism": "Use DiscountAwareConversionHead.objective: mean conversion BCE plus alpha times MSE on valid purchased-row discount labels; no valid positives contributes zero.",
+      "when_to_try": "Measured discount-related residuals remain and aligned realized-discount labels have sufficient positive coverage; the current task permits a response auxiliary objective.",
+      "required_evidence": "Training-only label lineage, common [0,1] ratio convention, positive-label count and coverage by slice; current-order realized labels are excluded from forward inputs.",
+      "controlled_comparison": "Keep the forward path and batches fixed; compare alpha=0 against a declared weight and inspect conversion quality, calibration, gradient scale and host business evaluation.",
+      "reject_if": "Negative/unavailable labels influence auxiliary gradients, zero-positive batches diverge, label timing leaks into features, or the fixed evaluation metric regresses."
     }
   ]
 }

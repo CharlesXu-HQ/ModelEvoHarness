@@ -97,6 +97,48 @@
       "source_models": [],
       "source_support": [],
       "source_project": []
+    },
+    {
+      "id": "representation_quality",
+      "name": "Representation diagnostics and feature screening",
+      "source_repo": "research-guided-components",
+      "source_url": "https://arxiv.org/html/2604.17878v3",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "reranking",
+        "policy",
+        "advertising",
+        "generation",
+        "search"
+      ],
+      "requires": [],
+      "question": "Which observed representation or input-use bottleneck warrants a local experiment?",
+      "experiment": "Inspect supplied training activations and gradients, state competing explanations, then change one component or protected feature group with a matched ablation and retraining.",
+      "pitfalls": "Effective rank, saliency and cosine similarity are diagnostics, not causal importance or proof of task improvement. Do not prune interaction-only fields from marginal scores.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
+    },
+    {
+      "id": "discount_response",
+      "name": "Discount-aware marketing and conversion response",
+      "source_repo": "danet-paper",
+      "source_url": "https://arxiv.org/html/2607.12578v1",
+      "stages": [
+        "ranking",
+        "policy",
+        "advertising"
+      ],
+      "requires": [],
+      "question": "Does pre-decision discount history or purchase preference explain residual response variation within the current backbone?",
+      "experiment": "Use the existing interest representation; isolate a discount branch, its history/user/context components, and a separately weighted purchase-only regression objective under a fixed evaluation protocol.",
+      "pitfalls": "Realized current-order discounts are labels, not serving inputs. Missing or future histories, mixed ratio definitions and conversion-to-uplift claims invalidate conclusions.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
     }
   ]
 }

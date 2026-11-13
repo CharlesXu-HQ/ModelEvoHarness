@@ -12,7 +12,7 @@ from .references import call_with_references
 from .interaction import INTERACTION_INSTRUCTIONS
 
 
-REFERENCE_INSTRUCTIONS = """Before introducing or modifying a bundled model, read its source:
+REFERENCE_INSTRUCTIONS = """Before using a bundled model or analysis tool, read its source:
 return {"action":"read_reference","framework":"pytorch or tensorflow",
 "method_ids":["up to four manifest IDs"],"include_training":true,"include_composition":true} instead of a candidate.
 The host returns complete local modules, including helper classes and executable loss
@@ -55,7 +55,8 @@ def propose_with_references(complete, context: dict, *, catalog: dict,
             requested.extend(component["reference_method_id"] for component in design["components"]
                              if isinstance(component, dict) and
                              isinstance(component.get("reference_method_id"), str))
-        unread = [entry["id"] for entry in catalog.get("model_implementations", [])
+        unread = [entry["id"] for entry in (catalog.get("model_implementations", []) +
+                                             catalog.get("analysis_implementations", []))
                   if entry["id"] in requested and entry["framework"] == framework and
                   entry["file"] not in material]
         parallel = (design.get("horizontal_expansion") or {}) if isinstance(design, dict) else {}
@@ -189,10 +190,16 @@ from what has been established for any individual component."""
 
 _PROPOSE_INSTRUCTIONS = """You lead one offline model-research decision. Return one JSON object only.
 Use the task, local knowledge, catalog families, method_cards, structure_patterns,
-training_patterns, decision_checks, model_api and their applicability reports, baseline,
+analysis_patterns, training_patterns, decision_checks, model_api, analysis_api and their applicability reports, baseline,
 and measured step history in the user JSON. Local guides contain the working material;
 source paths provide attribution. The model implementation manifest and model_api give
-exact component boundaries. The paper_inventory records added/existing cores,
+model component boundaries; analysis_implementations and analysis_api separately expose
+observation and screening tools. Analysis patterns describe operations, not structural changes.
+The host supplies activations/gradients and runs analysis tools explicitly; source retrieval
+does not execute them. Do not place analysis tools in model_design components or use their
+IDs as research.method_id. Use their observed results to propose an actual model/training
+change (or omit method_id for a custom screened-and-retrained candidate). A diagnostic
+alone is not an optimization trial. The paper_inventory records added/existing cores,
 shared mechanisms and exclusions; it is not a claim of full-paper reproduction.
 Do not infer a data pipeline, sampler, index or online policy from a tensor core.
 Use method requirements, local guides and implementation contracts together. The APIs give

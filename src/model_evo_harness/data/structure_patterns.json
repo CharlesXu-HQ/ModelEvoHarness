@@ -341,6 +341,55 @@
       "required_evidence": "Time-safe domain histories and masks, declared item/context or user/item tokens, and a downstream host consumer for returned representations.",
       "controlled_comparison": "Hold data, head and training budget fixed; compare retrieval with mean pooling and query generation with a projection-only control, then ablate each composed stage.",
       "reject_if": "Probes collapse without useful task signal, gains require leakage or padded content, or memory/latency cost outweighs reproducible held-out gains."
+    },
+    {
+      "id": "progressive_interaction_edges",
+      "name": "MGDIN-inspired initial-affinity progressive edge masks",
+      "method_ids": [
+        "progressive_interaction"
+      ],
+      "structural_change": "Rank directed field-token edges once by initial affinity, then allow nondecreasing edge counts across learned attention and FFN layers. The original ranking is reused throughout the forward pass.",
+      "when_to_try": "Defined field/group token axis, valid masks, observed unsupported/noisy early interactions or persistent pair residuals, and fixed parameter and edge-compute budgets.",
+      "required_evidence": "Defined field/group token axis, valid masks, observed unsupported/noisy early interactions or persistent pair residuals, and fixed parameter and edge-compute budgets.",
+      "controlled_comparison": "Using the same weights, dimensions and inputs, compare full-edge, fixed-sparse and progressive schedules. Keep downstream head, data split and optimizer fixed; ablate the schedule separately from width or depth.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "context_rich_history",
+      "name": "SIF-inspired per-event contextual representation, original continuous adapter",
+      "method_ids": [
+        "contextual_history_encoding"
+      ],
+      "structural_change": "Project aligned event item and context features into a common space and combine them at each historical event, preserving event order and sanitizing padding.",
+      "when_to_try": "Existing aligned per-event attributes and history masks with pre-prediction availability. Confirm the context already exists and is unused before requesting new dataset fields.",
+      "required_evidence": "Existing aligned per-event attributes and history masks with pre-prediction availability. Confirm the context already exists and is unused before requesting new dataset fields.",
+      "controlled_comparison": "Compare item-only and item-plus-context encodings with the same history length, downstream encoder/head and training budget. Include context-shuffle or context-ablation controls.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "separate_history_relations",
+      "name": "CCFormer-inspired independently normalized user/history/target relations",
+      "method_ids": [
+        "relation_history_attention"
+      ],
+      "structural_change": "Use independent learned Q/K/V/output projections and separate softmax normalization for user-to-history, target-to-history and target-to-user attention.",
+      "when_to_try": "Explicit user, ordered history and target token meanings and masks; evidence that joint normalization or candidate-independent history pooling loses useful relational signals.",
+      "required_evidence": "Explicit user, ordered history and target token meanings and masks; evidence that joint normalization or candidate-independent history pooling loses useful relational signals.",
+      "controlled_comparison": "Hold encoders, head and training budget fixed; compare separate relation normalization with joint pooling and ablate one relation at a time. Keep target candidates independent.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement."
+    },
+    {
+      "id": "discount_conditioned_response",
+      "name": "Discount preference inside the existing response backbone",
+      "method_ids": [
+        "danet_discount_preference",
+        "danet_conversion_head"
+      ],
+      "structural_change": "Add a discount-conditioned representation and an optional supervised discount head to the existing interest representation.",
+      "when_to_try": "Observed response residuals vary across supported historical discount/price/category or promotion slices and pre-decision purchase and calendar inputs are available.",
+      "required_evidence": "Input timing/ratio definitions, history coverage, aligned purchase attributes, a fixed backbone control and realized-label coverage for any auxiliary objective.",
+      "controlled_comparison": "Preserve the host objective and splits. Isolate the branch from auxiliary supervision, then ablate a component whose failure hypothesis is supported by observed evidence; record capacity and compute.",
+      "reject_if": "Missing histories are fabricated, current-order discounts leak, response gains are labeled uplift without causal evaluation, or held-out quality/resource guardrails fail."
     }
   ]
 }

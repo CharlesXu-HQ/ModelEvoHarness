@@ -811,6 +811,129 @@
       "comparison": "Add the bridge to the same host backbone/head and compare with its removal; separately ablate Co-Transformer, retrieval and query generation under the same data, optimization and cost reporting.",
       "failure_signals": "No reproducible held-out improvement; dependence on future events or padded values; collapsed probes, unstable gradients, or unacceptable parameter/latency/memory cost.",
       "implementation_boundary": "Single-view composition of equations 2-4 only. Context ordering is updated user tokens, updated item tokens, then retrieved domain tokens in supplied domain order. Inherits the standalone components' pooling, Co-Transformer gate/residual/LayerNorm and empty-input engineering choices; query generation adds no residual or LayerNorm. Every returned mask uses True=valid. Equation 5 sequence encoding/mixing/readout, H>1 views, packed shared-parameter attention, tokenizer, training recipe and prediction head are excluded. No TensorFlow 1.15, full champion reproduction, throughput or business-gain claim. Independent paper-based implementation; author repository and code license are unconfirmed, and no third-party code was copied. True means valid; padding is sanitized before arithmetic, including padded NaNs. Empty affected outputs are zero."
+    },
+    {
+      "id": "representation_diagnostics",
+      "family_id": "representation_quality",
+      "source_repo": "research-guided-components",
+      "source_model": "RankUp representation diagnosis, original masked tensor probes",
+      "source_url": "https://arxiv.org/html/2604.17878v3",
+      "source_references": [],
+      "mechanism": "Measure per-sample entropy effective rank, stable rank, token-axis output variance and optional paired-branch cosine similarity on supplied intermediate layers.",
+      "requires": [
+        "intermediate_representations"
+      ],
+      "comparison": "First collect diagnostics without changing predictions. Then compare one grouping, projection, sharing or interaction change against the same backbone using task quality and resource guardrails; do not maximize rank alone.",
+      "failure_signals": "No repeatable task gain after the controlled intervention, unsupported inputs, unstable or misleading diagnostics, invalid masking, loss of protected interaction signal or cost beyond budget.",
+      "implementation_boundary": "Detached diagnostics only; no parameters, loss, automatic hooks or automatic collapse classification. Caller explicitly supplies intermediate states. Ranks use each sample token-by-channel matrix; variance uses valid-token population variance averaged over channels. Optional centering changes rank and cosine semantics. Zero input has rank zero by convention. Paired branch cosine requires aligned shapes; missing observations are not evidence of a bottleneck."
+    },
+    {
+      "id": "gradient_feature_selection",
+      "family_id": "representation_quality",
+      "source_repo": "research-guided-components",
+      "source_model": "TayFCS-inspired first-order saliency and protected screening, original implementation",
+      "source_url": "https://arxiv.org/html/2507.03895v1",
+      "source_references": [],
+      "mechanism": "Measure mean absolute activation-times-gradient scores and pairwise-common-valid cosine redundancy for supplied field or explicit-cross tensors; select deterministically under a budget while retaining protected indices and interaction groups.",
+      "requires": [
+        "intermediate_representations",
+        "activation_gradients"
+      ],
+      "comparison": "Keep all source fields of protected interactions. Compare full-input and screened candidates after matched retraining; ablate nominated groups and report slices, uncertainty and cost. Correlation alone never drops a field.",
+      "failure_signals": "No repeatable task gain after the controlled intervention, unsupported inputs, unstable or misleading diagnostics, invalid masking, loss of protected interaction signal or cost beyond budget.",
+      "implementation_boundary": "First-order diagnostic inspired by feature screening, not a complete TayFCS or LO-FAR reproduction; no automatic cross enumeration or causal-importance claim. Redundancy is absolute cosine over common valid observations, not a removal decision. Score rows may represent fields or explicit crosses; source-field lineage is caller-owned. select is eager/offline, uses stable index tie breaking, retains every protected group member, and rejects budgets below protected requirements. Protection must be supplied explicitly. Single-feature saliency can miss interaction-only value. Training-only screening must be followed by ablation and retraining; do not use final holdout labels for selection."
+    },
+    {
+      "id": "progressive_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "research-guided-components",
+      "source_model": "MGDIN-inspired initial-affinity progressive edge masks",
+      "source_url": "https://arxiv.org/html/2603.12586v1",
+      "source_references": [],
+      "mechanism": "Rank directed field-token edges once by initial affinity, then allow nondecreasing edge counts across learned attention and FFN layers. The original ranking is reused throughout the forward pass.",
+      "requires": [
+        "field_tokens"
+      ],
+      "comparison": "Using the same weights, dimensions and inputs, compare full-edge, fixed-sparse and progressive schedules. Keep downstream head, data split and optimizer fixed; ablate the schedule separately from width or depth.",
+      "failure_signals": "No repeatable task gain after the controlled intervention, unsupported inputs, unstable or misleading diagnostics, invalid masking, loss of protected interaction signal or cost beyond budget.",
+      "implementation_boundary": "Original local mechanism inspired by MGDIN, not its multi-granularity full model or semantic-ID pipeline. Initial affinity uses scaled raw token dot products, with descending scores and stable row-major ties; it has no learned Q0/K0. Current layer Q/K/V projections are learned. Budgets count global directed edges including self edges, bounded by actual field_count squared. Empty attention rows get zero context; invalid fields stay zero. Sorting is discrete, not a learned differentiable gate."
+    },
+    {
+      "id": "contextual_history_encoding",
+      "family_id": "sequence_ranking",
+      "source_repo": "research-guided-components",
+      "source_model": "SIF-inspired per-event contextual representation, original continuous adapter",
+      "source_url": "https://arxiv.org/html/2604.15650v3",
+      "source_references": [],
+      "mechanism": "Project aligned event item and context features into a common space and combine them at each historical event, preserving event order and sanitizing padding.",
+      "requires": [
+        "event_sequence",
+        "aligned_event_context",
+        "sequence_mask"
+      ],
+      "comparison": "Compare item-only and item-plus-context encodings with the same history length, downstream encoder/head and training budget. Include context-shuffle or context-ablation controls.",
+      "failure_signals": "No repeatable task gain after the controlled intervention, unsupported inputs, unstable or misleading diagnostics, invalid masking, loss of protected interaction signal or cost beyond budget.",
+      "implementation_boundary": "Continuous tanh fusion of item and context projections only; not SIF hierarchical quantization, codebook training or the complete SIF-Mixer. Caller supplies ordered, aligned, pre-decision features. This adapter adds no timestamps, position encoding or causal sequence mixing. Padding is zeroed before projections and after fusion; missing histories remain absent. No data is fetched or fabricated."
+    },
+    {
+      "id": "relation_history_attention",
+      "family_id": "sequence_ranking",
+      "source_repo": "research-guided-components",
+      "source_model": "CCFormer-inspired independently normalized user/history/target relations",
+      "source_url": "https://arxiv.org/html/2607.28070v2",
+      "source_references": [],
+      "mechanism": "Use independent learned Q/K/V/output projections and separate softmax normalization for user-to-history, target-to-history and target-to-user attention.",
+      "requires": [
+        "event_sequence",
+        "user_tokens",
+        "item_tokens",
+        "sequence_mask"
+      ],
+      "comparison": "Hold encoders, head and training budget fixed; compare separate relation normalization with joint pooling and ablate one relation at a time. Keep target candidates independent.",
+      "failure_signals": "No repeatable task gain after the controlled intervention, unsupported inputs, unstable or misleading diagnostics, invalid masking, loss of protected interaction signal or cost beyond budget.",
+      "implementation_boundary": "Three relational attention cores only; no CCFormer hierarchical history compression, local token-channel mixer, prediction head or complete paper reproduction. Returned user/history evidence is not overwritten by target outputs. Gradients still flow unless the caller detaches tensors; no target-to-target attention. Absent key/query sides return zero and false availability; independent softmax sums to one only on valid query/key rows. Caller owns pre-decision temporal validity."
+    },
+    {
+      "id": "danet_discount_preference",
+      "family_id": "discount_response",
+      "source_repo": "danet-paper",
+      "source_model": "DANet equations 3-6",
+      "source_url": "https://arxiv.org/html/2607.12578v1",
+      "source_references": [
+        "https://github.com/tangrc/DANet"
+      ],
+      "mechanism": "Filter the complete item-discount calendar in frequency space; pool purchase attributes using target-conditioned item attention, apply a promotion-context gate, and concatenate preference with filtered/residual histories.",
+      "requires": [
+        "item_discount_history",
+        "regular_time_grid",
+        "purchase_history",
+        "aligned_purchase_discount_price_category",
+        "target_item_embedding",
+        "promotion_context",
+        "sequence_mask",
+        "predecision_feature_cutoff"
+      ],
+      "comparison": "Keep the interest backbone, features and budget fixed; compare branch removal and one history/user/context ablation chosen by measured residuals. Test simpler time-domain or pooled controls before attributing benefit to frequency filtering.",
+      "failure_signals": "Gains rely on future/realized labels as inputs, disappear with a fixed control or held-out slices, worsen calibration/cost, or require unsupported input semantics.",
+      "implementation_boundary": "Independent DANet-inspired DPN core, not the production IPN, tokenizer or full Tmall system. Caller supplies target/item embeddings and aligned purchase discount/category/price attributes. Uses the declared history length for rFFT/irFFT; packed real/imaginary MLP, one FFN masked-softmax attention and a sigmoid context gate are explicit engineering choices. No silent 400/32/97 conversion, multihead DCM reproduction or guaranteed low-pass property. Calendar-aligned history slots are zero-filled for filtering and remasked afterward. Missing slots remain unknown business observations; host owns cutoff, missingness interpretation and sensitivity checks. Observed discount ratios must use a consistent [0,1] convention. Invalid padding is sanitized before operations, including NaNs; empty purchase or history signals contribute zero. No treatment-effect or causal debiasing guarantee."
+    },
+    {
+      "id": "danet_conversion_head",
+      "family_id": "discount_response",
+      "source_repo": "danet-paper",
+      "source_model": "DANet equations 7-10",
+      "source_url": "https://arxiv.org/html/2607.12578v1",
+      "source_references": [
+        "https://github.com/tangrc/DANet"
+      ],
+      "mechanism": "Combine the existing interest and discount representations for a conversion logit; predict discount from the discount representation and optionally train it with valid-purchase-only supervision.",
+      "requires": [
+        "interest_representation",
+        "discount_preference_representation"
+      ],
+      "comparison": "Compare conversion-only alpha=0 with a prespecified nonzero auxiliary weight using identical forward structure and labels. Inspect positive-label coverage, conversion calibration and fixed business metrics; never compare losses with different units as evidence of gain.",
+      "failure_signals": "Gains rely on future/realized labels as inputs, disappear with a fixed control or held-out slices, worsen calibration/cost, or require unsupported input semantics.",
+      "implementation_boundary": "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer. objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper. Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels. Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
     }
   ]
 }

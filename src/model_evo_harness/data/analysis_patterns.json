@@ -1,0 +1,28 @@
+{
+  "analysis_patterns": [
+    {
+      "id": "observed_representation_quality",
+      "name": "RankUp representation diagnosis, original masked tensor probes",
+      "method_ids": [
+        "representation_diagnostics"
+      ],
+      "when_to_try": "Named layer activations, valid-token masks, dataset/split/checkpoint identity and declared centering; repeated observed residuals or branch similarity, not guesses from architecture names.",
+      "required_evidence": "Named layer activations, valid-token masks, dataset/split/checkpoint identity and declared centering; repeated observed residuals or branch similarity, not guesses from architecture names.",
+      "controlled_comparison": "First collect diagnostics without changing predictions. Then compare one grouping, projection, sharing or interaction change against the same backbone using task quality and resource guardrails; do not maximize rank alone.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement.",
+      "operation": "Measure per-sample entropy effective rank, stable rank, token-axis output variance and optional paired-branch cosine similarity on supplied intermediate layers."
+    },
+    {
+      "id": "protected_gradient_screening",
+      "name": "TayFCS-inspired first-order saliency and protected screening, original implementation",
+      "method_ids": [
+        "gradient_feature_selection"
+      ],
+      "when_to_try": "Training-split activations and aligned gradients from a declared objective, group/cross-to-source-field mapping, valid counts and protected interaction groups. Use repeated estimates before screening.",
+      "required_evidence": "Training-split activations and aligned gradients from a declared objective, group/cross-to-source-field mapping, valid counts and protected interaction groups. Use repeated estimates before screening.",
+      "controlled_comparison": "Keep all source fields of protected interactions. Compare full-input and screened candidates after matched retraining; ablate nominated groups and report slices, uncertainty and cost. Correlation alone never drops a field.",
+      "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement.",
+      "operation": "Measure mean absolute activation-times-gradient scores and pairwise-common-valid cosine redundancy for supplied field or explicit-cross tensors; select deterministically under a budget while retaining protected indices and interaction groups."
+    }
+  ]
+}

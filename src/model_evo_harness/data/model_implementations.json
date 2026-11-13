@@ -4025,6 +4025,302 @@
       },
       "local_guide": "knowledge/sequence_ranking.md",
       "structure_pattern": "queryformer_query_generation"
+    },
+    {
+      "id": "progressive_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.progressive_interaction:ProgressiveInteraction",
+      "file": "models/pytorch/progressive_interaction.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "field_token_adapter",
+          "validity_masks",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Original local mechanism inspired by MGDIN, not its multi-granularity full model or semantic-ID pipeline.",
+        "Initial affinity uses scaled raw token dot products, with descending scores and stable row-major ties; it has no learned Q0/K0. Current layer Q/K/V projections are learned.",
+        "Budgets count global directed edges including self edges, bounded by actual field_count squared. Empty attention rows get zero context; invalid fields stay zero. Sorting is discrete, not a learned differentiable gate."
+      ],
+      "output_contract": {
+        "kind": "token_representations",
+        "shape": "[B,F,D]; optional masks [B,L,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "progressive_interaction_edges"
+    },
+    {
+      "id": "progressive_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.progressive_interaction:ProgressiveInteraction",
+      "file": "models/tensorflow/progressive_interaction.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "field_token_adapter",
+          "validity_masks",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Original local mechanism inspired by MGDIN, not its multi-granularity full model or semantic-ID pipeline.",
+        "Initial affinity uses scaled raw token dot products, with descending scores and stable row-major ties; it has no learned Q0/K0. Current layer Q/K/V projections are learned.",
+        "Budgets count global directed edges including self edges, bounded by actual field_count squared. Empty attention rows get zero context; invalid fields stay zero. Sorting is discrete, not a learned differentiable gate."
+      ],
+      "output_contract": {
+        "kind": "token_representations",
+        "shape": "[B,F,D]; optional masks [B,L,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "progressive_interaction_edges"
+    },
+    {
+      "id": "contextual_history_encoding",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.contextual_history:ContextualHistoryEncoder",
+      "file": "models/pytorch/contextual_history.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "aligned_event_feature_adapter",
+          "time_cutoff",
+          "history_mask",
+          "downstream_encoder",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Continuous tanh fusion of item and context projections only; not SIF hierarchical quantization, codebook training or the complete SIF-Mixer.",
+        "Caller supplies ordered, aligned, pre-decision features. This adapter adds no timestamps, position encoding or causal sequence mixing.",
+        "Padding is zeroed before projections and after fusion; missing histories remain absent. No data is fetched or fabricated."
+      ],
+      "output_contract": {
+        "kind": "contextual_history_tokens",
+        "shape": "(tokens [B,L,D], history_mask [B,L])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "context_rich_history"
+    },
+    {
+      "id": "contextual_history_encoding",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.contextual_history:ContextualHistoryEncoder",
+      "file": "models/tensorflow/contextual_history.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "aligned_event_feature_adapter",
+          "time_cutoff",
+          "history_mask",
+          "downstream_encoder",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Continuous tanh fusion of item and context projections only; not SIF hierarchical quantization, codebook training or the complete SIF-Mixer.",
+        "Caller supplies ordered, aligned, pre-decision features. This adapter adds no timestamps, position encoding or causal sequence mixing.",
+        "Padding is zeroed before projections and after fusion; missing histories remain absent. No data is fetched or fabricated."
+      ],
+      "output_contract": {
+        "kind": "contextual_history_tokens",
+        "shape": "(tokens [B,L,D], history_mask [B,L])"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "context_rich_history"
+    },
+    {
+      "id": "relation_history_attention",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.contextual_history:RelationHistoryAttention",
+      "file": "models/pytorch/contextual_history.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "user_history_target_adapter",
+          "time_cutoff",
+          "validity_masks",
+          "fusion_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Three relational attention cores only; no CCFormer hierarchical history compression, local token-channel mixer, prediction head or complete paper reproduction.",
+        "Returned user/history evidence is not overwritten by target outputs. Gradients still flow unless the caller detaches tensors; no target-to-target attention.",
+        "Absent key/query sides return zero and false availability; independent softmax sums to one only on valid query/key rows. Caller owns pre-decision temporal validity."
+      ],
+      "output_contract": {
+        "kind": "relational_history_representations",
+        "shape": "{user_history: [B,U,D], target_history/target_user: [B,T,D], matching masks; optional relation attention [B,H,Q,K]}"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "separate_history_relations"
+    },
+    {
+      "id": "relation_history_attention",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.contextual_history:RelationHistoryAttention",
+      "file": "models/tensorflow/contextual_history.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "user_history_target_adapter",
+          "time_cutoff",
+          "validity_masks",
+          "fusion_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Three relational attention cores only; no CCFormer hierarchical history compression, local token-channel mixer, prediction head or complete paper reproduction.",
+        "Returned user/history evidence is not overwritten by target outputs. Gradients still flow unless the caller detaches tensors; no target-to-target attention.",
+        "Absent key/query sides return zero and false availability; independent softmax sums to one only on valid query/key rows. Caller owns pre-decision temporal validity."
+      ],
+      "output_contract": {
+        "kind": "relational_history_representations",
+        "shape": "{user_history: [B,U,D], target_history/target_user: [B,T,D], matching masks; optional relation attention [B,H,Q,K]}"
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "separate_history_relations"
+    },
+    {
+      "id": "danet_discount_preference",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.discount_aware:DiscountPreferenceBranch",
+      "file": "models/pytorch/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "predecision_feature_adapter",
+          "ratio_definition",
+          "validity_masks",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent DANet-inspired DPN core, not the production IPN, tokenizer or full Tmall system. Caller supplies target/item embeddings and aligned purchase discount/category/price attributes.",
+        "Uses the declared history length for rFFT/irFFT; packed real/imaginary MLP, one FFN masked-softmax attention and a sigmoid context gate are explicit engineering choices. No silent 400/32/97 conversion, multihead DCM reproduction or guaranteed low-pass property.",
+        "Calendar-aligned history slots are zero-filled for filtering and remasked afterward. Missing slots remain unknown business observations; host owns cutoff, missingness interpretation and sensitivity checks.",
+        "Observed discount ratios must use a consistent [0,1] convention. Invalid padding is sanitized before operations, including NaNs; empty purchase or history signals contribute zero. No treatment-effect or causal debiasing guarantee."
+      ],
+      "output_contract": {
+        "kind": "discount_preference_representation",
+        "shape": "{representation: [B,H+2N], user_preference: [B,H], filtered_history: [B,N], residual_history: [B,N], attention: [B,L]}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_discount_preference",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.discount_aware:DiscountPreferenceBranch",
+      "file": "models/tensorflow/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "predecision_feature_adapter",
+          "ratio_definition",
+          "validity_masks",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent DANet-inspired DPN core, not the production IPN, tokenizer or full Tmall system. Caller supplies target/item embeddings and aligned purchase discount/category/price attributes.",
+        "Uses the declared history length for rFFT/irFFT; packed real/imaginary MLP, one FFN masked-softmax attention and a sigmoid context gate are explicit engineering choices. No silent 400/32/97 conversion, multihead DCM reproduction or guaranteed low-pass property.",
+        "Calendar-aligned history slots are zero-filled for filtering and remasked afterward. Missing slots remain unknown business observations; host owns cutoff, missingness interpretation and sensitivity checks.",
+        "Observed discount ratios must use a consistent [0,1] convention. Invalid padding is sanitized before operations, including NaNs; empty purchase or history signals contribute zero. No treatment-effect or causal debiasing guarantee."
+      ],
+      "output_contract": {
+        "kind": "discount_preference_representation",
+        "shape": "{representation: [B,H+2N], user_preference: [B,H], filtered_history: [B,N], residual_history: [B,N], attention: [B,L]}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_conversion_head",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.discount_aware:DiscountAwareConversionHead",
+      "file": "models/pytorch/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "interest_and_discount_representation_producers",
+          "binary_labels",
+          "realized_discount_labels_and_mask_for_auxiliary",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer.",
+        "objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper.",
+        "Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels.",
+        "Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
+      ],
+      "output_contract": {
+        "kind": "conversion_and_discount_prediction",
+        "shape": "{conversion_logit: [B], discount_prediction: [B]}; objective -> {loss, conversion_loss, discount_loss, discount_count: scalar}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "danet_conversion_head",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.discount_aware:DiscountAwareConversionHead",
+      "file": "models/tensorflow/discount_aware.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "trainer",
+          "interest_and_discount_representation_producers",
+          "binary_labels",
+          "realized_discount_labels_and_mask_for_auxiliary",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer.",
+        "objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper.",
+        "Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels.",
+        "Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
+      ],
+      "output_contract": {
+        "kind": "conversion_and_discount_prediction",
+        "shape": "{conversion_logit: [B], discount_prediction: [B]}; objective -> {loss, conversion_loss, discount_loss, discount_count: scalar}"
+      },
+      "local_guide": "knowledge/discount_response.md",
+      "structure_pattern": "discount_conditioned_response"
     }
   ]
 }
