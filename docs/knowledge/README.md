@@ -1,6 +1,6 @@
 # Local technical knowledge
 
-These 27 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 84 method cards also have direct PyTorch and TensorFlow [model and diagnostic components](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
+These 29 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 127 method cards also have direct PyTorch and TensorFlow [model and diagnostic components](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
 
 ## Catalog families
 
@@ -62,3 +62,8 @@ structure choices, ablations and dataset-bound technical/business lessons.
 ## Discount-aware marketing
 
 The [discount response guide](../../src/model_evo_harness/knowledge/discount_response.md) connects input/label timing, local branch composition, objective ablation and randomized coupon evaluation. [DANet component contracts](../danet-components.md) document native code and explicit simplifications.
+
+- [Training interventions](../../src/model_evo_harness/knowledge/training_interventions.md)
+- [Representation adaptation](../../src/model_evo_harness/knowledge/representation_adaptation.md)
+
+The [FuxiCTR coverage](../fuxictr-coverage.md) links 43 additional native mechanisms to the expanded family guides.

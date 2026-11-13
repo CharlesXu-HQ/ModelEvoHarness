@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness keeps **84 method cards: 82 model methods and 2 analysis tools**. Each has a native PyTorch and TensorFlow implementation. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 166 entries: the 82 model methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for `representation_diagnostics` and `gradient_feature_selection`.
+ModelEvoHarness keeps **127 method cards: 125 model/training methods and 2 analysis tools**. Each has a native PyTorch and TensorFlow implementation. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 252 entries: the 125 model/training methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for `representation_diagnostics` and `gradient_feature_selection`.
 
 `model_api` exposes model constructors and contracts; `analysis_api` exposes analysis tools. Both include class paths, `reference_scope`, `training_support`, `output_contract`, and `limitations`, and both support whole-module `read_references`. These are compact mechanism references for controlled experiments; the host supplies the remaining data, training and evaluation code.
 
@@ -104,3 +104,7 @@ cannot be an experiment's standalone `method_id`.
 Model components live under `models/{pytorch,tensorflow}` and participate in the
 candidate's forward computation. All five additions are independently extractable.
 Discovery and source reading install no hooks and execute no tools or training.
+
+## CTR and long-history additions
+
+The [complete coverage and component map](fuxictr-coverage.md) documents 43 additions across ten paired modules. These include objectives and input adapters as well as network structures. Their manifest contracts specify host responsibilities and omitted full-model mechanisms.

@@ -20,3 +20,18 @@ Do not generate absent user facts from language-model guesses; do not compute fe
 ## Research lineage
 
 This guide is independently written. Reference context: [Feature input contracts in DeepCTR](https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/docs/source/Features.md).
+
+
+## Derived tensors are not missing business fields
+
+Some component requirements describe host-produced tensors: field embeddings/tokens,
+partner-specific embedding banks, hidden representations, branch logits, parameter groups,
+or aligned sequence states. Their absence from a snapshot does not establish a raw-data gap.
+First inspect the existing fields and candidate adapter. If the tensors can be constructed
+from existing time-safe inputs, propose a local encoding/head/adapter change and have the
+host declare the resulting capability. Do not ask a human to collect embeddings or logits.
+A genuine missing event history, item identity, pre-decision context or eligible negative
+label needs a separate data contract; never synthesize its semantics from column positions.
+Use existing feature-gap evidence rules for human requests and bind them to the dataset version.
+
+New component metadata separates raw/declared prerequisites in `requires` from candidate-produced inputs in `required_host_tensors`. The latter are exposed in `model_api` and source contracts and do not block discovery. Construct and verify them in the candidate before training. A field layout needs a stable declared axis; locality still needs a justified semantic hypothesis. Next-event negatives require an explicit eligible pool and sampler, not invented observed labels. A recent-N mask can use event order; a time-window mask additionally needs real event timestamps.

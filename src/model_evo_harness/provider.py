@@ -139,6 +139,24 @@ interchangeable with embeddings. Verify every branch reaches the score/loss, sha
 are actually tied, independent objects are not accidentally tied, and trainable parameters
 are registered in the optimizer. Missing gradient/runtime evidence remains unverified.
 
+When changing input representations or sharing an embedding, declare research.embedding_roles:
+[{id, module_path, kind:numeric|categorical|sequence|precomputed, fields:[task fields], width}].
+Categorical/sequence roles also need id_domain, vocabulary_digest, vocabulary_size and
+explicit padding_id/oov_id where used. Precomputed roles need input_dim. Record
+pretrained_digest and freeze_pretrained when applicable. Shared module paths must agree
+on vocabulary, ID meanings, width and pretrained policy; target/history can share only
+when these contracts agree. These checks validate declarations; verify actual tied objects
+and token mappings in host code. Frozen pretrained tables retain the same OOV coverage.
+Use model_api and read_reference for auxiliary objectives as well as structure changes.
+Keep logits, probabilities, retrieval scores and representations distinct. Report the
+unreduced mask, valid count, branch loss scale and intended stop-gradient boundaries.
+Align next-event labels once; a hard selector does not gain gradients through top-k indices.
+required_host_tensors names inputs to construct in candidate code, not missing raw data.
+Use existing fields to build embeddings, states, branches, masks and losses; validate their
+shapes and semantics before training. Never fabricate event or field meanings. For auxiliary
+negatives declare the eligible pool and sampling rule; recent-N uses order, time windows
+require actual timestamps. Raw requirements in requires remain task capability gates.
+
 Compare against the same-input unsplit/pooled control, a matched-capacity control where
 feasible, and branch/fusion ablations. Keep split, sampler, objective, training schedule and
 budget fixed or declare their changes as joint factors. Removing a branch and retraining

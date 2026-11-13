@@ -10,6 +10,7 @@ from .evidence import validate_audit_recommendations, validate_host_evidence
 from .provider import COMPOSITION_INSTRUCTIONS, REFERENCE_INSTRUCTIONS, propose_with_references
 from .references import call_with_references
 from .interaction import interaction_context, validate_interaction_views, validate_interaction_plan
+from .embeddings import validate_embedding_roles
 
 __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_applicability",
            "implementation_digest", "load_catalog", "load_guide", "model_api", "analysis_api", "method_applicability",
@@ -19,4 +20,4 @@ __all__ = ["applicability", "catalog_digest", "coverage_report", "decision_appli
            "training_applicability", "run_search", "validate_data_request",
            "validate_reflection", "validate_research", "validate_host_evidence",
            "validate_audit_recommendations", "interaction_context", "validate_interaction_views",
-           "validate_interaction_plan"]
+           "validate_interaction_plan", "validate_embedding_roles"]

@@ -36,3 +36,15 @@ A stalled optimizer is not evidence of missing features. Request a new input onl
 ## Research lineage
 
 This guide is independently written. Reference context: [FunRec trainer module](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/training/trainer.py), [FunRec loss module](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/src/funrec/training/loss.py).
+
+
+## Comparable training and checkpoint cadence
+
+Record optimizer update count, effective batch size, evaluation interval, early-stop
+patience units, monitored metric, checkpoint-selection rule and any plateau-triggered
+learning-rate changes. Equal epoch counts do not imply equal updates or opportunities
+for selection. Change cadence separately from architecture. A model-only state dict is
+not a resumable training checkpoint: exact continuation also needs optimizer, scheduler,
+RNG and data/sampler progress. The host owns these states and must label partial resumes.
+Explicit grouped Lp penalties and decoupled optimizer decay are distinct interventions;
+avoid applying both to the same parameters without declaring the joint factor.

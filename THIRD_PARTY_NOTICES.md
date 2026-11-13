@@ -51,3 +51,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+## FuxiCTR-informed mechanisms
+
+The new `ctr_*`, `field_*`, and `history_*` modules are original tensor implementations
+informed by [FuxiCTR](https://github.com/reczoo/FuxiCTR/tree/183da1c944ba8930fcdcd54114837c081959d748)
+and the papers it identifies. FuxiCTR wrappers, feature processors, training infrastructure,
+weights and datasets are not redistributed. The pinned source inventory, code-level
+differences and boundaries are recorded in `docs/fuxictr-coverage.md`, the method cards
+and packaged original guides. Source names provide attribution and do not imply endorsement
+or full paper reproduction. The new independent code is covered by this project's Apache-2.0 license.
