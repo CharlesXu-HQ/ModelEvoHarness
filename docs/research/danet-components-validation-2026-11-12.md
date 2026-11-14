@@ -1,5 +1,7 @@
 # Discount-aware components validation — 2026-11-12
 
+> GPU follow-up: the previously untested CUDA/mixed-precision and TensorFlow GPU paths were exercised on 2026-11-14. See [PR #3 GPU validation](pr3-gpu-validation-2026-11-14.md) for the executed cases, results and limits. The original CPU-only record below is preserved.
+
 ## Scope
 
 Added `DiscountPreferenceBranch` and `DiscountAwareConversionHead` in native
