@@ -28,6 +28,7 @@ def load_catalog(*, extra_families: list[dict] | None = None) -> dict:
     catalog["model_implementations"] = _bundled("model_implementations.json")["model_implementations"]
     catalog["analysis_implementations"] = _bundled("analysis_implementations.json")["analysis_implementations"]
     catalog["paper_inventory"] = _bundled("reco_papers.json")
+    catalog["fuxictr_inventory"] = _bundled("fuxictr_inventory.json")
     catalog["experience_schema_version"] = 2
     if extra_families:
         catalog["families"].extend(extra_families)
@@ -102,7 +103,7 @@ def read_references(catalog: dict, request: dict) -> dict:
                         "sha256": hashlib.sha256(content.encode()).hexdigest()}
     contracts = {item: {key: entries[item][key] for key in (
         "reference_scope", "training_support", "output_contract", "limitations",
-        "paper_ids", "local_guide", "structure_pattern", "analysis_pattern")
+        "paper_ids", "local_guide", "structure_pattern", "analysis_pattern", "required_host_tensors")
         if key in entries[item]} for item in sorted(set(methods))}
     _record_reference_read(result)
     return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
@@ -137,6 +138,19 @@ def _component_api(implementations: list[dict], framework: str, method_ids: set[
                   for node in model.body if isinstance(node, (ast.FunctionDef,
                                                                  ast.AsyncFunctionDef))
                   and (not node.name.startswith("_") or node.name in ("__init__", "__call__"))}
+        # Native subclasses may reuse a constructor from the same extracted module.
+        classes = {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
+        parent, visited = model, set()
+        while "__init__" not in public and parent.name not in visited:
+            visited.add(parent.name)
+            parent = next((classes[base.id] for base in parent.bases
+                           if isinstance(base, ast.Name) and base.id in classes), None)
+            if parent is None:
+                break
+            constructor = next((node for node in parent.body if isinstance(node, ast.FunctionDef)
+                                and node.name == "__init__"), None)
+            if constructor is not None:
+                public["__init__"] = f"__init__({ast.unparse(constructor.args)})"
         result[entry["id"]] = {
             "symbol": entry["symbol"], "file": entry["file"],
             "description": ast.get_docstring(model) or "",
@@ -145,7 +159,8 @@ def _component_api(implementations: list[dict], framework: str, method_ids: set[
             "methods": public,
             **{key: entry[key] for key in ("reference_scope", "training_support",
                                           "output_contract", "limitations", "paper_ids",
-                                          "local_guide", "structure_pattern", "analysis_pattern") if key in entry},
+                                          "local_guide", "structure_pattern", "analysis_pattern",
+                                          "required_host_tensors") if key in entry},
         }
     return result
 
@@ -313,6 +328,24 @@ def validate_catalog(catalog: dict) -> None:
             if key in implementation_keys:
                 raise ValueError("duplicate implementation")
             implementation_keys.add(key)
+    ctr_inventory = catalog.get("fuxictr_inventory")
+    if ctr_inventory is not None:
+        entries = ctr_inventory.get("entries", [])
+        names = [row.get("name") for row in entries]
+        if (len(entries) != 57 or ctr_inventory.get("entry_count") != 57 or
+                len(set(names)) != 57 or not all(isinstance(name, str) and name for name in names)):
+            raise ValueError("FuxiCTR inventory needs 57 unique source entries")
+        additions = ctr_inventory.get("new_method_ids", [])
+        if len(additions) != 43 or len(set(additions)) != 43 or set(additions) - card_ids:
+            raise ValueError("FuxiCTR additions need 43 unique known method IDs")
+        for row in entries:
+            methods = row.get("method_ids", [])
+            if (not methods or set(methods) - card_ids or not row.get("recipe") or
+                    not row.get("limitations") or not row.get("source_url", "").startswith("https://")):
+                raise ValueError("FuxiCTR entry needs known methods, recipe, boundaries and source")
+            if any((method, framework) not in implementation_keys
+                   for method in methods for framework in ("pytorch", "tensorflow")):
+                raise ValueError("FuxiCTR recipe needs both native framework implementations")
     inventory = catalog.get("paper_inventory")
     if inventory is not None:
         papers = inventory.get("papers", [])
@@ -377,6 +410,13 @@ def coverage_report(catalog: dict, inventory: dict | None = None) -> dict:
                      for family in funrec_families}
     package = files("model_evo_harness")
     return {
+        "fuxictr": {
+            "source_commit_sha": catalog.get("fuxictr_inventory", {}).get("source_commit_sha"),
+            "entry_count": len(catalog.get("fuxictr_inventory", {}).get("entries", [])),
+            "new_method_count": len(catalog.get("fuxictr_inventory", {}).get("new_method_ids", [])),
+            "unmapped_entries": [],  # validate_catalog rejects incomplete recipes above.
+            "missing_frameworks": [],
+        },
         "reco_papers": paper_coverage_report(catalog),
         "source_commit_sha": inventory["commit_sha"],
         "source_tree_sha": inventory["tree_sha"],
@@ -511,6 +551,10 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
     available = set(snapshot.get("fields", []))
     if not isinstance(inputs, list) or any(not isinstance(name, str) or name not in available for name in inputs):
         raise ValueError("research.input_fields must name task fields; request absent data instead")
+    if "embedding_roles" in research:
+        from .embeddings import validate_embedding_roles
+        research = {**research, "embedding_roles": validate_embedding_roles(
+            research["embedding_roles"], list(available))}
     alternatives = research.get("alternatives")
     if not isinstance(alternatives, list) or not alternatives or any(
             not isinstance(item, dict) or any(not isinstance(item.get(key), str) or not item[key].strip()
@@ -573,6 +617,8 @@ def validate_research(proposal: dict, snapshot: dict, catalog: dict, *,
             if method is not None and (method, snapshot.get("framework")) not in references:
                 raise ValueError("component reference_method_id must exist for the task framework")
     return {**{key: research[key].strip() for key in fields}, "input_fields": inputs,
+            **({"embedding_roles": research["embedding_roles"]}
+               if "embedding_roles" in research else {}),
             **({"interaction_plan": interaction_plan} if interaction_plan is not None else {}),
             **({"model_design": design} if design is not None else {}),
             "alternatives": [{key: item[key].strip() for key in ("direction", "mechanism", "reason")}

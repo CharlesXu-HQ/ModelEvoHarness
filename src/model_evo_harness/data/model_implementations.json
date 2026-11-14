@@ -4321,6 +4321,2704 @@
       },
       "local_guide": "knowledge/discount_response.md",
       "structure_pattern": "discount_conditioned_response"
+    },
+    {
+      "id": "gated_cross",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:GatedCross",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Coordinate-gated matrix cross block only; no learned FDO embedding dimensions, deep tower or classifier.",
+        "All dense inputs must be defined; host owns feature preparation and training."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,input_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "gated_cross",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:GatedCross",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Coordinate-gated matrix cross block only; no learned FDO embedding dimensions, deep tower or classifier.",
+        "All dense inputs must be defined; host owns feature preparation and training."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,input_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "instance_mask",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:MaskBlock",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One reusable MaskBlock; serial composition reuses original features, parallel composition uses explicitly declared independent/shared instances and host fusion.",
+        "No automatic feature embedding layer, batch norm, dropout or classifier."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "dense_features",
+        "hidden_representation"
+      ]
+    },
+    {
+      "id": "instance_mask",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:MaskBlock",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One reusable MaskBlock; serial composition reuses original features, parallel composition uses explicitly declared independent/shared instances and host fusion.",
+        "No automatic feature embedding layer, batch norm, dropout or classifier."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "dense_features",
+        "hidden_representation"
+      ]
+    },
+    {
+      "id": "context_feature_gate",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:ContextFeatureGate",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies the context; constant contexts produce global gates.",
+        "Uses existing gating primitive as an explicit stream interface; no pair of MLP towers is created."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,feature_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "context_feature_gate",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:ContextFeatureGate",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies the context; constant contexts produce global gates.",
+        "Uses existing gating primitive as an explicit stream interface; no pair of MLP towers is created."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,feature_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "multihead_bilinear_fusion",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:MultiHeadBilinearFusion",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Both stream widths must divide by heads; cross-head bilinear terms are excluded.",
+        "Extends existing single bilinear scoring with a fusion contract; no softmax attention, sigmoid output or branch construction."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "multihead_bilinear_fusion",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:MultiHeadBilinearFusion",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Both stream widths must divide by heads; cross-head bilinear terms are excluded.",
+        "Extends existing single bilinear scoring with a fusion contract; no softmax attention, sigmoid output or branch construction."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "cross_deep_bridge",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:CrossDeepBridge",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Single bridge at a host-selected depth; no entire EDCN network.",
+        "Attention deliberately uses distinct gates for the two streams, correcting pinned upstream reuse of attention1. Gate MLP final biases are enabled."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "cross_deep_bridge",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:CrossDeepBridge",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Single bridge at a host-selected depth; no entire EDCN network.",
+        "Attention deliberately uses distinct gates for the two streams, correcting pinned upstream reuse of attention1. Gate MLP final biases are enabled."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "stream_exchange",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "field_regulation",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:FieldRegulation",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Global field regulation rather than sample-adaptive routing; preserves field axis.",
+        "No batch normalization; host pairs this block with independently evaluated bridge/cross/deep updates."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "tuple([B,num_fields,embedding_dim], [B,num_fields,embedding_dim])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "field_regulation",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:FieldRegulation",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Global field regulation rather than sample-adaptive routing; preserves field axis.",
+        "No batch normalization; host pairs this block with independently evaluated bridge/cross/deep updates."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "tuple([B,num_fields,embedding_dim], [B,num_fields,embedding_dim])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "wukong_block",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:WuKongBlock",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "A single FMB+LCB block with a two-layer FMB MLP; no tokenizer, model stack or head.",
+        "Compressed Gram avoids forming the full field-pair matrix; no measured speed or scaling-law claim.",
+        "Fully defined field tokens required; optional final normalization, Gram normalization always enabled."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,interaction_tokens+linear_tokens,embedding_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "wukong_block",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:WuKongBlock",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "A single FMB+LCB block with a two-layer FMB MLP; no tokenizer, model stack or head.",
+        "Compressed Gram avoids forming the full field-pair matrix; no measured speed or scaling-law claim.",
+        "Fully defined field tokens required; optional final normalization, Gram normalization always enabled."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,interaction_tokens+linear_tokens,embedding_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "coordinate_interaction",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "field_matrix_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:FieldMatrixInteraction",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Uses host embeddings and returns pair scores without first-order terms or a classifier.",
+        "Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,num_fields*(num_fields-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "field_matrix_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:FieldMatrixInteraction",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Uses host embeddings and returns pair scores without first-order terms or a classifier.",
+        "Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,num_fields*(num_fields-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "grouped_field_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:GroupedFieldInteraction",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Group IDs per field must be contiguous nonnegative integers and cover at least two nonempty groups; singleton within-group terms are zero.",
+        "Generalizes the pinned three user/item/context groups; host supplies meaningful groups, linear terms, deep path and classifier."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,embedding_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "grouped_field_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:GroupedFieldInteraction",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Group IDs per field must be contiguous nonnegative integers and cover at least two nonempty groups; singleton within-group terms are zero.",
+        "Generalizes the pinned three user/item/context groups; host supplies meaningful groups, linear terms, deep path and classifier."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,embedding_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "factorized_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:FactorizedInteraction",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Sum form is already expressible with LatentCross plus a projection; this is a convenience component and recipe boundary.",
+        "Concat needs even output width; no FinalNet tower ensemble or detached consistency loss."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "factorized_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:FactorizedInteraction",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Sum form is already expressible with LatentCross plus a projection; this is a convenience component and recipe boundary.",
+        "Concat needs even output width; no FinalNet tower ensemble or detached consistency loss."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "quadratic_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_composition:QuadraticInteraction",
+      "file": "models/pytorch/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Input width must divide into fields and each embedding width must divide into heads.",
+        "Restores original coordinate order before residual, deliberately correcting pinned source direct flattening of head-major products. Projected row storage uses row/field/head/coordinate order.",
+        "No batch norm, dropout or self-ensemble objective; compare head/row parameterization against existing multiplicative gates."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,input_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "dense_features",
+        "field_layout"
+      ]
+    },
+    {
+      "id": "quadratic_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_composition:QuadraticInteraction",
+      "file": "models/tensorflow/ctr_composition.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Input width must divide into fields and each embedding width must divide into heads.",
+        "Restores original coordinate order before residual, deliberately correcting pinned source direct flattening of head-major products. Projected row storage uses row/field/head/coordinate order.",
+        "No batch norm, dropout or self-ensemble objective; compare head/row parameterization against existing multiplicative gates."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,input_dim]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "dense_features",
+        "field_layout"
+      ]
+    },
+    {
+      "id": "adaptive_linear",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_conditioning:AdaptiveLinear",
+      "file": "models/pytorch/ctr_conditioning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Extension of installed APG core as a reusable hidden-state layer; affine generator, no multilayer APG tower or final predictor.",
+        "Generated bias follows flattened generated matrix in this independent parameter layout. Rank cannot exceed input/output dimensions; overparameterization requires rank.",
+        "Host explicitly supplies condition (including layer(x,x) for self-conditioning), scenario semantics and training."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/multiscenario.md",
+      "structure_pattern": "conditioned_local_layers",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "adaptive_linear",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_conditioning:AdaptiveLinear",
+      "file": "models/tensorflow/ctr_conditioning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Extension of installed APG core as a reusable hidden-state layer; affine generator, no multilayer APG tower or final predictor.",
+        "Generated bias follows flattened generated matrix in this independent parameter layout. Rank cannot exceed input/output dimensions; overparameterization requires rank.",
+        "Host explicitly supplies condition (including layer(x,x) for self-conditioning), scenario semantics and training."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,output_dim]"
+      },
+      "local_guide": "knowledge/multiscenario.md",
+      "structure_pattern": "conditioned_local_layers",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "prior_conditioned_gate",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_conditioning:PriorConditionedGate",
+      "file": "models/pytorch/ctr_conditioning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Extends existing PEPNet gating with explicit prior inputs, per-depth reuse and a declared stop-gradient boundary.",
+        "detach_features defaults True; hidden and prior paths remain differentiable. Host creates one gate per chosen depth.",
+        "No prior embedding tables, EPNet, task tower or automatic stacking; upstream PEPNet.py itself is only a stub."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,hidden_dim]"
+      },
+      "local_guide": "knowledge/multiscenario.md",
+      "structure_pattern": "conditioned_local_layers",
+      "required_host_tensors": [
+        "hidden_representation",
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "prior_conditioned_gate",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_conditioning:PriorConditionedGate",
+      "file": "models/tensorflow/ctr_conditioning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Extends existing PEPNet gating with explicit prior inputs, per-depth reuse and a declared stop-gradient boundary.",
+        "detach_features defaults True; hidden and prior paths remain differentiable. Host creates one gate per chosen depth.",
+        "No prior embedding tables, EPNet, task tower or automatic stacking; upstream PEPNet.py itself is only a stub."
+      ],
+      "output_contract": {
+        "kind": "interaction_representations",
+        "shape": "[B,hidden_dim]"
+      },
+      "local_guide": "knowledge/multiscenario.md",
+      "structure_pattern": "conditioned_local_layers",
+      "required_host_tensors": [
+        "hidden_representation",
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "ffm_pairs",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:FieldAwareFactorization",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host creates partner-specific lookup/projection banks; this parameter-free core is not an FFM trainer or automatic ID tokenizer. Diagonal entries are unused by the pair output.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "ffm_pairs",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:FieldAwareFactorization",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host creates partner-specific lookup/projection banks; this parameter-free core is not an FFM trainer or automatic ID tokenizer. Diagonal entries are unused by the pair output.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "onn_operations",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:OperationAwareInteraction",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*D+F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "onn_operations",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:OperationAwareInteraction",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*D+F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_specific_parameters",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "higher_order_fm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:HigherOrderFactorization",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One tensor bank and one order only; host combines independent orders/banks and linear terms. Products can overflow for extreme activations and high order.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "higher_order_fm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:HigherOrderFactorization",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One tensor bank and one order only; host combines independent orders/banks and linear terms. Products can overflow for extreme activations and high order.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "deep_interaction_machine",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:InteractionMachine",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Same polynomials as HOFM, with an all-order composition and power-sum implementation; not a new generic MLP. K<=min(5,F). No BatchNorm, head or parallel deep branch; cancellation is possible at large scales.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,K*D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "deep_interaction_machine",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:InteractionMachine",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Same polynomials as HOFM, with an all-order composition and power-sum implementation; not a new generic MLP. K<=min(5,F). No BatchNorm, head or parallel deep branch; cancellation is possible at large scales.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,K*D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "polynomial_interactions",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "holographic_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:HolographicInteraction",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Circular embedding-coordinate interactions, not chronological convolution. Explicit inverse length supports odd D; half inputs promote. No source classifier or HFM projection head.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "holographic_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:HolographicInteraction",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Circular embedding-coordinate interactions, not chronological convolution. Explicit inverse length supports odd D; half inputs promote. No source classifier or HFM projection head.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "dlrm_composition",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:DenseSparseInteraction",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Composition of existing dot products; host supplies dense bottom MLP, sparse embeddings and top prediction head. Dense token is always observed; only sparse fields have a mask.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,(F+1)*F/2+D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "dense_sparse_composition",
+      "required_host_tensors": [
+        "field_embeddings",
+        "dense_representation"
+      ]
+    },
+    {
+      "id": "dlrm_composition",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:DenseSparseInteraction",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Composition of existing dot products; host supplies dense bottom MLP, sparse embeddings and top prediction head. Dense token is always observed; only sparse fields have a mask.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,(F+1)*F/2+D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "dense_sparse_composition",
+      "required_host_tensors": [
+        "field_embeddings",
+        "dense_representation"
+      ]
+    },
+    {
+      "id": "lorentz_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_products:LorentzInteraction",
+      "file": "models/pytorch/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Curvature fixed at one, no manifold optimizer or learned geometric projection. Float64 intermediates protect float32 squares, but extreme float64 values can overflow and performance is unmeasured.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "lorentz_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_products:LorentzInteraction",
+      "file": "models/tensorflow/field_products.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Curvature fixed at one, no manifold optimizer or learned geometric projection. Float64 intermediates protect float32 squares, but extreme float64 values can overflow and performance is unmeasured.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F*(F-1)/2]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "logarithmic_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_algebra:LogarithmicInteraction",
+      "file": "models/pytorch/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Sign is discarded; epsilon floors magnitudes and exponent clipping saturates gradients. Missing fields are multiplicative-neutral, all-missing output zero. Omits AFN log/exp BatchNorm and ensemble DNN.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,O,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "logarithmic_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_algebra:LogarithmicInteraction",
+      "file": "models/tensorflow/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Sign is discarded; epsilon floors magnitudes and exponent clipping saturates gradients. Missing fields are multiplicative-neutral, all-missing output zero. Omits AFN log/exp BatchNorm and ensemble DNN.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,O,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "euler_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_algebra:EulerInteraction",
+      "file": "models/pytorch/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies real/imaginary tensors; no initial semantic embedding conversion, dropout, normalization or head. Zero phase is explicitly defined with zero gradient near zero, magnitudes floored, exponents clipped. Missing fields are multiplicative-neutral.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "(real [B,O,D], imaginary [B,O,D])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "complex_field_representations"
+      ]
+    },
+    {
+      "id": "euler_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_algebra:EulerInteraction",
+      "file": "models/tensorflow/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies real/imaginary tensors; no initial semantic embedding conversion, dropout, normalization or head. Zero phase is explicitly defined with zero gradient near zero, magnitudes floored, exponents clipped. Missing fields are multiplicative-neutral.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "(real [B,O,D], imaginary [B,O,D])"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "complex_field_representations"
+      ]
+    },
+    {
+      "id": "generalized_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_algebra:GeneralizedInteraction",
+      "file": "models/pytorch/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One generalized interaction layer only. Initial and current token axes remain explicit; no parallel DNN or complete AOANet stack. Full O*D*D matrices can be costly.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,O,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings",
+        "current_subspace_tokens"
+      ]
+    },
+    {
+      "id": "generalized_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_algebra:GeneralizedInteraction",
+      "file": "models/tensorflow/field_algebra.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One generalized interaction layer only. Initial and current token axes remain explicit; no parallel DNN or complete AOANet stack. Full O*D*D matrices can be costly.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,O,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "interaction_algebra",
+      "required_host_tensors": [
+        "field_embeddings",
+        "current_subspace_tokens"
+      ]
+    },
+    {
+      "id": "hierarchical_field_aggregation",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_attention:HierarchicalInteractionAggregation",
+      "file": "models/pytorch/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes host contextual X1; omits upstream initial self-attention/FFN and classifier. Learned local aggregators use hidden width D. No claim that higher orders improve held-out outcomes.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "contextualized_field_embeddings"
+      ]
+    },
+    {
+      "id": "hierarchical_field_aggregation",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_attention:HierarchicalInteractionAggregation",
+      "file": "models/tensorflow/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Consumes host contextual X1; omits upstream initial self-attention/FFN and classifier. Learned local aggregators use hidden width D. No claim that higher orders improve held-out outcomes.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "contextualized_field_embeddings"
+      ]
+    },
+    {
+      "id": "field_graph_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_attention:FieldGraphInteraction",
+      "file": "models/pytorch/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One non-GRU propagation step, no extra initial residual, multi-step reuse or task head; bias omitted from messages. A graph over fields is not a user-item graph. Isolated valid fields retain their residual.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F,D]; optional tuple with graph [B,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "field_graph_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_attention:FieldGraphInteraction",
+      "file": "models/tensorflow/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One non-GRU propagation step, no extra initial residual, multi-step reuse or task head; bias omitted from messages. A graph over fields is not a user-item graph. Isolated valid fields retain their residual.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F,D]; optional tuple with graph [B,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "disentangled_field_attention",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_attention:DisentangledFieldAttention",
+      "file": "models/pytorch/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Correct [B,H,F,d] head transpose replaces source direct view; both distributions sum to one so combined row mass is two. No residual, dropout, optional pre-attention ReLU or classifier. Valid centering respects padding.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F,D]; optional tuple with attention [B,H,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "disentangled_field_attention",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_attention:DisentangledFieldAttention",
+      "file": "models/tensorflow/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Correct [B,H,F,d] head transpose replaces source direct view; both distributions sum to one so combined row mass is two. No residual, dropout, optional pre-attention ReLU or classifier. Valid centering respects padding.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,F,D]; optional tuple with attention [B,H,F,F]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "sam_interaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_attention:SelfAttentionInteraction",
+      "file": "models/pytorch/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "All four local variants supported; no softmax, dropout or final weighted/sum/concat aggregation. Self pairs are included, unlike strict upper-triangle FM pair outputs.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "2A/2E: [B,F,F,D]; 3A/3E: [B,F,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "sam_interaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_attention:SelfAttentionInteraction",
+      "file": "models/tensorflow/field_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "All four local variants supported; no softmax, dropout or final weighted/sum/concat aggregation. Self pairs are included, unlike strict upper-triangle FM pair outputs.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "2A/2E: [B,F,F,D]; 3A/3E: [B,F,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "field_message_aggregation",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "ordered_field_convolution",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_convolution:OrderedKMaxConvolution",
+      "file": "models/pytorch/field_convolution.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One stage with explicit k, no source dynamic multi-stage schedule or task head. Host must justify field order. Missing inputs are zero-filled; empty receptive fields cannot win and unavailable top-k slots become zero.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,k*D*C] flattened position-coordinate-channel"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "ordered_field_generation",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "ordered_field_convolution",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_convolution:OrderedKMaxConvolution",
+      "file": "models/tensorflow/field_convolution.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One stage with explicit k, no source dynamic multi-stage schedule or task head. Host must justify field order. Missing inputs are zero-filled; empty receptive fields cannot win and unavailable top-k slots become zero.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,k*D*C] flattened position-coordinate-channel"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "ordered_field_generation",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "convolutional_field_generation",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.field_convolution:ConvolutionalFieldGenerator",
+      "file": "models/pytorch/field_convolution.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One stage, odd kernels, right-padded final pooling window, generated tokens only. No BatchNorm, source multistage schedule, original-field concatenation or head. All-absent samples yield zero.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,G,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "ordered_field_generation",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "convolutional_field_generation",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.field_convolution:ConvolutionalFieldGenerator",
+      "file": "models/tensorflow/field_convolution.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One stage, odd kernels, right-padded final pooling window, generated tokens only. No BatchNorm, source multistage schedule, original-field concatenation or head. All-absent samples yield zero.",
+        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+      ],
+      "output_contract": {
+        "kind": "interaction_representation",
+        "shape": "[B,G,D]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "ordered_field_generation",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "bst_history_encoder",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_matching:BSTHistoryEncoder",
+      "file": "models/pytorch/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option.",
+        "No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "candidate_state": "[B,D]",
+          "states": "[B,L,D]",
+          "mask": "bool [B,L]",
+          "has_history": "bool [B]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "bst_history_encoder",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_matching:BSTHistoryEncoder",
+      "file": "models/tensorflow/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option.",
+        "No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "candidate_state": "[B,D]",
+          "states": "[B,L,D]",
+          "mask": "bool [B,L]",
+          "has_history": "bool [B]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmin_interest_refiner",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_matching:DMINInterestRefiner",
+      "file": "models/pytorch/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent two-normalization refiner and D-dimensional positional context; no dropout or upstream exact hidden-width choices.",
+        "The host constructs auxiliary next-event/negative supervision; intermediate refined/head states are exposed and remain event-aligned.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,H*D]",
+          "interests": "[B,H,D]",
+          "refined": "[B,L,D]",
+          "head_states": "[B,H,L,D]",
+          "attention": "[B,H,L]",
+          "mask": "bool [B,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmin_interest_refiner",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_matching:DMINInterestRefiner",
+      "file": "models/tensorflow/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent two-normalization refiner and D-dimensional positional context; no dropout or upstream exact hidden-width choices.",
+        "The host constructs auxiliary next-event/negative supervision; intermediate refined/head states are exposed and remain event-aligned.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,H*D]",
+          "interests": "[B,H,D]",
+          "refined": "[B,L,D]",
+          "head_states": "[B,H,L,D]",
+          "attention": "[B,H,L]",
+          "mask": "bool [B,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmr_history_matching",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_matching:DMRHistoryMatching",
+      "file": "models/pytorch/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Optional side context must be event-aligned; omission supplies zero side context, not fabricated business features.",
+        "Separate input/output item embedding tables, calibrated heads and next-event objective are host-owned. Uses the last valid prefix rather than the last padded array slot.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,2D]",
+          "user_match": "[B,D]",
+          "item_match": "[B,D]",
+          "user_states": "[B,L,D]",
+          "user_score": "[B]",
+          "item_score": "[B]",
+          "item_scores": "[B,L], invalid=0",
+          "attention": "[B,L]",
+          "mask": "bool [B,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmr_history_matching",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_matching:DMRHistoryMatching",
+      "file": "models/tensorflow/history_matching.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Optional side context must be event-aligned; omission supplies zero side context, not fabricated business features.",
+        "Separate input/output item embedding tables, calibrated heads and next-event objective are host-owned. Uses the last valid prefix rather than the last padded array slot.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,2D]",
+          "user_match": "[B,D]",
+          "item_match": "[B,D]",
+          "user_states": "[B,L,D]",
+          "user_score": "[B]",
+          "item_score": "[B]",
+          "item_scores": "[B,L], invalid=0",
+          "attention": "[B,L]",
+          "mask": "bool [B,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "history_relations_and_states",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sim_history_selector",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_retrieval:SIMHistorySelector",
+      "file": "models/pytorch/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Hard indices are nondifferentiable; the coarse representation and scores expose a trainable route for selector supervision.",
+        "Masks rank invalid events below every finite valid score, correcting source padding that can beat negative scores. Coarse/fine heads, losses and short-history branch remain host-owned.",
+        "Dense O(L) score scan; fixed K outputs, stable ties favor earlier event indices. Invalid indices are -1.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D] (=fine)",
+          "coarse": "[B,D]",
+          "fine": "[B,D]",
+          "coarse_scores": "[B,L], invalid=0",
+          "selected": "[B,K,D]",
+          "selected_mask": "bool [B,K]",
+          "indices": "integer [B,K], original event indices or -1",
+          "attention": "[B,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sim_history_selector",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_retrieval:SIMHistorySelector",
+      "file": "models/tensorflow/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Hard indices are nondifferentiable; the coarse representation and scores expose a trainable route for selector supervision.",
+        "Masks rank invalid events below every finite valid score, correcting source padding that can beat negative scores. Coarse/fine heads, losses and short-history branch remain host-owned.",
+        "Dense O(L) score scan; fixed K outputs, stable ties favor earlier event indices. Invalid indices are -1.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D] (=fine)",
+          "coarse": "[B,D]",
+          "fine": "[B,D]",
+          "coarse_scores": "[B,L], invalid=0",
+          "selected": "[B,K,D]",
+          "selected_mask": "bool [B,K]",
+          "indices": "integer [B,K], original event indices or -1",
+          "attention": "[B,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "eta_history_selector",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_retrieval:ETAHistorySelector",
+      "file": "models/pytorch/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing.",
+        "Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "selected": "[B,K,D]",
+          "selected_mask": "bool [B,K]",
+          "indices": "integer [B,K]",
+          "hash_distance": "integer [B,L], invalid=0",
+          "attention": "[B,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "eta_history_selector",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_retrieval:ETAHistorySelector",
+      "file": "models/tensorflow/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing.",
+        "Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "selected": "[B,K,D]",
+          "selected_mask": "bool [B,K]",
+          "indices": "integer [B,K]",
+          "hash_distance": "integer [B,L], invalid=0",
+          "attention": "[B,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sdim_collision_pooling",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_retrieval:SDIMCollisionPooling",
+      "file": "models/pytorch/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention.",
+        "No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "per_hash": "[B,H,D]",
+          "collision_mask": "bool [B,H,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sdim_collision_pooling",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_retrieval:SDIMCollisionPooling",
+      "file": "models/tensorflow/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention.",
+        "No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "per_hash": "[B,H,D]",
+          "collision_mask": "bool [B,H,L]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "twin_headwise_selector",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_retrieval:TWINHeadwiseSelector",
+      "file": "models/pytorch/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense search, without production ANN caches or the full short/long dual-branch ranker. Hard selection indices are nondifferentiable.",
+        "Fixed K per head; every head reports original event indices, masks and weights. Invalid indices are -1, and all-masked heads remain zero.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "heads": "[B,H,D/H]",
+          "selected": "[B,H,K,D/H]",
+          "selected_mask": "bool [B,H,K]",
+          "indices": "integer [B,H,K]",
+          "attention": "[B,H,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "twin_headwise_selector",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_retrieval:TWINHeadwiseSelector",
+      "file": "models/tensorflow/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Dense search, without production ANN caches or the full short/long dual-branch ranker. Hard selection indices are nondifferentiable.",
+        "Fixed K per head; every head reports original event indices, masks and weights. Invalid indices are -1, and all-masked heads remain zero.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "heads": "[B,H,D/H]",
+          "selected": "[B,H,K,D/H]",
+          "selected_mask": "bool [B,H,K]",
+          "indices": "integer [B,H,K]",
+          "attention": "[B,H,K]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "mirrn_history_refiner",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.history_retrieval:MIRRNHistoryRefiner",
+      "file": "models/pytorch/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Corrects unused selection masks and diagonal-only einsum: full off-diagonal channel mixing is deliberate and independently implemented.",
+        "Orthogonal rFFT/irFFT with explicit n=K supports odd K; complex matrices are shared across frequencies. Zero-padded invalid slots are part of the declared K-point transform, masked both before FFT and after residual LayerNorm.",
+        "Omits upstream recency-position additions, dropout and short-history attention branch. Recent mask must be a subset of valid; missing recent history produces no recent interest.",
+        "Dense hash scans, no ANN cache. Fixed K with chronological valid selections and invalid -1 slots.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "interests": "[B,3,D]",
+          "interest_mask": "bool [B,3]",
+          "refined": "[B,3,K,D]",
+          "selected": "[B,3,K,D]",
+          "selected_mask": "bool [B,3,K]",
+          "indices": "integer [B,3,K]",
+          "attention": "[B,3]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask",
+        "recent_history_mask"
+      ]
+    },
+    {
+      "id": "mirrn_history_refiner",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.history_retrieval:MIRRNHistoryRefiner",
+      "file": "models/tensorflow/history_retrieval.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Corrects unused selection masks and diagonal-only einsum: full off-diagonal channel mixing is deliberate and independently implemented.",
+        "Orthogonal rFFT/irFFT with explicit n=K supports odd K; complex matrices are shared across frequencies. Zero-padded invalid slots are part of the declared K-point transform, masked both before FFT and after residual LayerNorm.",
+        "Omits upstream recency-position additions, dropout and short-history attention branch. Recent mask must be a subset of valid; missing recent history produces no recent interest.",
+        "Dense hash scans, no ANN cache. Fixed K with chronological valid selections and invalid -1 slots.",
+        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "interests": "[B,3,D]",
+          "interest_mask": "bool [B,3]",
+          "refined": "[B,3,K,D]",
+          "selected": "[B,3,K,D]",
+          "selected_mask": "bool [B,3,K]",
+          "indices": "integer [B,3,K]",
+          "attention": "[B,3]"
+        }
+      },
+      "local_guide": "knowledge/sequence_ranking.md",
+      "structure_pattern": "long_history_selection",
+      "required_host_tensors": [
+        "sequence_mask",
+        "recent_history_mask"
+      ]
+    },
+    {
+      "id": "ensemble_consistency",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_training:EnsembleConsistency",
+      "file": "models/pytorch/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Teacher is detached; aggregate supervised path remains differentiable. The weight multiplies a SUM of branch means, so branch count changes its scale.",
+        "Probability averaging uses stable log probabilities; neither aggregation is a causal effect estimator."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,supervised,consistency,teacher)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "branch_logits"
+      ]
+    },
+    {
+      "id": "ensemble_consistency",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_training:EnsembleConsistency",
+      "file": "models/tensorflow/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Teacher is detached; aggregate supervised path remains differentiable. The weight multiplies a SUM of branch means, so branch count changes its scale.",
+        "Probability averaging uses stable log probabilities; neither aggregation is a causal effect estimator."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,supervised,consistency,teacher)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "branch_logits"
+      ]
+    },
+    {
+      "id": "next_behavior_auxiliary",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_training:NextBehaviorObjective",
+      "file": "models/pytorch/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host aligns state t with event t+1 and supplies time-safe negatives. Inputs are already shifted; this module does not shift a second time.",
+        "Mask is applied to unreduced positive and negative losses. Empty/all-masked transitions give differentiable zero. Host must expose sequence states from the candidate."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,positive_logit,negative_logit,valid_count)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "aligned_sequence_states",
+        "positive_negative_next_events",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "next_behavior_auxiliary",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_training:NextBehaviorObjective",
+      "file": "models/tensorflow/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host aligns state t with event t+1 and supplies time-safe negatives. Inputs are already shifted; this module does not shift a second time.",
+        "Mask is applied to unreduced positive and negative losses. Empty/all-masked transitions give differentiable zero. Host must expose sequence states from the candidate."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,positive_logit,negative_logit,valid_count)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "aligned_sequence_states",
+        "positive_negative_next_events",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "coarse_fine_supervision",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_training:CoarseFineObjective",
+      "file": "models/pytorch/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host builds both prediction heads. Retrieval scores alone are not response logits.",
+        "Does not make hard top-k differentiable; report which selection parameters receive gradients."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,coarse,fine)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "coarse_fine_logits"
+      ]
+    },
+    {
+      "id": "coarse_fine_supervision",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_training:CoarseFineObjective",
+      "file": "models/tensorflow/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host builds both prediction heads. Retrieval scores alone are not response logits.",
+        "Does not make hard top-k differentiable; report which selection parameters receive gradients."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,coarse,fine)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "coarse_fine_logits"
+      ]
+    },
+    {
+      "id": "grouped_regularization",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_training:GroupedRegularization",
+      "file": "models/pytorch/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "This is an explicit loss penalty, not decoupled AdamW. Host supplies disjoint parameter objects and chooses whether to exclude bias and normalization.",
+        "Never double-count the same penalty in optimizer weight decay; group identity checks do not detect storage aliases."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,embedding,network)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "parameter_groups"
+      ]
+    },
+    {
+      "id": "grouped_regularization",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_training:GroupedRegularization",
+      "file": "models/tensorflow/ctr_training.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "This is an explicit loss penalty, not decoupled AdamW. Host supplies disjoint parameter objects and chooses whether to exclude bias and normalization.",
+        "Never double-count the same penalty in optimizer weight decay; group identity checks do not detect storage aliases."
+      ],
+      "output_contract": {
+        "kind": "objective_bundle",
+        "shape": "dict(loss,embedding,network)"
+      },
+      "local_guide": "knowledge/training_interventions.md",
+      "structure_pattern": "auxiliary_training_objectives",
+      "required_host_tensors": [
+        "parameter_groups"
+      ]
+    },
+    {
+      "id": "pretrained_id_fusion",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_embeddings:PretrainedIDFusion",
+      "file": "models/pytorch/ctr_embeddings.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host aligns IDs and validates vocabulary version, padding and OOV coverage. Inputs are native integer IDs.",
+        "Freezing changes pretrained gradients only: it must not silently discard appended OOV vectors or switch the inference representation."
+      ],
+      "output_contract": {
+        "kind": "representation_or_logits",
+        "shape": "[B,...,output_dim]"
+      },
+      "local_guide": "knowledge/representation_adaptation.md",
+      "structure_pattern": "aligned_pretrained_fusion",
+      "required_host_tensors": []
+    },
+    {
+      "id": "pretrained_id_fusion",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_embeddings:PretrainedIDFusion",
+      "file": "models/tensorflow/ctr_embeddings.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host aligns IDs and validates vocabulary version, padding and OOV coverage. Inputs are native integer IDs.",
+        "Freezing changes pretrained gradients only: it must not silently discard appended OOV vectors or switch the inference representation."
+      ],
+      "output_contract": {
+        "kind": "representation_or_logits",
+        "shape": "[B,...,output_dim]"
+      },
+      "local_guide": "knowledge/representation_adaptation.md",
+      "structure_pattern": "aligned_pretrained_fusion",
+      "required_host_tensors": []
+    },
+    {
+      "id": "response_mlp",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.ctr_embeddings:ResponseMLP",
+      "file": "models/pytorch/ctr_embeddings.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Generic LR/DNN control or host prediction head; no tokenizer, implicit sigmoid or causal interpretation."
+      ],
+      "output_contract": {
+        "kind": "representation_or_logits",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "dense_sparse_composition",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "response_mlp",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.ctr_embeddings:ResponseMLP",
+      "file": "models/tensorflow/ctr_embeddings.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Generic LR/DNN control or host prediction head; no tokenizer, implicit sigmoid or causal interpretation."
+      ],
+      "output_contract": {
+        "kind": "representation_or_logits",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "dense_sparse_composition",
+      "required_host_tensors": [
+        "dense_features"
+      ]
     }
   ]
 }

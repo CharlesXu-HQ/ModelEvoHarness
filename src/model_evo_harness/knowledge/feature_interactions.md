@@ -89,3 +89,399 @@ These entries are independent computational components, not full training system
 - `predictive_bilinear` / `PredictiveBilinear`: Bilinear user-content interaction x_user^T W x_item for changing item features. Output: `bilinear_score`, `[B]`. Only the predictor; host must build as-of dynamic features and fit the intended objective.
 
 The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.
+
+## FuxiCTR mechanism components
+
+These are independently implemented, composable PyTorch and TensorFlow mechanisms. Read the full local module and output contract before editing the current candidate. A paper name identifies a source of ideas; omitted towers, input adapters, samplers and objectives remain the host’s responsibility. Preserve the current compatible backbone and test one mechanism with its matched control. Multiple meaningful feature groups may use independent or shared instances; justify sharing and fusion from the actual fields. Do not force a complete named-model replacement or exhaust a fixed model list. Record mechanism evidence separately from task/dataset-bound business interpretations.
+
+### `gated_cross` — `GatedCross`
+
+At each layer, add x0*(W*x+b)*sigmoid(G*x) to the current hidden state, retaining the initial feature vector.
+
+**When:** Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.
+
+**Input contract:** dense_features. See `model_api` for the framework constructor and calls. **Output:** `[B,input_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Coordinate-gated matrix cross block only; no learned FDO embedding dimensions, deep tower or classifier. All dense inputs must be defined; host owns feature preparation and training.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/GDCN/src/GDCN.py).
+
+### `instance_mask` — `MaskBlock`
+
+Generate an unbounded nonlinear coordinate mask from original features, multiply current hidden state, then project, optionally normalize and ReLU.
+
+**When:** Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.
+
+**Input contract:** dense_features, hidden_representation. See `model_api` for the framework constructor and calls. **Output:** `[B,output_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One reusable MaskBlock; serial composition reuses original features, parallel composition uses explicitly declared independent/shared instances and host fusion. No automatic feature embedding layer, batch norm, dropout or classifier.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/MaskNet/src/MaskNet.py).
+
+### `context_feature_gate` — `ContextFeatureGate`
+
+Scale input features by twice sigmoid of a context-conditioned two-layer ReLU gate, independently instantiated per stream.
+
+**When:** Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.
+
+**Input contract:** dense_features, context_features. See `model_api` for the framework constructor and calls. **Output:** `[B,feature_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Host supplies the context; constant contexts produce global gates. Uses existing gating primitive as an explicit stream interface; no pair of MLP towers is created.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalMLP/src/FinalMLP.py).
+
+### `multihead_bilinear_fusion` — `MultiHeadBilinearFusion`
+
+Fuse two representations with affine contributions and separate bilinear parameter tensors for matching contiguous head partitions.
+
+**When:** Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.
+
+**Input contract:** branch_representations. See `model_api` for the framework constructor and calls. **Output:** `[B,output_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Both stream widths must divide by heads; cross-head bilinear terms are excluded. Extends existing single bilinear scoring with a fusion contract; no softmax attention, sigmoid output or branch construction.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalMLP/src/FinalMLP.py).
+
+### `cross_deep_bridge` — `CrossDeepBridge`
+
+Communicate cross/deep intermediate states through product, sum, projected concatenation or two independently parameterized attention gates.
+
+**When:** Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.
+
+**Input contract:** branch_representations. See `model_api` for the framework constructor and calls. **Output:** `[B,dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Single bridge at a host-selected depth; no entire EDCN network. Attention deliberately uses distinct gates for the two streams, correcting pinned upstream reuse of attention1. Gate MLP final biases are enabled.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EDCN/src/EDCN.py).
+
+### `field_regulation` — `FieldRegulation`
+
+Apply two learned temperature-softmax field weight vectors, each shared across embedding coordinates, to form cross/deep inputs.
+
+**When:** Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.
+
+**Input contract:** field_tokens. See `model_api` for the framework constructor and calls. **Output:** `tuple([B,num_fields,embedding_dim], [B,num_fields,embedding_dim])`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Global field regulation rather than sample-adaptive routing; preserves field axis. No batch normalization; host pairs this block with independently evaluated bridge/cross/deep updates.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EDCN/src/EDCN.py).
+
+### `wukong_block` — `WuKongBlock`
+
+Normalize low-rank Gram features X*(X^T*P), transform them into tokens with a ReLU MLP, concatenate linear field compression and add a projected residual.
+
+**When:** Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.
+
+**Input contract:** field_tokens. See `model_api` for the framework constructor and calls. **Output:** `[B,interaction_tokens+linear_tokens,embedding_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** A single FMB+LCB block with a two-layer FMB MLP; no tokenizer, model stack or head. Compressed Gram avoids forming the full field-pair matrix; no measured speed or scaling-law claim. Fully defined field tokens required; optional final normalization, Gram normalization always enabled.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/WuKong/src/WuKong.py).
+
+### `field_matrix_interaction` — `FieldMatrixInteraction`
+
+Compute lexicographic i<j field-pair scores using a distinct matrix e_i^T*M_ij*e_j or vector-weighted product for each pair.
+
+**When:** Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.
+
+**Input contract:** field_tokens. See `model_api` for the framework constructor and calls. **Output:** `[B,num_fields*(num_fields-1)/2]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Uses host embeddings and returns pair scores without first-order terms or a classifier. Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FmFM/src/FmFM.py).
+
+### `grouped_field_interaction` — `GroupedFieldInteraction`
+
+Combine weighted within-group FM vectors with weighted products between pooled semantic groups.
+
+**When:** Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.
+
+**Input contract:** field_tokens, feature_groups. See `model_api` for the framework constructor and calls. **Output:** `[B,embedding_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Group IDs per field must be contiguous nonnegative integers and cover at least two nonempty groups; singleton within-group terms are zero. Generalizes the pinned three user/item/context groups; host supplies meaningful groups, linear terms, deep path and classifier.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FLEN/src/FLEN.py).
+
+### `factorized_interaction` — `FactorizedInteraction`
+
+Split an affine projection into a,b and emit a+a*b or concat(a,a*b), preserving factorized multiplicative interactions.
+
+**When:** Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.
+
+**Input contract:** dense_features. See `model_api` for the framework constructor and calls. **Output:** `[B,output_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Sum form is already expressible with LatentCross plus a projection; this is a convenience component and recipe boundary. Concat needs even output width; no FinalNet tower ensemble or detached consistency loss.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalNet/src/FinalNet.py).
+
+### `quadratic_interaction` — `QuadraticInteraction`
+
+Split field coordinates into heads, multiply them by multiple ReLU-projected rows, sum rows, restore field-coordinate order and add the residual.
+
+**When:** Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.
+
+**Input contract:** dense_features, field_layout. See `model_api` for the framework constructor and calls. **Output:** `[B,input_dim]`.
+
+**Controlled test:** Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Input width must divide into fields and each embedding width must divide into heads. Restores original coordinate order before residual, deliberately correcting pinned source direct flattening of head-major products. Projected row storage uses row/field/head/coordinate order. No batch norm, dropout or self-ensemble objective; compare head/row parameterization against existing multiplicative gates.
+
+**Bundled code:** `models/pytorch/ctr_composition.py`, `models/tensorflow/ctr_composition.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/QNN/src/QNN_alpha.py).
+
+### `ffm_pairs` — `FieldAwareFactorization`
+
+Dot each field i embedded for partner j with field j embedded for partner i, keeping the i<j pair axis.
+
+**When:** Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.
+
+**Input contract:** field_embeddings, partner_specific_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F*(F-1)/2]`.
+
+**Controlled test:** Compare genuine partner-specific embeddings with a repeated shared embedding bank at fixed head, reporting parameter and memory changes. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Host creates partner-specific lookup/projection banks; this parameter-free core is not an FFM trainer or automatic ID tokenizer. Diagonal entries are unused by the pair output. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FFM/src/FFM.py).
+
+### `onn_operations` — `OperationAwareInteraction`
+
+Concatenate diagonal copy-operation embeddings with off-diagonal field-aware pair dot values.
+
+**When:** Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.
+
+**Input contract:** field_embeddings, partner_specific_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F*D+F*(F-1)/2]`.
+
+**Controlled test:** Compare operation-specific copy/pair banks with shared embeddings while fixing downstream DNN width and reporting parameter/storage cost. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/ONN/ONN_torch/src/ONNv2.py).
+
+### `higher_order_fm` — `HigherOrderFactorization`
+
+Dynamic programming computes exact elementary symmetric products over distinct fields for one selected order.
+
+**When:** Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,D]`.
+
+**Controlled test:** Compare order 2 with a prespecified higher order using identical embeddings/head; report any independent per-order embedding banks separately. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One tensor bank and one order only; host combines independent orders/banks and linear terms. Products can overflow for extreme activations and high order. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/HOFM/src/HOFM.py).
+
+### `deep_interaction_machine` — `InteractionMachine`
+
+Power sums and Newton identities produce a concatenated readout of all elementary symmetric interaction orders 1..K.
+
+**When:** Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,K*D]`.
+
+**Controlled test:** Compare all-order readout with matched selected-order HOFM or the order-2 control; keep the host head/deep path fixed. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Same polynomials as HOFM, with an all-order composition and power-sum implementation; not a new generic MLP. K<=min(5,F). No BatchNorm, head or parallel deep branch; cancellation is possible at large scales. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DeepIM/src/DeepIM.py).
+
+### `holographic_interaction` — `HolographicInteraction`
+
+Real FFT pair multiplication followed by inverse FFT yields circular convolution, or correlation by conjugating the left spectrum.
+
+**When:** An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F*(F-1)/2,D]`.
+
+**Controlled test:** Compare circular convolution/correlation against Hadamard pair products with the same embedding dimension and host aggregation. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Circular embedding-coordinate interactions, not chronological convolution. Explicit inverse length supports odd D; half inputs promote. No source classifier or HFM projection head. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/HFM/src/HFM.py).
+
+### `dlrm_composition` — `DenseSparseInteraction`
+
+Append the projected dense representation as a field, compute all sparse/dense pair dots, then append the dense vector itself.
+
+**When:** Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.
+
+**Input contract:** field_embeddings, dense_representation. See `model_api` for the framework constructor and calls. **Output:** `[B,(F+1)*F/2+D]`.
+
+**Controlled test:** Compare dot composition with dense/sparse concatenation under identical bottom representation and top-head budget. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Composition of existing dot products; host supplies dense bottom MLP, sparse embeddings and top prediction head. Dense token is always observed; only sparse fields have a mask. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DLRM/src/DLRM.py).
+
+### `lorentz_interaction` — `LorentzInteraction`
+
+Lift each embedding to the unit hyperboloid time component and return LorentzFM triangle interaction values for field pairs.
+
+**When:** An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F*(F-1)/2]`.
+
+**Controlled test:** Compare Lorentz triangle terms with Euclidean dot pairs using the same embeddings/head and controlled embedding norms. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Curvature fixed at one, no manifold optimizer or learned geometric projection. Float64 intermediates protect float32 squares, but extreme float64 values can overflow and performance is unmeasured. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_products.py`, `models/tensorflow/field_products.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LorentzFM/src/LorentzFM.py).
+
+### `logarithmic_interaction` — `LogarithmicInteraction`
+
+Learn field-axis interaction orders in log(abs(x)) space and exponentiate their bounded linear combinations.
+
+**When:** An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,O,D]`.
+
+**Controlled test:** Compare learned orders with fixed pair products or a linear field mixer at matched hidden width; inspect clipping frequency. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Sign is discarded; epsilon floors magnitudes and exponent clipping saturates gradients. Missing fields are multiplicative-neutral, all-missing output zero. Omits AFN log/exp BatchNorm and ensemble DNN. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_algebra.py`, `models/tensorflow/field_algebra.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/AFN/src/AFN.py).
+
+### `euler_interaction` — `EulerInteraction`
+
+Apply shared learned field orders to log magnitudes and phases, reconstruct real/imaginary outputs and add a shared implicit ReLU projection.
+
+**When:** An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.
+
+**Input contract:** complex_field_representations. See `model_api` for the framework constructor and calls. **Output:** `(real [B,O,D], imaginary [B,O,D])`.
+
+**Controlled test:** Compare explicit polar products alone, implicit projection alone and their sum with matched representations and host head. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Host supplies real/imaginary tensors; no initial semantic embedding conversion, dropout, normalization or head. Zero phase is explicitly defined with zero gradient near zero, magnitudes floored, exponents clipped. Missing fields are multiplicative-neutral. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_algebra.py`, `models/tensorflow/field_algebra.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EulerNet/src/EulerNet.py).
+
+### `generalized_interaction` — `GeneralizedInteraction`
+
+Fuse full initial-field/current-subspace outer products with learned alpha, multiply by output-specific channel matrices, and contract a learned channel vector.
+
+**When:** An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.
+
+**Input contract:** field_embeddings, current_subspace_tokens. See `model_api` for the framework constructor and calls. **Output:** `[B,O,D]`.
+
+**Controlled test:** Compare learned subspace fusion and full channel matrices against fixed fusion and diagonal matrices, holding token counts/head fixed. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One generalized interaction layer only. Initial and current token axes remain explicit; no parallel DNN or complete AOANet stack. Full O*D*D matrices can be costly. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_algebra.py`, `models/tensorflow/field_algebra.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/AOANet/src/AOANet.py).
+
+### `hierarchical_field_aggregation` — `HierarchicalInteractionAggregation`
+
+Pool each interaction order, update fields with the pooled vector multiplied by the fixed initial contextual tokens, then attention-pool across orders.
+
+**When:** Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.
+
+**Input contract:** contextualized_field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,D]`.
+
+**Controlled test:** Compare one order with recurrent orders and uniform versus learned pooling using the same contextualized input and prediction head. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Consumes host contextual X1; omits upstream initial self-attention/FFN and classifier. Learned local aggregators use hidden width D. No claim that higher orders improve held-out outcomes. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_attention.py`, `models/tensorflow/field_attention.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/InterHAt/src/InterHAt.py).
+
+### `field_graph_interaction` — `FieldGraphInteraction`
+
+Build a learned directed field graph without self edges, send through per-field output matrices and receive through per-field input matrices, with residual.
+
+**When:** Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F,D]; optional tuple with graph [B,F,F]`.
+
+**Controlled test:** Compare learned graph weights with uniform valid-neighbor weights and shared versus field-specific matrices at fixed propagation depth. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One non-GRU propagation step, no extra initial residual, multi-step reuse or task head; bias omitted from messages. A graph over fields is not a user-item graph. Isolated valid fields retain their residual. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_attention.py`, `models/tensorflow/field_attention.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FiGNN/src/FiGNN.py).
+
+### `disentangled_field_attention` — `DisentangledFieldAttention`
+
+Center Q/K over valid fields per head and add separately normalized pair attention and unary key attention.
+
+**When:** Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `[B,F,D]; optional tuple with attention [B,H,F,F]`.
+
+**Controlled test:** Compare pair-only, unary-only and their sum at fixed head count and projection width. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Correct [B,H,F,d] head transpose replaces source direct view; both distributions sum to one so combined row mass is two. No residual, dropout, optional pre-attention ReLU or classifier. Valid centering respects padding. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_attention.py`, `models/tensorflow/field_attention.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DESTINE/src/DESTINE.py).
+
+### `sam_interaction` — `SelfAttentionInteraction`
+
+Multiply raw pair dots by learned pair vectors (A) or elementwise pair vectors (E); order-3 variants transform keys, aggregate neighbors and optionally add a projection residual.
+
+**When:** Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.
+
+**Input contract:** field_embeddings. See `model_api` for the framework constructor and calls. **Output:** `2A/2E: [B,F,F,D]; 3A/3E: [B,F,D]`.
+
+**Controlled test:** Compare 2A/2E and 3A/3E at declared pair/vector storage cost, separating residual and output aggregation choices. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** All four local variants supported; no softmax, dropout or final weighted/sum/concat aggregation. Self pairs are included, unlike strict upper-triangle FM pair outputs. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_attention.py`, `models/tensorflow/field_attention.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/SAM/src/SAM.py).
+
+### `ordered_field_convolution` — `OrderedKMaxConvolution`
+
+Wide convolution along the ordered field axis, independently select largest k positions per channel/coordinate, restore their source order, then tanh.
+
+**When:** A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.
+
+**Input contract:** field_embeddings, ordered_field_layout. See `model_api` for the framework constructor and calls. **Output:** `[B,k*D*C] flattened position-coordinate-channel`.
+
+**Controlled test:** Compare ordered convolution/k-max with no convolution or ordinary max pooling, including a field-order shuffle control. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One stage with explicit k, no source dynamic multi-stage schedule or task head. Host must justify field order. Missing inputs are zero-filled; empty receptive fields cannot win and unavailable top-k slots become zero. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_convolution.py`, `models/tensorflow/field_convolution.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/CCPM/src/CCPM.py).
+
+### `convolutional_field_generation` — `ConvolutionalFieldGenerator`
+
+Length-preserving field convolution, tanh and max pooling feed a learned flattened recombination that creates new field tokens.
+
+**When:** A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.
+
+**Input contract:** field_embeddings, ordered_field_layout. See `model_api` for the framework constructor and calls. **Output:** `[B,G,D]`.
+
+**Controlled test:** Compare original fields with original plus generated fields at matched downstream interaction budget, ablating convolution and recombination separately. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One stage, odd kernels, right-padded final pooling window, generated tokens only. No BatchNorm, source multistage schedule, original-field concatenation or head. All-absent samples yield zero. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.
+
+**Bundled code:** `models/pytorch/field_convolution.py`, `models/tensorflow/field_convolution.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FGCNN/src/FGCNN.py).
+
+### `response_mlp` — `ResponseMLP`
+
+Apply a raw-logit affine head when hidden_dims is empty, or a ReLU MLP for a declared sequence of hidden widths.
+
+**When:** Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.
+
+**Input contract:** dense_features. See `model_api` for the framework constructor and calls. **Output:** `[B]`.
+
+**Controlled test:** Keep input encoding and objective fixed; use this as the no-extra-structure or capacity-matched control for a candidate component. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Generic LR/DNN control or host prediction head; no tokenizer, implicit sigmoid or causal interpretation.
+
+**Bundled code:** `models/pytorch/ctr_embeddings.py`, `models/tensorflow/ctr_embeddings.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DNN/DNN_torch/src/DNN.py).

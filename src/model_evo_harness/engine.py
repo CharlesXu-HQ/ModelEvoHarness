@@ -18,6 +18,7 @@ from .evidence import (cited_facts, validate_audit_recommendations,
                        validate_host_evidence)
 from .references import _collect_reference_events
 from .interaction import interaction_context, validate_interaction_views
+from .embeddings import validate_embedding_roles
 
 
 PACKAGE_VERSION = "0.2.0"
@@ -65,6 +66,9 @@ def _snapshot(task: object) -> dict:
         raise ValueError("task snapshot needs a list of capabilities")
     if "framework" in snapshot and snapshot["framework"] not in ("pytorch", "tensorflow"):
         raise ValueError("framework must be pytorch or tensorflow")
+    if "embedding_roles" in snapshot:
+        snapshot = {**snapshot, "embedding_roles": validate_embedding_roles(
+            snapshot["embedding_roles"], snapshot["fields"])}
     if "feature_groups" in snapshot:
         snapshot = {**snapshot, "feature_groups": validate_feature_groups(
             snapshot["feature_groups"], snapshot["fields"])}

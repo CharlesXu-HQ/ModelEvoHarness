@@ -7,7 +7,11 @@
       "source_model": "torch_rechub/models/ranking/dcn_v2.py",
       "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/ranking/dcn_v2.py",
       "mechanism": "Uses matrix-based explicit crosses, with optional low-rank expert mixtures, instead of the original vector cross.",
-      "requires": ["tabular_features", "typed_feature_schema", "observed_outcome_labels"],
+      "requires": [
+        "tabular_features",
+        "typed_feature_schema",
+        "observed_outcome_labels"
+      ],
       "comparison": "On identical fields and split, compare vector-cross DCN with matrix or low-rank crosses under a declared parameter or latency budget.",
       "failure_signals": "No held-out gain beyond the simpler cross, sparse-field instability, or excessive memory or latency.",
       "implementation_boundary": "The linked PyTorch implementation is a source example; the host adapter must implement and validate its own candidate."
@@ -19,7 +23,11 @@
       "source_model": "deepctr/models/fwfm.py",
       "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/fwfm.py",
       "mechanism": "Weights each pairwise factorization interaction by its field pair, allowing different field-pair strengths.",
-      "requires": ["tabular_features", "categorical_field_identities", "observed_outcome_labels"],
+      "requires": [
+        "tabular_features",
+        "categorical_field_identities",
+        "observed_outcome_labels"
+      ],
       "comparison": "On the same categorized fields and split, compare field-pair weights with plain FM at matched embedding width.",
       "failure_signals": "No held-out gain, or rare field pairs produce unstable coefficients.",
       "implementation_boundary": "DeepCTR is TensorFlow/Keras; the card transfers the ablation question, not a model implementation or benchmark result."
@@ -31,7 +39,10 @@
       "source_model": "deepctr/models/mlr.py",
       "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/mlr.py",
       "mechanism": "Uses soft learned regions to combine local linear response functions.",
-      "requires": ["tabular_features", "observed_outcome_labels"],
+      "requires": [
+        "tabular_features",
+        "observed_outcome_labels"
+      ],
       "comparison": "Compare with one linear model and a similarly sized MLP on the fixed split; inspect effective region support.",
       "failure_signals": "A region has too few examples, or the mixture fails to beat simpler baselines at the same budget.",
       "implementation_boundary": "The linked TensorFlow model is a reference for a host-owned implementation; region membership is not a causal segment effect."
@@ -43,7 +54,11 @@
       "source_model": "torch_rechub/models/multi_task/aitm.py",
       "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/multi_task/aitm.py",
       "mechanism": "Transfers information from an earlier task representation to a later ordered task through attention.",
-      "requires": ["tabular_features", "multiple_outcomes", "ordered_outcome_labels"],
+      "requires": [
+        "tabular_features",
+        "multiple_outcomes",
+        "ordered_outcome_labels"
+      ],
       "comparison": "On identical examples and label definitions, compare ordered transfer with independent heads and a shared-bottom control.",
       "failure_signals": "The declared outcome order is unsupported, or an auxiliary-task gain harms the primary task.",
       "implementation_boundary": "Treatment and outcome columns alone do not establish an ordered multi-step label funnel."
@@ -55,7 +70,12 @@
       "source_model": "torch_rechub/models/matching/narm.py",
       "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/narm.py",
       "mechanism": "Combines a session-level representation with attention to the current session intent for item retrieval.",
-      "requires": ["event_sequence", "item_catalog", "session_boundaries", "target_item_ids"],
+      "requires": [
+        "event_sequence",
+        "item_catalog",
+        "session_boundaries",
+        "target_item_ids"
+      ],
       "comparison": "With the same time-cut session data and candidate universe, compare session attention with masked history pooling.",
       "failure_signals": "No full-catalog recall gain, missing session boundaries, or future events enter the history.",
       "implementation_boundary": "Aggregated user windows cannot be substituted for ordered session events."
@@ -67,7 +87,12 @@
       "source_model": "torch_rechub/models/matching/youtube_sbc.py",
       "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/matching/youtube_sbc.py",
       "mechanism": "Corrects in-batch item logits using the logged item sampling weight.",
-      "requires": ["item_catalog", "user_features", "item_sampling_weights", "negative_sampler_definition"],
+      "requires": [
+        "item_catalog",
+        "user_features",
+        "item_sampling_weights",
+        "negative_sampler_definition"
+      ],
       "comparison": "Correct versus uncorrected logits with identical sampled items and the same full-catalog evaluation universe.",
       "failure_signals": "Weights are unknown or do not match the sampler, or gains disappear under full-catalog evaluation.",
       "implementation_boundary": "Sampling weights describe retrieval training negatives, not treatment-assignment or exposure propensities."
@@ -934,6 +959,742 @@
       "comparison": "Compare conversion-only alpha=0 with a prespecified nonzero auxiliary weight using identical forward structure and labels. Inspect positive-label coverage, conversion calibration and fixed business metrics; never compare losses with different units as evidence of gain.",
       "failure_signals": "Gains rely on future/realized labels as inputs, disappear with a fixed control or held-out slices, worsen calibration/cost, or require unsupported input semantics.",
       "implementation_boundary": "Independent conversion/discount heads on caller-supplied interest and discount representations; this class does not create the IPN, DPN, embeddings, data pipeline or trainer. objective combines mean BCE-with-logits with alpha times MSE over purchased rows having a valid realized-discount label. The auxiliary denominator is the count of those rows; no valid positive gives differentiable zero. This reduction is an explicit interpretation of the paper. Conversion labels are binary and valid discount labels lie in [0,1]. Label tensors are detached; unavailable and nonpurchase discount labels are masked before arithmetic. Forward prediction takes no labels. Current-order realized discount must never enter the input representation. Response prediction and positive-only regression do not identify individual treatment effects or prove coupon profitability. Alpha=0 is the objective ablation control."
+    },
+    {
+      "id": "gated_cross",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/GDCN/src/GDCN.py",
+      "source_model": "model_zoo/GDCN/src/GDCN.py",
+      "requires": [],
+      "mechanism": "At each layer, add x0*(W*x+b)*sigmoid(G*x) to the current hidden state, retaining the initial feature vector.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Coordinate-gated matrix cross block only; no learned FDO embedding dimensions, deep tower or classifier. All dense inputs must be defined; host owns feature preparation and training.",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "instance_mask",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/MaskNet/src/MaskNet.py",
+      "source_model": "model_zoo/MaskNet/src/MaskNet.py",
+      "requires": [],
+      "mechanism": "Generate an unbounded nonlinear coordinate mask from original features, multiply current hidden state, then project, optionally normalize and ReLU.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One reusable MaskBlock; serial composition reuses original features, parallel composition uses explicitly declared independent/shared instances and host fusion. No automatic feature embedding layer, batch norm, dropout or classifier.",
+      "required_host_tensors": [
+        "dense_features",
+        "hidden_representation"
+      ]
+    },
+    {
+      "id": "context_feature_gate",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalMLP/src/FinalMLP.py",
+      "source_model": "model_zoo/FinalMLP/src/FinalMLP.py",
+      "requires": [],
+      "mechanism": "Scale input features by twice sigmoid of a context-conditioned two-layer ReLU gate, independently instantiated per stream.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host supplies the context; constant contexts produce global gates. Uses existing gating primitive as an explicit stream interface; no pair of MLP towers is created.",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "multihead_bilinear_fusion",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalMLP/src/FinalMLP.py",
+      "source_model": "model_zoo/FinalMLP/src/FinalMLP.py",
+      "requires": [],
+      "mechanism": "Fuse two representations with affine contributions and separate bilinear parameter tensors for matching contiguous head partitions.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Both stream widths must divide by heads; cross-head bilinear terms are excluded. Extends existing single bilinear scoring with a fusion contract; no softmax attention, sigmoid output or branch construction.",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "cross_deep_bridge",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EDCN/src/EDCN.py",
+      "source_model": "model_zoo/EDCN/src/EDCN.py",
+      "requires": [],
+      "mechanism": "Communicate cross/deep intermediate states through product, sum, projected concatenation or two independently parameterized attention gates.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Single bridge at a host-selected depth; no entire EDCN network. Attention deliberately uses distinct gates for the two streams, correcting pinned upstream reuse of attention1. Gate MLP final biases are enabled.",
+      "required_host_tensors": [
+        "branch_representations"
+      ]
+    },
+    {
+      "id": "field_regulation",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EDCN/src/EDCN.py",
+      "source_model": "model_zoo/EDCN/src/EDCN.py",
+      "requires": [],
+      "mechanism": "Apply two learned temperature-softmax field weight vectors, each shared across embedding coordinates, to form cross/deep inputs.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Global field regulation rather than sample-adaptive routing; preserves field axis. No batch normalization; host pairs this block with independently evaluated bridge/cross/deep updates.",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "wukong_block",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/WuKong/src/WuKong.py",
+      "source_model": "model_zoo/WuKong/src/WuKong.py",
+      "requires": [],
+      "mechanism": "Normalize low-rank Gram features X*(X^T*P), transform them into tokens with a ReLU MLP, concatenate linear field compression and add a projected residual.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "A single FMB+LCB block with a two-layer FMB MLP; no tokenizer, model stack or head. Compressed Gram avoids forming the full field-pair matrix; no measured speed or scaling-law claim. Fully defined field tokens required; optional final normalization, Gram normalization always enabled.",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "field_matrix_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FmFM/src/FmFM.py",
+      "source_model": "model_zoo/FmFM/src/FmFM.py",
+      "requires": [],
+      "mechanism": "Compute lexicographic i<j field-pair scores using a distinct matrix e_i^T*M_ij*e_j or vector-weighted product for each pair.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Uses host embeddings and returns pair scores without first-order terms or a classifier. Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension.",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "grouped_field_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FLEN/src/FLEN.py",
+      "source_model": "model_zoo/FLEN/src/FLEN.py",
+      "requires": [
+        "feature_groups"
+      ],
+      "mechanism": "Combine weighted within-group FM vectors with weighted products between pooled semantic groups.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Group IDs per field must be contiguous nonnegative integers and cover at least two nonempty groups; singleton within-group terms are zero. Generalizes the pinned three user/item/context groups; host supplies meaningful groups, linear terms, deep path and classifier.",
+      "required_host_tensors": [
+        "field_tokens"
+      ]
+    },
+    {
+      "id": "factorized_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalNet/src/FinalNet.py",
+      "source_model": "model_zoo/FinalNet/src/FinalNet.py",
+      "requires": [],
+      "mechanism": "Split an affine projection into a,b and emit a+a*b or concat(a,a*b), preserving factorized multiplicative interactions.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Sum form is already expressible with LatentCross plus a projection; this is a convenience component and recipe boundary. Concat needs even output width; no FinalNet tower ensemble or detached consistency loss.",
+      "required_host_tensors": [
+        "dense_features"
+      ]
+    },
+    {
+      "id": "quadratic_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/QNN/src/QNN_alpha.py",
+      "source_model": "model_zoo/QNN/src/QNN_alpha.py",
+      "requires": [],
+      "mechanism": "Split field coordinates into heads, multiply them by multiple ReLU-projected rows, sum rows, restore field-coordinate order and add the residual.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Input width must divide into fields and each embedding width must divide into heads. Restores original coordinate order before residual, deliberately correcting pinned source direct flattening of head-major products. Projected row storage uses row/field/head/coordinate order. No batch norm, dropout or self-ensemble objective; compare head/row parameterization against existing multiplicative gates.",
+      "required_host_tensors": [
+        "dense_features",
+        "field_layout"
+      ]
+    },
+    {
+      "id": "adaptive_linear",
+      "family_id": "multiscenario",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/APG/src/APG.py",
+      "source_model": "model_zoo/APG/src/APG.py",
+      "requires": [],
+      "mechanism": "Generate a per-example full linear matrix or low-rank center S(condition) between shared input/output factors, with optional generated bias and overparameterized shared factors.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Current context/priors are available before decision and supported slices indicate parameter heterogeneity. Compare full/shared/low-rank or detached gate paths separately.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Extension of installed APG core as a reusable hidden-state layer; affine generator, no multilayer APG tower or final predictor. Generated bias follows flattened generated matrix in this independent parameter layout. Rank cannot exceed input/output dimensions; overparameterization requires rank. Host explicitly supplies condition (including layer(x,x) for self-conditioning), scenario semantics and training.",
+      "required_host_tensors": [
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "prior_conditioned_gate",
+      "family_id": "multiscenario",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/PEPNet/src/PPNet.py",
+      "source_model": "model_zoo/PEPNet/src/PPNet.py",
+      "requires": [],
+      "mechanism": "Scale a hidden layer by twice sigmoid of a ReLU MLP over base features and prior features; optionally detach only the base-feature gate path.",
+      "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
+      "when_to_try": "Current context/priors are available before decision and supported slices indicate parameter heterogeneity. Compare full/shared/low-rank or detached gate paths separately.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Extends existing PEPNet gating with explicit prior inputs, per-depth reuse and a declared stop-gradient boundary. detach_features defaults True; hidden and prior paths remain differentiable. Host creates one gate per chosen depth. No prior embedding tables, EPNet, task tower or automatic stacking; upstream PEPNet.py itself is only a stub.",
+      "required_host_tensors": [
+        "hidden_representation",
+        "dense_features",
+        "context_features"
+      ]
+    },
+    {
+      "id": "ffm_pairs",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FFM/src/FFM.py",
+      "source_model": "model_zoo/FFM/src/FFM.py",
+      "requires": [],
+      "mechanism": "Dot each field i embedded for partner j with field j embedded for partner i, keeping the i<j pair axis.",
+      "comparison": "Compare genuine partner-specific embeddings with a repeated shared embedding bank at fixed head, reporting parameter and memory changes.",
+      "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host creates partner-specific lookup/projection banks; this parameter-free core is not an FFM trainer or automatic ID tokenizer. Diagonal entries are unused by the pair output. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "onn_operations",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/ONN/ONN_torch/src/ONNv2.py",
+      "source_model": "model_zoo/ONN/ONN_torch/src/ONNv2.py",
+      "requires": [],
+      "mechanism": "Concatenate diagonal copy-operation embeddings with off-diagonal field-aware pair dot values.",
+      "comparison": "Compare operation-specific copy/pair banks with shared embeddings while fixing downstream DNN width and reporting parameter/storage cost.",
+      "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "partner_specific_embeddings"
+      ]
+    },
+    {
+      "id": "higher_order_fm",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/HOFM/src/HOFM.py",
+      "source_model": "model_zoo/HOFM/src/HOFM.py",
+      "requires": [],
+      "mechanism": "Dynamic programming computes exact elementary symmetric products over distinct fields for one selected order.",
+      "comparison": "Compare order 2 with a prespecified higher order using identical embeddings/head; report any independent per-order embedding banks separately.",
+      "when_to_try": "Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One tensor bank and one order only; host combines independent orders/banks and linear terms. Products can overflow for extreme activations and high order. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "deep_interaction_machine",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DeepIM/src/DeepIM.py",
+      "source_model": "model_zoo/DeepIM/src/DeepIM.py",
+      "requires": [],
+      "mechanism": "Power sums and Newton identities produce a concatenated readout of all elementary symmetric interaction orders 1..K.",
+      "comparison": "Compare all-order readout with matched selected-order HOFM or the order-2 control; keep the host head/deep path fixed.",
+      "when_to_try": "Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Same polynomials as HOFM, with an all-order composition and power-sum implementation; not a new generic MLP. K<=min(5,F). No BatchNorm, head or parallel deep branch; cancellation is possible at large scales. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "holographic_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/HFM/src/HFM.py",
+      "source_model": "model_zoo/HFM/src/HFM.py",
+      "requires": [],
+      "mechanism": "Real FFT pair multiplication followed by inverse FFT yields circular convolution, or correlation by conjugating the left spectrum.",
+      "comparison": "Compare circular convolution/correlation against Hadamard pair products with the same embedding dimension and host aggregation.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Circular embedding-coordinate interactions, not chronological convolution. Explicit inverse length supports odd D; half inputs promote. No source classifier or HFM projection head. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "dlrm_composition",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DLRM/src/DLRM.py",
+      "source_model": "model_zoo/DLRM/src/DLRM.py",
+      "requires": [],
+      "mechanism": "Append the projected dense representation as a field, compute all sparse/dense pair dots, then append the dense vector itself.",
+      "comparison": "Compare dot composition with dense/sparse concatenation under identical bottom representation and top-head budget.",
+      "when_to_try": "Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Composition of existing dot products; host supplies dense bottom MLP, sparse embeddings and top prediction head. Dense token is always observed; only sparse fields have a mask. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "dense_representation"
+      ]
+    },
+    {
+      "id": "lorentz_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LorentzFM/src/LorentzFM.py",
+      "source_model": "model_zoo/LorentzFM/src/LorentzFM.py",
+      "requires": [],
+      "mechanism": "Lift each embedding to the unit hyperboloid time component and return LorentzFM triangle interaction values for field pairs.",
+      "comparison": "Compare Lorentz triangle terms with Euclidean dot pairs using the same embeddings/head and controlled embedding norms.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Curvature fixed at one, no manifold optimizer or learned geometric projection. Float64 intermediates protect float32 squares, but extreme float64 values can overflow and performance is unmeasured. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "logarithmic_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/AFN/src/AFN.py",
+      "source_model": "model_zoo/AFN/src/AFN.py",
+      "requires": [],
+      "mechanism": "Learn field-axis interaction orders in log(abs(x)) space and exponentiate their bounded linear combinations.",
+      "comparison": "Compare learned orders with fixed pair products or a linear field mixer at matched hidden width; inspect clipping frequency.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Sign is discarded; epsilon floors magnitudes and exponent clipping saturates gradients. Missing fields are multiplicative-neutral, all-missing output zero. Omits AFN log/exp BatchNorm and ensemble DNN. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "euler_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/EulerNet/src/EulerNet.py",
+      "source_model": "model_zoo/EulerNet/src/EulerNet.py",
+      "requires": [],
+      "mechanism": "Apply shared learned field orders to log magnitudes and phases, reconstruct real/imaginary outputs and add a shared implicit ReLU projection.",
+      "comparison": "Compare explicit polar products alone, implicit projection alone and their sum with matched representations and host head.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host supplies real/imaginary tensors; no initial semantic embedding conversion, dropout, normalization or head. Zero phase is explicitly defined with zero gradient near zero, magnitudes floored, exponents clipped. Missing fields are multiplicative-neutral. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "complex_field_representations"
+      ]
+    },
+    {
+      "id": "generalized_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/AOANet/src/AOANet.py",
+      "source_model": "model_zoo/AOANet/src/AOANet.py",
+      "requires": [],
+      "mechanism": "Fuse full initial-field/current-subspace outer products with learned alpha, multiply by output-specific channel matrices, and contract a learned channel vector.",
+      "comparison": "Compare learned subspace fusion and full channel matrices against fixed fusion and diagonal matrices, holding token counts/head fixed.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One generalized interaction layer only. Initial and current token axes remain explicit; no parallel DNN or complete AOANet stack. Full O*D*D matrices can be costly. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "current_subspace_tokens"
+      ]
+    },
+    {
+      "id": "hierarchical_field_aggregation",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/InterHAt/src/InterHAt.py",
+      "source_model": "model_zoo/InterHAt/src/InterHAt.py",
+      "requires": [],
+      "mechanism": "Pool each interaction order, update fields with the pooled vector multiplied by the fixed initial contextual tokens, then attention-pool across orders.",
+      "comparison": "Compare one order with recurrent orders and uniform versus learned pooling using the same contextualized input and prediction head.",
+      "when_to_try": "Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Consumes host contextual X1; omits upstream initial self-attention/FFN and classifier. Learned local aggregators use hidden width D. No claim that higher orders improve held-out outcomes. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "contextualized_field_embeddings"
+      ]
+    },
+    {
+      "id": "field_graph_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FiGNN/src/FiGNN.py",
+      "source_model": "model_zoo/FiGNN/src/FiGNN.py",
+      "requires": [],
+      "mechanism": "Build a learned directed field graph without self edges, send through per-field output matrices and receive through per-field input matrices, with residual.",
+      "comparison": "Compare learned graph weights with uniform valid-neighbor weights and shared versus field-specific matrices at fixed propagation depth.",
+      "when_to_try": "Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One non-GRU propagation step, no extra initial residual, multi-step reuse or task head; bias omitted from messages. A graph over fields is not a user-item graph. Isolated valid fields retain their residual. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "disentangled_field_attention",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DESTINE/src/DESTINE.py",
+      "source_model": "model_zoo/DESTINE/src/DESTINE.py",
+      "requires": [],
+      "mechanism": "Center Q/K over valid fields per head and add separately normalized pair attention and unary key attention.",
+      "comparison": "Compare pair-only, unary-only and their sum at fixed head count and projection width.",
+      "when_to_try": "Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Correct [B,H,F,d] head transpose replaces source direct view; both distributions sum to one so combined row mass is two. No residual, dropout, optional pre-attention ReLU or classifier. Valid centering respects padding. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "sam_interaction",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/SAM/src/SAM.py",
+      "source_model": "model_zoo/SAM/src/SAM.py",
+      "requires": [],
+      "mechanism": "Multiply raw pair dots by learned pair vectors (A) or elementwise pair vectors (E); order-3 variants transform keys, aggregate neighbors and optionally add a projection residual.",
+      "comparison": "Compare 2A/2E and 3A/3E at declared pair/vector storage cost, separating residual and output aggregation choices.",
+      "when_to_try": "Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "All four local variants supported; no softmax, dropout or final weighted/sum/concat aggregation. Self pairs are included, unlike strict upper-triangle FM pair outputs. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings"
+      ]
+    },
+    {
+      "id": "ordered_field_convolution",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/CCPM/src/CCPM.py",
+      "source_model": "model_zoo/CCPM/src/CCPM.py",
+      "requires": [],
+      "mechanism": "Wide convolution along the ordered field axis, independently select largest k positions per channel/coordinate, restore their source order, then tanh.",
+      "comparison": "Compare ordered convolution/k-max with no convolution or ordinary max pooling, including a field-order shuffle control.",
+      "when_to_try": "A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One stage with explicit k, no source dynamic multi-stage schedule or task head. Host must justify field order. Missing inputs are zero-filled; empty receptive fields cannot win and unavailable top-k slots become zero. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "convolutional_field_generation",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FGCNN/src/FGCNN.py",
+      "source_model": "model_zoo/FGCNN/src/FGCNN.py",
+      "requires": [],
+      "mechanism": "Length-preserving field convolution, tanh and max pooling feed a learned flattened recombination that creates new field tokens.",
+      "comparison": "Compare original fields with original plus generated fields at matched downstream interaction budget, ablating convolution and recombination separately.",
+      "when_to_try": "A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One stage, odd kernels, right-padded final pooling window, generated tokens only. No BatchNorm, source multistage schedule, original-field concatenation or head. All-absent samples yield zero. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "required_host_tensors": [
+        "field_embeddings",
+        "ordered_field_layout"
+      ]
+    },
+    {
+      "id": "bst_history_encoder",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/BST/src/BST.py",
+      "source_model": "model_zoo/BST/src/BST.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Append the candidate token to history, add learned positions, then apply bidirectional multihead self-attention and residual feed-forward refinement. Expose transformed history and candidate readout.",
+      "comparison": "Keep the same events, embedding width and training budget; compare candidate-in-encoder with history-only encoding followed by target attention. Test positional contribution separately.",
+      "when_to_try": "Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option. No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmin_interest_refiner",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DMIN/src/DMIN.py",
+      "source_model": "model_zoo/DMIN/src/DMIN.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Causally refine events, compute a second head-split self-attention, expand each head separately, then use independent target/position-conditioned DIN-style attentions to form multiple interests.",
+      "comparison": "Compare one head and multiple heads at matched budget, then ablate the causal behavior refiner while retaining target attentions. Auxiliary transition loss is a separate experiment.",
+      "when_to_try": "Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Independent two-normalization refiner and D-dimensional positional context; no dropout or upstream exact hidden-width choices. The host constructs auxiliary next-event/negative supervision; intermediate refined/head states are exposed and remain event-aligned. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dmr_history_matching",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DMR/src/DMR.py",
+      "source_model": "model_zoo/DMR/src/DMR.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Context/position-conditioned scores form causal prefix user states; their final valid state matches the target by a dot product. A separate target/context-conditioned item path returns both softmax history pooling and the sum of raw relevance scores.",
+      "comparison": "On aligned events and context, compare user path only, item path only and both. Keep the loss fixed, then test next-event user-state supervision separately.",
+      "when_to_try": "Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Optional side context must be event-aligned; omission supplies zero side context, not fabricated business features. Separate input/output item embedding tables, calibrated heads and next-event objective are host-owned. Uses the last valid prefix rather than the last padded array slot. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sim_history_selector",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SIM/SIM.py",
+      "source_model": "model_zoo/LongCTR/SIM/SIM.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Learned target/history dot scores create an unnormalized coarse weighted sum, including negative contributions; valid-only top-K retrieval feeds a separate learned target-attention fine readout.",
+      "comparison": "Compare the same fine attention under random/recency/learned selection at fixed K; then add coarse-head supervision without changing selectors or fine structure.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Hard indices are nondifferentiable; the coarse representation and scores expose a trainable route for selector supervision. Masks rank invalid events below every finite valid score, correcting source padding that can beat negative scores. Coarse/fine heads, losses and short-history branch remain host-owned. Dense O(L) score scan; fixed K outputs, stable ties favor earlier event indices. Invalid indices are -1. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "eta_history_selector",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/ETA/ETA.py",
+      "source_model": "model_zoo/LongCTR/ETA/ETA.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Fixed checkpointed random-hyperplane signs yield Hamming distance from target; retrieve nearest K valid history events and apply learned target attention.",
+      "comparison": "Fix K, history and fine readout; compare Hamming retrieval with learned similarity, recency and random eligible retrieval. Treat hash seed as an experimental seed.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing. Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "sdim_collision_pooling",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SDIM/SDIM.py",
+      "source_model": "model_zoo/LongCTR/SDIM/SDIM.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Sum history embeddings whose full random-hyperplane bit code equals the target code independently for each hash; average the hash-specific sums.",
+      "comparison": "At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "twin_headwise_selector",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/TWIN/TWIN.py",
+      "source_model": "model_zoo/LongCTR/TWIN/TWIN.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Each learned query/key head chooses its own top-K history events; exactly those scores normalize corresponding value heads, then concatenated head outputs are projected.",
+      "comparison": "Compare headwise selections against a common shared-K selection with matched q/k/v width, then ablate retrieval/fine-score consistency.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Dense search, without production ANN caches or the full short/long dual-branch ranker. Hard selection indices are nondifferentiable. Fixed K per head; every head reports original event indices, masks and weights. Invalid indices are -1, and all-masked heads remain zero. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "mirrn_history_refiner",
+      "family_id": "sequence_ranking",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/MIRRN/MIRRN.py",
+      "source_model": "model_zoo/LongCTR/MIRRN/MIRRN.py",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "mechanism": "Target, masked recent-history mean and global-history mean independently query fixed LSH top-K; original indices are restored to temporal order. Each selected stream receives masked complex block-channel FFT refinement, pooled interests and final target attention.",
+      "comparison": "Compare target-only with three selector queries, then compare identity/no-filter control against frequency refinement at identical selected indices. Keep K, hashes and serving cost recorded.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Corrects unused selection masks and diagonal-only einsum: full off-diagonal channel mixing is deliberate and independently implemented. Orthogonal rFFT/irFFT with explicit n=K supports odd K; complex matrices are shared across frequencies. Zero-padded invalid slots are part of the declared K-point transform, masked both before FFT and after residual LayerNorm. Omits upstream recency-position additions, dropout and short-history attention branch. Recent mask must be a subset of valid; missing recent history produces no recent interest. Dense hash scans, no ANN cache. Fixed K with chronological valid selections and invalid -1 slots. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "required_host_tensors": [
+        "sequence_mask",
+        "recent_history_mask"
+      ]
+    },
+    {
+      "id": "ensemble_consistency",
+      "family_id": "training_interventions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/FinalNet/src/FinalNet.py",
+      "source_model": "model_zoo/FinalNet/src/FinalNet.py",
+      "requires": [
+        "binary_outcome_labels"
+      ],
+      "mechanism": "Supervise aggregated branch logits or probabilities and add separately summed branch BCE against a detached ensemble teacher.",
+      "comparison": "Hold branch architecture and predictions fixed; ablate consistency weight and compare logit versus probability aggregation separately, reporting each loss and calibration.",
+      "when_to_try": "Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Teacher is detached; aggregate supervised path remains differentiable. The weight multiplies a SUM of branch means, so branch count changes its scale. Probability averaging uses stable log probabilities; neither aggregation is a causal effect estimator.",
+      "required_host_tensors": [
+        "branch_logits"
+      ]
+    },
+    {
+      "id": "next_behavior_auxiliary",
+      "family_id": "training_interventions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DIEN/src/DIEN.py",
+      "source_model": "model_zoo/DIEN/src/DIEN.py",
+      "requires": [
+        "event_sequence"
+      ],
+      "mechanism": "Score aligned state-positive and state-negative pairs with a shared MLP; average BCE over both classes and valid transitions only.",
+      "comparison": "Keep main model and sampler fixed; compare main loss only with a weighted auxiliary term, then test negative strategy separately. Audit false negatives and future leakage.",
+      "when_to_try": "Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host aligns state t with event t+1 and supplies time-safe negatives. Inputs are already shifted; this module does not shift a second time. Mask is applied to unreduced positive and negative losses. Empty/all-masked transitions give differentiable zero. Host must expose sequence states from the candidate.",
+      "required_host_tensors": [
+        "aligned_sequence_states",
+        "positive_negative_next_events",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "coarse_fine_supervision",
+      "family_id": "training_interventions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SIM/SIM.py",
+      "source_model": "model_zoo/LongCTR/SIM/SIM.py",
+      "requires": [
+        "binary_outcome_labels"
+      ],
+      "mechanism": "Apply independently weighted binary supervision to coarse and fine response logits for the same observed target.",
+      "comparison": "Keep selector, fine head and retained history fixed; isolate coarse loss weight and measure retrieval coverage alongside final task quality.",
+      "when_to_try": "Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host builds both prediction heads. Retrieval scores alone are not response logits. Does not make hard top-k differentiable; report which selection parameters receive gradients.",
+      "required_host_tensors": [
+        "coarse_fine_logits"
+      ]
+    },
+    {
+      "id": "grouped_regularization",
+      "family_id": "training_interventions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/fuxictr/pytorch/models/rank_model.py",
+      "source_model": "fuxictr/pytorch/models/rank_model.py",
+      "requires": [],
+      "mechanism": "Add explicit lambda/p times the sum of absolute parameter values to power p, separately for embedding and network groups.",
+      "comparison": "Keep optimizer and architecture fixed; vary one regularization group at a time, recording loss contribution, gradient scale and slice support.",
+      "when_to_try": "Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "This is an explicit loss penalty, not decoupled AdamW. Host supplies disjoint parameter objects and chooses whether to exclude bias and normalization. Never double-count the same penalty in optimizer weight decay; group identity checks do not detect storage aliases.",
+      "required_host_tensors": [
+        "parameter_groups"
+      ]
+    },
+    {
+      "id": "pretrained_id_fusion",
+      "family_id": "representation_adaptation",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/fuxictr/pytorch/layers/embeddings/pretrained_embedding.py",
+      "source_model": "fuxictr/pytorch/layers/embeddings/pretrained_embedding.py",
+      "requires": [
+        "id_vocabulary",
+        "aligned_pretrained_vectors"
+      ],
+      "mechanism": "Initialize, sum, or concatenate aligned pretrained ID vectors with a learned ID path and project to the declared output width.",
+      "comparison": "Use the same vocabulary and pretrained table; isolate fusion mode and freezing, then compare cold/OOV and frequent-ID slices.",
+      "when_to_try": "A versioned aligned pretrained table and sparse/cold slice evidence exist. Test fusion and freezing independently with constant ID mapping.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Host aligns IDs and validates vocabulary version, padding and OOV coverage. Inputs are native integer IDs. Freezing changes pretrained gradients only: it must not silently discard appended OOV vectors or switch the inference representation.",
+      "required_host_tensors": []
+    },
+    {
+      "id": "response_mlp",
+      "family_id": "feature_interactions",
+      "source_repo": "fuxictr",
+      "source_url": "https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DNN/DNN_torch/src/DNN.py",
+      "source_model": "model_zoo/DNN/DNN_torch/src/DNN.py",
+      "requires": [],
+      "mechanism": "Apply a raw-logit affine head when hidden_dims is empty, or a ReLU MLP for a declared sequence of hidden widths.",
+      "comparison": "Keep input encoding and objective fixed; use this as the no-extra-structure or capacity-matched control for a candidate component.",
+      "when_to_try": "Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.",
+      "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
+      "implementation_boundary": "Generic LR/DNN control or host prediction head; no tokenizer, implicit sigmoid or causal interpretation.",
+      "required_host_tensors": [
+        "dense_features"
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Structure hypotheses beyond the current model cards
 
-This guide describes **candidate mechanisms for an Agent to implement and test**, not models already provided by ModelEvoHarness. The current 44 method cards and their PyTorch/TensorFlow references do not include the structures below. A source name is orientation, not a drop-in API or a claim of paper reproduction. If a host has a valid task contract, the Agent may write an original implementation directly in PyTorch or TensorFlow, add a matched control, and run it through that host's trainer. It must record the exact variant and training recipe it actually tested.
+This guide describes **candidate mechanisms for an Agent to implement and test**. Each section distinguishes bundled tensor components from directions that still need an original implementation. A source name is orientation, not a drop-in API or a claim of paper reproduction. If a host has a valid task contract, the Agent may write an original implementation directly in PyTorch or TensorFlow, add a matched control, and run it through that host's trainer. It must record the exact variant and training recipe it actually tested.
 
 ## Contract before selecting a new structure
 
@@ -24,7 +24,7 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 
 **Falsification.** A lift confined to extremely rare pairs, disappearing under cross-fold support checks, or accompanied by severe calibration/latency regression is weak evidence for richer pair parameterization. Do not invent explicit cross fields from outcomes or aggregates beyond the decision time.
 
-**Code status.** Design guidance only; no local FFM, DeepFFM, FatDeepFFM, FEFM or ONN card/reference. Source mechanisms: [DeepCTR FEFM and ONN descriptions](https://deepctr-doc.readthedocs.io/en/latest/Features.html#deepfefm-deep-field-embedded-factorization-machine) and [Torch-RecHub DeepFFM source](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/ranking/deepffm.py).
+**Code status.** Bundled `ffm_pairs` and `onn_operations` provide partner/operation-aware tensor cores; `field_matrix_interaction` provides FmFM-style matrices, without imposing FEFM symmetry. Host supplies lookup banks and heads. DeepFFM/FatDeepFFM and complete FEFM variants remain design guidance. Source mechanisms: [DeepCTR FEFM and ONN descriptions](https://deepctr-doc.readthedocs.io/en/latest/Features.html#deepfefm-deep-field-embedded-factorization-machine) and [Torch-RecHub DeepFFM source](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/ranking/deepffm.py).
 
 ## Cross/deep information exchange: EDCN
 
@@ -34,7 +34,7 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 
 **Falsification.** If a wider DCN/MLP matches EDCN, the exchange mechanism has not been isolated. If the bridge adds no gain after regulation or vice versa, attribute the result to the working component. Disappearing support in sparse groups is not evidence of a missing business feature.
 
-**Code status.** Design guidance only; no local EDCN card/reference. [DeepCTR description and source](https://deepctr-doc.readthedocs.io/en/latest/Features.html#edcn-enhancing-explicit-and-implicit-feature-interactions-dcn) identify bridge and regulation as discriminating components.
+**Code status.** Bundled `cross_deep_bridge` and `field_regulation` provide independently ablatable exchange and regulation. The host wires them into its cross/deep layers. [DeepCTR description and source](https://deepctr-doc.readthedocs.io/en/latest/Features.html#edcn-enhancing-explicit-and-implicit-feature-interactions-dcn) identify bridge and regulation as discriminating components.
 
 ## Field locality and grouping: FGCNN, CCPM, FLEN
 
@@ -44,7 +44,7 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 
 **Falsification.** If no valid field order exists, do not build a CNN simply because it appears in an upstream list. If a random order performs equally well, the effect may be capacity or regularization. If groups are inferred from the validation outcomes, the protocol is contaminated.
 
-**Code status.** Design guidance only; none has a local method card/reference. [DeepCTR model descriptions](https://deepctr-doc.readthedocs.io/en/latest/Features.html#fgcnn-feature-generation-by-convolutional-neural-network) distinguish generated local patterns from field grouping.
+**Code status.** Bundled `convolutional_field_generation`, `ordered_field_convolution`, and `grouped_field_interaction` provide the distinct generation, convolution and semantic-group mechanisms. They do not construct a full predictor automatically. [DeepCTR model descriptions](https://deepctr-doc.readthedocs.io/en/latest/Features.html#fgcnn-feature-generation-by-convolutional-neural-network) distinguish generated local patterns from field grouping.
 
 ## Candidate-aware sequence Transformer: BST
 
@@ -54,7 +54,7 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 
 **Falsification.** If order shuffling leaves the gain intact, the sequence-dependency hypothesis is unsupported. If only target leakage or a longer history explains the gain, do not credit self-attention. A post-coupon event in the input invalidates the uplift comparison.
 
-**Code status.** Design guidance only; no local BST card/reference. The [Torch-RecHub BST source](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/ranking/bst.py) makes its history, target and padding contracts explicit.
+**Code status.** Bundled `bst_history_encoder` provides one candidate-in-encoder block with explicit masks and target-token readout; the host owns stacking, embeddings and task supervision. The [Torch-RecHub BST source](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/ranking/bst.py) makes its history, target and padding contracts explicit.
 
 ## Sparse, recent and diverse interests: SINE, STAMP, ComiRec
 

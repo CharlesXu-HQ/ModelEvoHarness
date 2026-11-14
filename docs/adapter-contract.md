@@ -87,7 +87,7 @@ class Agent:
 
 `context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` and `analysis_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. `model_api` contains model components; `analysis_api` contains diagnostic and screening tools. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both.
 
-The catalog includes 27 research families and 84 unified method cards: 82 model methods and 2 analysis tools. `model_implementations.json` has 166 entries, including generic `two_tower` in both frameworks; `analysis_implementations.json` has 4 entries. TwoTower remains outside the method cards. `method_applicability.frameworks` reports native PyTorch/TensorFlow availability for either kind. Model changes use `structure_patterns` with `structural_change`; analysis uses `analysis_patterns` with `operation`. A `ready` status means the inputs are declared; it does not establish effectiveness.
+The catalog includes 29 research families and 127 unified method cards: 125 model/training methods and 2 analysis tools. `model_implementations.json` has 252 entries, including generic `two_tower` in both frameworks; `analysis_implementations.json` has 4 entries. TwoTower remains outside the method cards. `method_applicability.frameworks` reports native PyTorch/TensorFlow availability for either kind. Model changes use `structure_patterns` with `structural_change`; analysis uses `analysis_patterns` with `operation`. A `ready` status means the inputs are declared; it does not establish effectiveness.
 
 Analysis tools live in `analysis/<framework>/research_diagnostics.py`. The host explicitly invokes them on captured activations and training gradients while diagnosing a baseline or completed trial, and may report the observations as host evidence. Model components under `models/<framework>` are integrated into the candidate's forward computation. API discovery and source retrieval install no hooks, invoke no analysis tools and run no training.
 
@@ -189,3 +189,43 @@ Normal reflection uses `iteration_effort`, default `high`. The host can set `eva
 Supply nonempty `interaction_views` with `id`, open-ended `kind`, original `fields` and `representation`; derived views cite the same source fields. Set `interaction_plan_required: true` to require `research.interaction_plan`. The engine passes `interaction_context` with view-pair coverage templates and prior scopes, control outcomes and reflection attribution. Unknown coverage stays an Agent assessment.
 
 See [explicit interactions](explicit-interactions.md) for the plan schema, open-ended priority guidance and native source reader. Hosts execute controls, enforce compute budgets and report `interaction_control` outcomes; the generic engine does not train an extra arm. A `test` plan alone does not assert that a control ran. A `defer` plan may retain candidate hypotheses without selecting one. Coarse view-pair coverage does not require materializing or testing every original-field pair; component `input_fields` describe concrete subsets.
+
+
+## Embedding roles and shared vocabulary contracts
+
+A snapshot may include `embedding_roles`; a representation-changing proposal should include
+`research.embedding_roles`. Both use the same validator. Each role names `id`, `module_path`,
+`kind` (`numeric`, `categorical`, `sequence`, `precomputed`), `fields`, and positive `width`.
+Categorical/sequence roles additionally require `id_domain`, `vocabulary_digest`, and
+`vocabulary_size`. Declare `padding_id` and `oov_id` when present, with distinct meanings.
+Precomputed roles require `input_dim`; pretrained roles can name `pretrained_digest` and
+`freeze_pretrained` (boolean). Every field must belong to the task. Roles using the same module
+must agree on dimensions, vocabularies, special rows and pretrained policy. Candidate and
+history roles can share when their ID semantics agree.
+
+```json
+{
+  "id": "history_items",
+  "module_path": "encoder.item_embedding",
+  "kind": "sequence",
+  "fields": ["past_item_ids"],
+  "width": 32,
+  "id_domain": "item",
+  "vocabulary_digest": "items-v3",
+  "vocabulary_size": 10002,
+  "padding_id": 0,
+  "oov_id": 1
+}
+```
+
+These are declaration checks, not runtime tracing. The host verifies actual shared parameter
+objects, ID mapping and trainable-variable registration. `PretrainedIDFusion` freezes the
+pretrained table without changing which ID/OOV vectors are used; learned ID paths remain
+trainable. Keras freezing excludes the table from `trainable_variables`.
+
+Tensor requirements such as `field_tokens`, `branch_logits` or `parameter_groups` may be
+produced from existing fields by host code. A `needs_data` applicability result names missing
+capability declarations; it is not permission to issue a human raw-data request automatically.
+Consult the packaged feature-gap guide before deciding whether a code or dataset change is needed.
+
+New component metadata separates raw/declared prerequisites in `requires` from candidate-produced inputs in `required_host_tensors`. The latter are exposed in `model_api` and source contracts and do not block discovery. Construct and verify them in the candidate before training. A field layout needs a stable declared axis; locality still needs a justified semantic hypothesis. Next-event negatives require an explicit eligible pool and sampler, not invented observed labels. A recent-N mask can use event order; a time-window mask additionally needs real event timestamps.

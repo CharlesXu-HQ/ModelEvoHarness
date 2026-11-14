@@ -3,7 +3,14 @@
     {
       "id": "collaborative_signal",
       "name": "Neighborhood and latent collaborative signals",
-      "method_ids": ["user_cf", "item_cf", "swing", "funksvd", "biassvd", "neumf"],
+      "method_ids": [
+        "user_cf",
+        "item_cf",
+        "swing",
+        "funksvd",
+        "biassvd",
+        "neumf"
+      ],
       "structural_change": "Use interaction neighborhoods or learned user and item ID factors as an additional retrieval signal; neighborhood methods aggregate observed co-interactions, while factor methods compress them into vectors.",
       "when_to_try": "A popularity or content-only baseline misses repeat-interest items on a fixed user cohort, and interaction density is sufficient to estimate neighbors or factors.",
       "required_evidence": "Time-ordered user-item interactions, catalog membership, interaction-density and cold-user/item slices, and a fixed retrieval candidate universe.",
@@ -13,7 +20,10 @@
     {
       "id": "item_context_embedding",
       "name": "Item context and side-information embeddings",
-      "method_ids": ["item2vec", "eges"],
+      "method_ids": [
+        "item2vec",
+        "eges"
+      ],
       "structural_change": "Learn item representations from local co-occurrence contexts; optionally blend item ID and side-attribute embeddings to represent less-observed items.",
       "when_to_try": "ID-only item representations underperform on low-history items while temporally valid item contexts or side attributes have measurable coverage.",
       "required_evidence": "Pre-decision ordered item contexts, item catalog, side-attribute availability when used, and coverage metrics by item age and interaction count.",
@@ -23,7 +33,16 @@
     {
       "id": "pairwise_feature_interaction",
       "name": "Pairwise feature interactions",
-      "method_ids": ["fm", "deepfm", "nfm", "pnn", "afm", "fibinet", "fwfm", "predictive_bilinear"],
+      "method_ids": [
+        "fm",
+        "deepfm",
+        "nfm",
+        "pnn",
+        "afm",
+        "fibinet",
+        "fwfm",
+        "predictive_bilinear"
+      ],
       "structural_change": "Add second-order field interactions through factorized products, pooled product vectors, field-pair weights, or attention and gating over pairs.",
       "when_to_try": "A linear or plain MLP baseline leaves repeatable validation errors on supported pairs of pre-decision fields, such as user segment by offer attribute.",
       "required_evidence": "Typed field schema, pre-decision availability, support counts for candidate field pairs, and slice-level residuals on a held-out split.",
@@ -33,7 +52,13 @@
     {
       "id": "explicit_high_order_cross",
       "name": "Explicit and attention-based higher-order crosses",
-      "method_ids": ["wide_deep", "dcn", "dcn_v2", "xdeepfm", "autoint"],
+      "method_ids": [
+        "wide_deep",
+        "dcn",
+        "dcn_v2",
+        "xdeepfm",
+        "autoint"
+      ],
       "structural_change": "Add configured wide crosses, bounded-degree cross layers, matrix or expert cross layers, vector-wise crossing, or field attention alongside the prediction backbone.",
       "when_to_try": "Pairwise interactions still leave stable residual patterns across three or more supported fields, or the existing wide crosses require excessive manual enumeration.",
       "required_evidence": "Typed and serving-available fields, repeatable higher-order slice effects, adequate joint support, and a parameter and inference-cost budget.",
@@ -43,7 +68,12 @@
     {
       "id": "independent_retrieval_towers",
       "name": "Indexable user and item representations",
-      "method_ids": ["dssm", "fm_recall", "youtubednn", "multi_view_dssm"],
+      "method_ids": [
+        "dssm",
+        "fm_recall",
+        "youtubednn",
+        "multi_view_dssm"
+      ],
       "structural_change": "Encode user context and catalog items into separately computable vectors so dot product or cosine similarity can retrieve candidates from an index.",
       "when_to_try": "The current candidate generator has low recall at a fixed candidate count, and user and item features support separately computed representations.",
       "required_evidence": "Item catalog and index update cadence, user/item features available before retrieval, labeled interactions, and a fixed candidate and negative-sampling protocol.",
@@ -53,7 +83,9 @@
     {
       "id": "retrieval_sampling_correction",
       "name": "Sampled-item logit correction",
-      "method_ids": ["youtube_sbc"],
+      "method_ids": [
+        "youtube_sbc"
+      ],
       "structural_change": "Adjust in-batch item logits using the item's logged sampling weight while retaining the retrieval tower and candidate representation.",
       "when_to_try": "In-batch training overweights frequently sampled items and held-out recall or calibration varies systematically by item popularity.",
       "required_evidence": "Known sampling weights from the actual training sampler, item-frequency slices, and an unchanged evaluation candidate universe.",
@@ -63,7 +95,12 @@
     {
       "id": "target_conditioned_history",
       "name": "Target-aware history for ranking",
-      "method_ids": ["din", "dien", "dsin", "transact"],
+      "method_ids": [
+        "din",
+        "dien",
+        "dsin",
+        "transact"
+      ],
       "structural_change": "Condition attention over past behavior on the candidate item; optionally model interest evolution or aggregate within and across sessions before target activation.",
       "when_to_try": "The same user receives different outcomes for candidate types and a pooled-history baseline has persistent target-specific residuals.",
       "required_evidence": "Timestamped histories strictly before each candidate decision, candidate features, valid session boundaries when used, and adequate sequence coverage.",
@@ -73,7 +110,13 @@
     {
       "id": "ordered_sequence_retrieval",
       "name": "Order-sensitive sequence retrieval",
-      "method_ids": ["sasrec", "sdm", "narm", "hstu", "pinnerformer"],
+      "method_ids": [
+        "sasrec",
+        "sdm",
+        "narm",
+        "hstu",
+        "pinnerformer"
+      ],
       "structural_change": "Encode the ordered history or current session with causal attention, recurrent states, or short- and long-term fusion to predict the next item.",
       "when_to_try": "Next-item errors vary with recency or within-session order, and an order-agnostic history representation leaves stable temporal residuals.",
       "required_evidence": "Event timestamps, session boundaries where applicable, pre-decision sequence construction, a fixed next-item candidate universe, and negative-sampling details.",
@@ -83,7 +126,9 @@
     {
       "id": "multiple_interest_retrieval",
       "name": "Multiple user-interest vectors",
-      "method_ids": ["mind"],
+      "method_ids": [
+        "mind"
+      ],
       "structural_change": "Represent one user's history with multiple interest vectors and select the target-relevant interest during training or retrieval.",
       "when_to_try": "A single user vector misses distinct, supported interest clusters within the same users while total top-K is held fixed.",
       "required_evidence": "Sufficient per-user behavioral diversity, stable interest-cluster slices, item embeddings, and a deduplicated fixed-K candidate protocol.",
@@ -93,7 +138,12 @@
     {
       "id": "shared_multi_task_representation",
       "name": "Shared and task-specific experts",
-      "method_ids": ["shared_bottom", "mmoe", "ple", "m2m"],
+      "method_ids": [
+        "shared_bottom",
+        "mmoe",
+        "ple",
+        "m2m"
+      ],
       "structural_change": "Share a representation across observed tasks, then separate task heads or use gated shared and task-specific experts; scenario-conditioned gates are possible when the scenario is known.",
       "when_to_try": "Related task metrics diverge across training runs, a single shared trunk harms at least one task, or independent models waste signal on sparse task labels.",
       "required_evidence": "Aligned task labels and missingness rules, task priorities and guardrails, sample counts per task, and scenario labels if scenario-conditioned gating is tested.",
@@ -103,7 +153,10 @@
     {
       "id": "ordered_task_transfer",
       "name": "Ordered outcome transfer",
-      "method_ids": ["esmm", "aitm"],
+      "method_ids": [
+        "esmm",
+        "aitm"
+      ],
       "structural_change": "Transfer information along an ordered outcome chain through a probability product constraint or attention between earlier and later task representations.",
       "when_to_try": "Later-stage outcomes are sparse and direct training has unstable validation behavior, while earlier-stage labels are observed at substantially higher coverage.",
       "required_evidence": "A genuine temporal and semantic outcome order, impression-level labels, valid masking for later outcomes, and calibration metrics at each stage.",
@@ -113,7 +166,11 @@
     {
       "id": "scenario_conditioned_parameters",
       "name": "Scenario-conditioned experts and normalization",
-      "method_ids": ["star", "hmoe", "pepnet"],
+      "method_ids": [
+        "star",
+        "hmoe",
+        "pepnet"
+      ],
       "structural_change": "Condition normalization, expert gates, or layer activations on a known scenario while retaining shared parameters across scenarios.",
       "when_to_try": "A global model has repeatable, materially different residuals across scenarios, and separate per-scenario models lack enough data or are costly to serve.",
       "required_evidence": "Scenario identity available before inference, per-scenario counts and held-out metrics, and a stable definition of scenario across training and serving.",
@@ -123,7 +180,10 @@
     {
       "id": "low_rank_or_soft_segment",
       "name": "Low-rank adaptation and soft segmentation",
-      "method_ids": ["apg", "mlr"],
+      "method_ids": [
+        "apg",
+        "mlr"
+      ],
       "structural_change": "Adapt a shared transformation through compact context-generated factors or softly partition examples among simple local response functions.",
       "when_to_try": "Response patterns vary across supported contexts, but a global model underfits and fully separate high-capacity models overfit or exceed memory limits.",
       "required_evidence": "Pre-decision context fields, support and response metrics by context, and an explicit parameter, memory, and latency budget.",
@@ -133,7 +193,12 @@
     {
       "id": "slate_aware_decision",
       "name": "Slate-aware reranking and position response",
-      "method_ids": ["prm", "prs", "seq2slate", "dpp_greedy"],
+      "method_ids": [
+        "prm",
+        "prs",
+        "seq2slate",
+        "dpp_greedy"
+      ],
       "structural_change": "Score candidates jointly with position and neighboring-item context, or model per-position response and continuation before selecting an order.",
       "when_to_try": "Item-level scores are stable but observed slate outcomes vary by position or neighboring items, and independent score sorting leaves a measurable slate-level gap.",
       "required_evidence": "Logged candidate sets and displayed positions, pre-decision slate features, exposure and position-bias assumptions, and a valid slate-level evaluation protocol.",
@@ -390,6 +455,192 @@
       "required_evidence": "Input timing/ratio definitions, history coverage, aligned purchase attributes, a fixed backbone control and realized-label coverage for any auxiliary objective.",
       "controlled_comparison": "Preserve the host objective and splits. Isolate the branch from auxiliary supervision, then ablate a component whose failure hypothesis is supported by observed evidence; record capacity and compute.",
       "reject_if": "Missing histories are fabricated, current-order discounts leak, response gains are labeled uplift without causal evaluation, or held-out quality/resource guardrails fail."
+    },
+    {
+      "id": "coordinate_interaction",
+      "name": "Coordinate-dependent interaction",
+      "method_ids": [
+        "gated_cross",
+        "instance_mask",
+        "field_regulation",
+        "wukong_block"
+      ],
+      "structural_change": "At each layer, add x0*(W*x+b)*sigmoid(G*x) to the current hidden state, retaining the initial feature vector.; Generate an unbounded nonlinear coordinate mask from original features, multiply current hidden state, then project, optionally normalize and ReLU.; Apply two learned temperature-softmax field weight vectors, each shared across embedding coordinates, to form cross/deep inputs.; Normalize low-rank Gram features X*(X^T*P), transform them into tokens with a ReLU MLP, concatenate linear field compression and add a projected residual.",
+      "when_to_try": "Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Context or field-slice residuals suggest selective multiplicative processing. First compare with the existing local cross/MLP control.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "stream_exchange",
+      "name": "Stream exchange and fusion",
+      "method_ids": [
+        "context_feature_gate",
+        "multihead_bilinear_fusion",
+        "cross_deep_bridge"
+      ],
+      "structural_change": "Scale input features by twice sigmoid of a context-conditioned two-layer ReLU gate, independently instantiated per stream.; Fuse two representations with affine contributions and separate bilinear parameter tensors for matching contiguous head partitions.; Communicate cross/deep intermediate states through product, sum, projected concatenation or two independently parameterized attention gates.",
+      "when_to_try": "Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Two existing streams show complementary supported residuals. Test mid-layer exchange or fusion while preserving both input branches.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "field_specific_parameters",
+      "name": "Field-specific pair parameters",
+      "method_ids": [
+        "ffm_pairs",
+        "onn_operations",
+        "field_matrix_interaction",
+        "grouped_field_interaction"
+      ],
+      "structural_change": "Compute lexicographic i<j field-pair scores using a distinct matrix e_i^T*M_ij*e_j or vector-weighted product for each pair.; Combine weighted within-group FM vectors with weighted products between pooled semantic groups.; Dot each field i embedded for partner j with field j embedded for partner i, keeping the i<j pair axis.; Concatenate diagonal copy-operation embeddings with off-diagonal field-aware pair dot values.",
+      "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "polynomial_interactions",
+      "name": "Higher-order and factorized products",
+      "method_ids": [
+        "higher_order_fm",
+        "deep_interaction_machine",
+        "factorized_interaction",
+        "quadratic_interaction"
+      ],
+      "structural_change": "Split an affine projection into a,b and emit a+a*b or concat(a,a*b), preserving factorized multiplicative interactions.; Split field coordinates into heads, multiply them by multiple ReLU-projected rows, sum rows, restore field-coordinate order and add the residual.; Dynamic programming computes exact elementary symmetric products over distinct fields for one selected order.; Power sums and Newton identities produce a concatenated readout of all elementary symmetric interaction orders 1..K.",
+      "when_to_try": "Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Lower-order controls underfit an interaction hypothesis on current fields. Increase order or factorization locally before enlarging the entire backbone.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "interaction_algebra",
+      "name": "Alternative interaction algebra",
+      "method_ids": [
+        "holographic_interaction",
+        "lorentz_interaction",
+        "logarithmic_interaction",
+        "euler_interaction",
+        "generalized_interaction"
+      ],
+      "structural_change": "Real FFT pair multiplication followed by inverse FFT yields circular convolution, or correlation by conjugating the left spectrum.; Lift each embedding to the unit hyperboloid time component and return LorentzFM triangle interaction values for field pairs.; Learn field-axis interaction orders in log(abs(x)) space and exponentiate their bounded linear combinations.; Apply shared learned field orders to log magnitudes and phases, reconstruct real/imaginary outputs and add a shared implicit ReLU projection.; Fuse full initial-field/current-subspace outer products with learned alpha, multiply by output-specific channel matrices, and contract a learned channel vector.",
+      "when_to_try": "An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. An explicit product or geometric hypothesis remains unexplained by simple pairwise controls. Compare the new algebra with the same representation width and numerical scale.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "field_message_aggregation",
+      "name": "Field attention and message aggregation",
+      "method_ids": [
+        "hierarchical_field_aggregation",
+        "field_graph_interaction",
+        "disentangled_field_attention",
+        "sam_interaction"
+      ],
+      "structural_change": "Pool each interaction order, update fields with the pooled vector multiplied by the fixed initial contextual tokens, then attention-pool across orders.; Build a learned directed field graph without self edges, send through per-field output matrices and receive through per-field input matrices, with residual.; Center Q/K over valid fields per head and add separately normalized pair attention and unary key attention.; Multiply raw pair dots by learned pair vectors (A) or elementwise pair vectors (E); order-3 variants transform keys, aggregate neighbors and optionally add a projection residual.",
+      "when_to_try": "Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Field tokens are available and context-dependent connectivity or order aggregation is a testable bottleneck. Measure field-order and attention-path ablations.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "ordered_field_generation",
+      "name": "Ordered field convolution and generation",
+      "method_ids": [
+        "ordered_field_convolution",
+        "convolutional_field_generation"
+      ],
+      "structural_change": "Wide convolution along the ordered field axis, independently select largest k positions per channel/coordinate, restore their source order, then tanh.; Length-preserving field convolution, tanh and max pooling feed a learned flattened recombination that creates new field tokens.",
+      "when_to_try": "A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. A defensible stable field order exists; compare order permutations, generated-field removal and a non-convolutional matched-capacity control.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "dense_sparse_composition",
+      "name": "Dense and sparse prediction composition",
+      "method_ids": [
+        "dlrm_composition",
+        "response_mlp"
+      ],
+      "structural_change": "Append the projected dense representation as a field, compute all sparse/dense pair dots, then append the dense vector itself.; Apply a raw-logit affine head when hidden_dims is empty, or a ReLU MLP for a declared sequence of hidden widths.",
+      "when_to_try": "Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Use an explicit simple control or combine actual dense and sparse representations without inventing token semantics.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "conditioned_local_layers",
+      "name": "Conditioned local parameter layers",
+      "method_ids": [
+        "adaptive_linear",
+        "prior_conditioned_gate"
+      ],
+      "structural_change": "Generate a per-example full linear matrix or low-rank center S(condition) between shared input/output factors, with optional generated bias and overparameterized shared factors.; Scale a hidden layer by twice sigmoid of a ReLU MLP over base features and prior features; optionally detach only the base-feature gate path.",
+      "when_to_try": "Current context/priors are available before decision and supported slices indicate parameter heterogeneity. Compare full/shared/low-rank or detached gate paths separately.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Current context/priors are available before decision and supported slices indicate parameter heterogeneity. Compare full/shared/low-rank or detached gate paths separately.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "history_relations_and_states",
+      "name": "Candidate and history state refinement",
+      "method_ids": [
+        "bst_history_encoder",
+        "dmin_interest_refiner",
+        "dmr_history_matching"
+      ],
+      "structural_change": "Append the candidate token to history, add learned positions, then apply bidirectional multihead self-attention and residual feed-forward refinement. Expose transformed history and candidate readout.; Causally refine events, compute a second head-split self-attention, expand each head separately, then use independent target/position-conditioned DIN-style attentions to form multiple interests.; Context/position-conditioned scores form causal prefix user states; their final valid state matches the target by a dot product. A separate target/context-conditioned item path returns both softmax history pooling and the sum of raw relevance scores.",
+      "when_to_try": "Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "long_history_selection",
+      "name": "Selection and refinement of long histories",
+      "method_ids": [
+        "sim_history_selector",
+        "eta_history_selector",
+        "sdim_collision_pooling",
+        "twin_headwise_selector",
+        "mirrn_history_refiner"
+      ],
+      "structural_change": "Learned target/history dot scores create an unnormalized coarse weighted sum, including negative contributions; valid-only top-K retrieval feeds a separate learned target-attention fine readout.; Fixed checkpointed random-hyperplane signs yield Hamming distance from target; retrieve nearest K valid history events and apply learned target attention.; Sum history embeddings whose full random-hyperplane bit code equals the target code independently for each hash; average the hash-specific sums.; Each learned query/key head chooses its own top-K history events; exactly those scores normalize corresponding value heads, then concatenated head outputs are projected.; Target, masked recent-history mean and global-history mean independently query fixed LSH top-K; original indices are restored to temporal order. Each selected stream receives masked complex block-channel FFT refinement, pooled interests and final target attention.",
+      "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "auxiliary_training_objectives",
+      "name": "Auxiliary supervision and parameter penalties",
+      "method_ids": [
+        "ensemble_consistency",
+        "next_behavior_auxiliary",
+        "coarse_fine_supervision",
+        "grouped_regularization"
+      ],
+      "structural_change": "Supervise aggregated branch logits or probabilities and add separately summed branch BCE against a detached ensemble teacher.; Score aligned state-positive and state-negative pairs with a shared MLP; average BCE over both classes and valid transitions only.; Apply independently weighted binary supervision to coarse and fine response logits for the same observed target.; Add explicit lambda/p times the sum of absolute parameter values to power p, separately for embedding and network groups.",
+      "when_to_try": "Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. Host can expose the required logits/states/parameters. A learning or gradient observation motivates changing an objective while retaining the backbone.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "aligned_pretrained_fusion",
+      "name": "Aligned pretrained input fusion",
+      "method_ids": [
+        "pretrained_id_fusion"
+      ],
+      "structural_change": "Initialize, sum, or concatenate aligned pretrained ID vectors with a learned ID path and project to the declared output width.",
+      "when_to_try": "A versioned aligned pretrained table and sparse/cold slice evidence exist. Test fusion and freezing independently with constant ID mapping.",
+      "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
+      "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. A versioned aligned pretrained table and sparse/cold slice evidence exist. Test fusion and freezing independently with constant ID mapping.",
+      "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
     }
   ]
 }

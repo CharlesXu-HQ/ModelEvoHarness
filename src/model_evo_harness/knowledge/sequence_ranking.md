@@ -73,3 +73,119 @@ These entries are independent computational components, not full training system
 - `mmrec` / `MMRec`: Four separately normalized text/image candidate-history attention streams, summed before joint candidate scoring. Output: `ranking_score`, `[B]`. Exact attention/scoring head over supplied embeddings; excludes ViLBERT, image ROI extraction and multimodal pretraining.
 
 The machine-readable paper inventory links these methods to their PDF, family, structural pattern and training objective. Explicitly declared capabilities only establish input availability; they do not establish that an experiment will improve the target task.
+
+## FuxiCTR mechanism components
+
+These are independently implemented, composable PyTorch and TensorFlow mechanisms. Read the full local module and output contract before editing the current candidate. A paper name identifies a source of ideas; omitted towers, input adapters, samplers and objectives remain the host’s responsibility. Preserve the current compatible backbone and test one mechanism with its matched control. Multiple meaningful feature groups may use independent or shared instances; justify sharing and fusion from the actual fields. Do not force a complete named-model replacement or exhaust a fixed model list. Record mechanism evidence separately from task/dataset-bound business interpretations.
+
+### `bst_history_encoder` — `BSTHistoryEncoder`
+
+Append the candidate token to history, add learned positions, then apply bidirectional multihead self-attention and residual feed-forward refinement. Expose transformed history and candidate readout.
+
+**When:** Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Keep the same events, embedding width and training budget; compare candidate-in-encoder with history-only encoding followed by target attention. Test positional contribution separately. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option. No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_matching.py`, `models/tensorflow/history_matching.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/BST/src/BST.py).
+
+### `dmin_interest_refiner` — `DMINInterestRefiner`
+
+Causally refine events, compute a second head-split self-attention, expand each head separately, then use independent target/position-conditioned DIN-style attentions to form multiple interests.
+
+**When:** Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Compare one head and multiple heads at matched budget, then ablate the causal behavior refiner while retaining target attentions. Auxiliary transition loss is a separate experiment. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Independent two-normalization refiner and D-dimensional positional context; no dropout or upstream exact hidden-width choices. The host constructs auxiliary next-event/negative supervision; intermediate refined/head states are exposed and remain event-aligned. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_matching.py`, `models/tensorflow/history_matching.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DMIN/src/DMIN.py).
+
+### `dmr_history_matching` — `DMRHistoryMatching`
+
+Context/position-conditioned scores form causal prefix user states; their final valid state matches the target by a dot product. A separate target/context-conditioned item path returns both softmax history pooling and the sum of raw relevance scores.
+
+**When:** Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** On aligned events and context, compare user path only, item path only and both. Keep the loss fixed, then test next-event user-state supervision separately. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Optional side context must be event-aligned; omission supplies zero side context, not fabricated business features. Separate input/output item embedding tables, calibrated heads and next-event objective are host-owned. Uses the last valid prefix rather than the last padded array slot. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_matching.py`, `models/tensorflow/history_matching.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DMR/src/DMR.py).
+
+### `sim_history_selector` — `SIMHistorySelector`
+
+Learned target/history dot scores create an unnormalized coarse weighted sum, including negative contributions; valid-only top-K retrieval feeds a separate learned target-attention fine readout.
+
+**When:** Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Compare the same fine attention under random/recency/learned selection at fixed K; then add coarse-head supervision without changing selectors or fine structure. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Hard indices are nondifferentiable; the coarse representation and scores expose a trainable route for selector supervision. Masks rank invalid events below every finite valid score, correcting source padding that can beat negative scores. Coarse/fine heads, losses and short-history branch remain host-owned. Dense O(L) score scan; fixed K outputs, stable ties favor earlier event indices. Invalid indices are -1. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SIM/SIM.py).
+
+### `eta_history_selector` — `ETAHistorySelector`
+
+Fixed checkpointed random-hyperplane signs yield Hamming distance from target; retrieve nearest K valid history events and apply learned target attention.
+
+**When:** Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Fix K, history and fine readout; compare Hamming retrieval with learned similarity, recency and random eligible retrieval. Treat hash seed as an experimental seed. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing. Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/ETA/ETA.py).
+
+### `sdim_collision_pooling` — `SDIMCollisionPooling`
+
+Sum history embeddings whose full random-hyperplane bit code equals the target code independently for each hash; average the hash-specific sums.
+
+**When:** Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SDIM/SDIM.py).
+
+### `twin_headwise_selector` — `TWINHeadwiseSelector`
+
+Each learned query/key head chooses its own top-K history events; exactly those scores normalize corresponding value heads, then concatenated head outputs are projected.
+
+**When:** Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Compare headwise selections against a common shared-K selection with matched q/k/v width, then ablate retrieval/fine-score consistency. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Dense search, without production ANN caches or the full short/long dual-branch ranker. Hard selection indices are nondifferentiable. Fixed K per head; every head reports original event indices, masks and weights. Invalid indices are -1, and all-masked heads remain zero. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/TWIN/TWIN.py).
+
+### `mirrn_history_refiner` — `MIRRNHistoryRefiner`
+
+Target, masked recent-history mean and global-history mean independently query fixed LSH top-K; original indices are restored to temporal order. Each selected stream receives masked complex block-channel FFT refinement, pooled interests and final target attention.
+
+**When:** Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.
+
+**Input contract:** event_sequence, target_item_features, sequence_mask, recent_history_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
+
+**Controlled test:** Compare target-only with three selector queries, then compare identity/no-filter control against frequency refinement at identical selected indices. Keep K, hashes and serving cost recorded. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+
+**Boundaries:** Corrects unused selection masks and diagonal-only einsum: full off-diagonal channel mixing is deliberate and independently implemented. Orthogonal rFFT/irFFT with explicit n=K supports odd K; complex matrices are shared across frequencies. Zero-padded invalid slots are part of the declared K-point transform, masked both before FFT and after residual LayerNorm. Omits upstream recency-position additions, dropout and short-history attention branch. Recent mask must be a subset of valid; missing recent history produces no recent interest. Dense hash scans, no ANN cache. Fixed K with chronological valid selections and invalid -1 slots. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+
+**Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/MIRRN/MIRRN.py).

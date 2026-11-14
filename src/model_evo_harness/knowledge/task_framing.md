@@ -17,3 +17,14 @@ A better proxy loss does not establish better decisions. If labels or action cos
 ## Research lineage
 
 This guide is independently written. Pinned upstream materials used for orientation: [docs/chapter_0_introduction/1.intro.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_0_introduction/1.intro.html), [docs/chapter_0_introduction/2.outline.html](https://github.com/datawhalechina/fun-rec/blob/5f7bd84d4403b5f92b6bedbd31e3984ef00a4572/docs/chapter_0_introduction/2.outline.html).
+
+
+## Group metrics and holdout boundaries
+
+Declare whether a group AUC uses equal group weights (average AUC) or example-count
+weights (gAUC), how groups with only one label are excluded, and retained group/sample
+coverage. These summaries do not correct exposure bias or estimate incremental treatment
+value. Fit predictive transforms and vocabularies on allowed training data; evaluator-only
+group identifiers may preserve identities across splits but must never enter the predictor.
+Keep the final test set sealed during Agent hypothesis selection. Repeated validation
+readouts are search feedback and require an independent final assessment.

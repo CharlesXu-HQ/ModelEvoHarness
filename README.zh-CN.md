@@ -8,10 +8,10 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 | 内容 | 作用 |
 | --- | --- |
-| [27 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 84 张 method card | 统一记录 82 种模型方法与 2 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明所需输入。 |
+| [29 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
+| 127 张 method card | 统一记录 125 种模型与训练方法，以及 2 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [82 种双框架模型方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 166 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；对应 loss 与评估器由业务方提供。 |
+| [125 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 252 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
 | [2 个双框架分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 4 项，包含表示诊断与梯度特征筛选。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 
@@ -107,3 +107,10 @@ model-evo-harness run \
 ## 许可证
 
 本项目采用 [Apache-2.0](LICENSE)。[来源署名与复用边界](docs/research/source-attribution.md)说明与 FunRec、DeepCTR、Torch-RecHub、RecBole 等研究资料的关系。
+
+## 可组合的 CTR 与序列实验组件
+
+[FuxiCTR 覆盖说明](docs/fuxictr-coverage.md)逐项对应其 57 项目录，本次补充 43 个双框架方法。
+Agent 可以在当前 backbone 内调整交叉与融合、字段代数、历史筛选、embedding 融合或辅助目标，
+并读取本地完整源码、输入契约和对照实验要求。组件支持组合与局部消融；覆盖范围是机制与配方，
+完整论文复现及业务收益需要由宿主实验进一步验证。
