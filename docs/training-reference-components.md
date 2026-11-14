@@ -1,7 +1,7 @@
 # Evidence-driven training and prediction references
 
 These additions address specific experimental gaps found while reviewing PEP,
-DSSM-Lookalike, the Antai e-commerce solution and an AUC/LogLoss notebook. They
+DSSM-Lookalike and an AUC/LogLoss notebook. They
 extend the current backbone's representation and training options. They do not
 require a backbone switch or make every direction mandatory.
 
@@ -10,7 +10,6 @@ require a backbone switch or make every direction mandatory.
 | Embedding capacity or sparse-ID overfitting | `prunable_embedding` / `PrunableEmbedding` | Dense vs matched random mask vs learned mask, with identical initialization and a declared total training budget |
 | Easy or popularity-biased retrieval negatives | `conditional_negative_sampling` / `ConditionalNegativeSampler` | Change only the proposal distribution, preserving positives, negative draws and the evaluator's candidate universe |
 | Conflicting AUC and LogLoss | `binary_prediction_diagnostics` / `BinaryPredictionDiagnostics` | Check paired rows, class losses and clipping before selecting a calibration, representation or training hypothesis |
-| Different repeat/discovery errors | `time_safe_repeat_exploration` decision check and business guide | Separate candidate coverage from conditional ranking; compare routing under a fixed total candidate budget |
 
 ## Native embedding pruning
 
@@ -107,13 +106,6 @@ model/training component triggers source delivery before the provider accepts
 the candidate. A prediction diagnostic is an analysis tool: the host explicitly
 runs it and records observations; reading its source is not execution or a
 successful optimization trial.
-
-The existing [business-insight guide](../src/model_evo_harness/knowledge/business_insight_synthesis.md)
-now explains repeat/discovery hypotheses, time-safe aggregates and out-of-fold
-routing. Future target membership can be a training/evaluation label, never a
-decision-time input. Separate technical improvements from business conclusions
-and bind both to the current task and dataset. Existing human-feature-request
-evidence requirements remain in force.
 
 Source differences and local verification are recorded in the
 [review](research/training-reference-gap-review-2026-11-14.md).

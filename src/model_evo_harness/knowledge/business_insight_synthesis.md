@@ -14,14 +14,6 @@ Random assignment supports comparisons of assigned actions within overlap; it do
 
 Record the business hypothesis, dataset fingerprint, action and outcome definitions, audience segment, compared policies, estimate and uncertainty, supporting/contradicting slices, limitations, and a suggested follow-up. Mark the conclusion `supported`, `tentative`, or `refuted` using the predeclared decision rule. Keep a separate technical note for architecture, loss, sampling, and feature results. Both are local to the dataset and task; a changed dataset requires review before reuse.
 
-## Repeat and exploration hypotheses
-
-The [Antai e-commerce solution](https://github.com/lmxhappy/Tianchi-AntaiCup-International-E-commerce-Artificial-Intelligence-Challenge/tree/0baf46ff442bfb2dfa52eb1393c9256d732f94d1) suggests a useful business question: are errors concentrated in recommending previously interacted items or discovering previously unseen items? Derive history strictly before the decision cutoff. A target's eventual repeat/exploration membership may define a label or an evaluation slice, but cannot become a serving input. A user who next chooses an unseen item is not necessarily a new or cold-start user.
-
-First separate candidate recall coverage from ranking quality conditional on retrieval. More expressive ranking cannot recover a target absent from its candidate pool. Compare a global model with a history/association route under the same catalog, candidate budget and metric. Learn routing or stacking features from training-only out-of-fold predictions (time-respecting folds for temporal tasks); choose thresholds and mixture weights on validation, then freeze them before the final holdout. The competition's particular thresholds, split choices and reported scores are not transferable evidence.
-
-Record a falsifiable business hypothesis before the experiment, the history definition, slice support, uncertainty and opposing evidence. A supported observation may be that an association route improves discovery coverage on this dataset; it does not establish why a customer prefers novelty or how they would respond to a coupon. Keep that business interpretation separate from the technical conclusion about routing or feature interactions. If the current data permit additional time-safe feature/structure tests, continue them; do not turn a plausible business story into an immediate request for new fields. Existing evidence requirements for human feature suggestions still apply.
-
 ## Research lineage
 
 This guide is independently written. Reference context: [RecBole evaluation settings](https://recbole.io/docs/user_guide/config/evaluation_settings.html).

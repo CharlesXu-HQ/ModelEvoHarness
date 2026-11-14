@@ -90,5 +90,3 @@ def test_new_controls_reach_existing_training_and_common_knowledge_contexts():
     assert patterns["embedding_mask_retraining"]["status"] == "ready"
     guides = common_knowledge()
     assert "with replacement" in guides["sampling_and_hard_examples"]
-    assert "repeat" in guides["business_insight_synthesis"]
-    assert "out-of-fold" in guides["business_insight_synthesis"]

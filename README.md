@@ -19,7 +19,7 @@ The [source attribution](docs/research/source-attribution.md) records the upstre
 
 ## Test representation and training hypotheses
 
-[Training references](docs/training-reference-components.md) add learned embedding sparsity with fixed-mask retraining, conditional negative sampling with explicit proposal probabilities, and paired AUC/LogLoss diagnosis. The Agent uses measured symptoms to choose a local intervention; time-safe repeat/discovery hypotheses connect model evidence to business interpretation. Diagnosis does not count as an improvement, and dense masked parameters do not establish deployment savings.
+[Training references](docs/training-reference-components.md) add learned embedding sparsity with fixed-mask retraining, conditional negative sampling with explicit proposal probabilities, and paired AUC/LogLoss diagnosis. The Agent uses measured symptoms to choose a local intervention. Diagnosis does not count as an improvement, and dense masked parameters do not establish deployment savings.
 
 ## Diagnose before changing a backbone
 

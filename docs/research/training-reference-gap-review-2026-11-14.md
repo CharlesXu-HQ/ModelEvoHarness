@@ -1,7 +1,7 @@
-# Four training/reference gaps: source review and independent implementation
+# Three training/reference gaps: source review and independent implementation
 
 Baseline: ModelEvoHarness main `84b2f650645c849039b37bcd3dba564bdde1bbb0`.
-The review concerns the four references selected after inspecting lmxhappy's
+The review concerns the three references selected after inspecting lmxhappy's
 public repositories. It does not claim complete reproduction of their trainers
 or datasets. No upstream model wrappers, notebooks or prediction arrays were copied.
 
@@ -11,7 +11,6 @@ or datasets. No upstream model wrappers, notebooks or prediction arrays were cop
 | --- | --- | --- |
 | Learnable Embedding Sizes / PEP | Pretrained ID fusion, role/vocabulary contracts and cross-network gates; no learned sparse support/retraining | Native PyTorch/TF soft-threshold embedding and fixed-mask rewind/retraining core |
 | DSSM-Lookalike | Negative-sampling guidance and hard-score selection; no executable uniform/popularity conditional sampler | Native PyTorch/TF with-replacement proposals, explicit row exclusion and returned q |
-| Antai e-commerce solution | Separate technical/business experience and generic segmentation guidance | Time-safe repeat/discovery hypothesis, coverage vs conditional ranking diagnosis and fold-safe routing controls |
 | AUC/LogLoss notebook | Calibration guidance and representation diagnostics; no paired prediction analysis | Stdlib ID-paired weighted AUC/LogLoss and class/row loss decomposition in `analysis/` |
 
 Implementation APIs and boundaries are in
@@ -63,24 +62,6 @@ draw returns its actual conditional probability. Empty support is an error.
 No method is labeled a faithful RALM implementation. Existing hard-negative
 helper docstrings now distinguish sampled unobserved items from logged
 non-response; numerical selection behavior is unchanged.
-
-## Antai: business hypotheses with valid input timing
-
-Pinned source: [0baf46ff442bfb2dfa52eb1393c9256d732f94d1](https://github.com/lmxhappy/Tianchi-AntaiCup-International-E-commerce-Artificial-Intelligence-Challenge/tree/0baf46ff442bfb2dfa52eb1393c9256d732f94d1).
-
-`round2_base.ipynb` classifies the last observed target as repeat/unseen using
-`irank == 1` and item rank. This is an outcome-derived label or evaluation
-slice, not a serving-time known user property. An unseen next item does not
-necessarily mean a new user with no history. Another helper removes the held
-out interaction before constructing historical timestamps.
-
-`rank_model.ipynb` groups folds by buyer ID, but the inspected function leaves
-its initialized OOF array unfilled and exposes only the last fold through its
-validation return. The README's broader stacking/routing description is
-therefore inspiration, not proof of a complete reproducible implementation.
-The local guide calls for training-only out-of-fold predictions, time-safe
-folds, validation-only routing choices, fixed candidate budgets and sealed
-final evaluation. No competition threshold or score is adopted as evidence.
 
 ## Prediction notebook: preserve the question, fix the measurement contract
 

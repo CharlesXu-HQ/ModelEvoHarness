@@ -19,7 +19,7 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 ## 根据证据优化表示与训练
 
-新增[训练参考组件](docs/training-reference-components.md)：学习 Embedding 稀疏掩码后固定掩码重训、返回真实条件概率的负采样，以及同一批样本上的 AUC/LogLoss 配对诊断。Agent 根据观测选择局部改动，并通过符合时间边界的复购/探索假设形成业务解释。诊断结果本身不算优化收益；稠密参数置零也不代表已经节省部署成本。
+新增[训练参考组件](docs/training-reference-components.md)：学习 Embedding 稀疏掩码后固定掩码重训、返回真实条件概率的负采样，以及同一批样本上的 AUC/LogLoss 配对诊断。Agent 根据观测选择局部改动。诊断结果本身不算优化收益；稠密参数置零也不代表已经节省部署成本。
 
 ## 根据内部观测选择 backbone 内的改动
 

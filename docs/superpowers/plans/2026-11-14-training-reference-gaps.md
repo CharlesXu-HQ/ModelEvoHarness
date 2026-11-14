@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use the assigned independent component boundaries; the primary agent integrates and reviews the final branch.
 
-**Goal:** Fill four verified reference gaps with local components and actionable experimental guidance.
+**Goal:** Fill three verified reference gaps with local components and actionable experimental guidance.
 
 **Architecture:** Keep native tensor mechanisms under `models/{pytorch,tensorflow}` and prediction diagnostics under `analysis`. Register them in existing cards, patterns and manifests so Agent context and source retrieval expose their actual contracts.
 
@@ -22,7 +22,6 @@
 - A fixed mask must survive optimizer updates and serialization; sparse cells are not a physically smaller embedding table.
 - A zero-support negative pool must fail; returned probabilities must reflect positive exclusion, mixture and replacement semantics.
 - Metric comparison requires identical ordered sample IDs; tied AUC scores, a single class and zero-weight observations have explicit semantics.
-- Outcome-derived repeat/exploration labels cannot become decision-time inputs; observed slices are not causal explanations.
 - Components must be discoverable, capability-gated and fully readable by the Agent, without analysis IDs becoming model trials.
 
 ## Tasks
