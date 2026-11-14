@@ -8,7 +8,8 @@ from model_evo_harness import catalog
 from model_evo_harness.provider import OpenAICompatibleAgent
 
 
-TOOLS = {"representation_diagnostics", "gradient_feature_selection", "cold_feature_search"}
+TOOLS = {"representation_diagnostics", "gradient_feature_selection", "cold_feature_search",
+         "binary_prediction_diagnostics"}
 
 
 @pytest.mark.parametrize("framework", ["pytorch", "tensorflow"])
@@ -24,6 +25,9 @@ def test_analysis_has_separate_manifest_api_and_patterns(framework):
         if method == "cold_feature_search":
             assert entry["file"] == "analysis/cost_aware_search.py"
             assert entry["symbol"] == "model_evo_harness.analysis.cost_aware_search:CostAwareFeatureSearch"
+        elif method == "binary_prediction_diagnostics":
+            assert entry["file"] == "analysis/prediction_diagnostics.py"
+            assert entry["symbol"] == "model_evo_harness.analysis.prediction_diagnostics:BinaryPredictionDiagnostics"
         else:
             assert entry["file"].startswith(f"analysis/{framework}/")
             assert entry["symbol"].startswith(f"model_evo_harness.analysis.{framework}.")
@@ -55,6 +59,7 @@ def test_analysis_sources_reach_provider_with_contracts_and_real_hashes(framewor
     path = f"analysis/{framework}/research_diagnostics.py"
     assert len(calls) == 2
     assert path in calls[1]["reference_material"]
+    assert "analysis/prediction_diagnostics.py" in calls[1]["reference_material"]
     assert len(proposal["reference_reads"][path]) == 64
     assert calls[1]["reference_contracts"]["representation_diagnostics"][
         "analysis_pattern"] == "observed_representation_quality"

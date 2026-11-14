@@ -8,14 +8,18 @@ ModelEvoHarness is an **Agent-led offline experiment harness** for recommendatio
 
 | Component | Purpose |
 | --- | --- |
-| [29 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
-| 131 method cards | Cover 128 model/training methods and 3 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
+| [30 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
+| 134 method cards | Cover 130 model/training methods and 4 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
-| [128 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 258 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
-| [3 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 6 entries for representation diagnostics, gradient feature screening and cost-constrained subset retraining. The retraining workflow is one shared stdlib implementation usable by either framework. `analysis_api` exposes their classes and contracts for explicit host invocation. |
+| [130 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 262 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
+| [4 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 8 entries for representation diagnostics, gradient feature screening, cost-constrained subset retraining and paired prediction diagnostics. The last two are shared stdlib implementations usable by either framework. `analysis_api` exposes their classes and contracts for explicit host invocation. |
 | Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 
 The [source attribution](docs/research/source-attribution.md) records the upstream work that informed the research map. The explanations are independently written; model code includes original implementations and explicitly attributed adaptations with retained [license notices](THIRD_PARTY_NOTICES.md). Coverage is explained in [research source coverage](docs/source-coverage.md).
+
+## Test representation and training hypotheses
+
+[Training references](docs/training-reference-components.md) add learned embedding sparsity with fixed-mask retraining, conditional negative sampling with explicit proposal probabilities, and paired AUC/LogLoss diagnosis. The Agent uses measured symptoms to choose a local intervention; time-safe repeat/discovery hypotheses connect model evidence to business interpretation. Diagnosis does not count as an improvement, and dense masked parameters do not establish deployment savings.
 
 ## Diagnose before changing a backbone
 

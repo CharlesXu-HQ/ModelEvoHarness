@@ -655,6 +655,30 @@
       "required_evidence": "Typed field identities and pair semantics, pre-decision availability, support and sparse/new-ID slices, the host table/parameter layout, and measured parameter/latency budgets. Constructed parameters are not new business inputs.",
       "controlled_comparison": "Retain the backbone/head and test one pair against no branch, bilinear/dot product and full-matrix APG; isolate order count/reduction and independent versus shared tables with the same split and training budget.",
       "reject_if": "The branch fails supported held-out slices, depends on leaked or unsupported pairs, gains vanish under matched capacity, or table size and latency exceed budget."
+    },
+    {
+      "id": "learned_embedding_sparsity",
+      "name": "Prunable embedding",
+      "method_ids": [
+        "prunable_embedding"
+      ],
+      "structural_change": "Learn sign(V) * relu(abs(V) - sigmoid(s)) with a declared threshold granularity, export a nonzero-cell mask, then construct a separate fixed-mask layer from the original initialization for matched retraining.",
+      "when_to_try": "Measured embedding capacity or sparse-ID overfitting warrants a local capacity experiment and the host can retain initialization, train a mask and retrain under a declared budget.",
+      "required_evidence": "id_vocabulary, embedding_initialization, observed_outcome_labels; fixed task/dataset/split, baseline and evaluation protocol.",
+      "controlled_comparison": "Keep ID mapping, backbone, data split, primary loss and total search/retrain budget fixed. Compare dense retraining, a matched random mask and the learned mask from the same initialization; evaluate rare/OOV slices and actual storage/latency separately.",
+      "reject_if": "Pruning uses holdout labels, initialization or optimizer reset is inconsistent, protected padding changes, rare-ID quality regresses, or masked dense storage is described as measured compression or speedup."
+    },
+    {
+      "id": "conditional_negative_proposal",
+      "name": "Conditional negative sampling",
+      "method_ids": [
+        "conditional_negative_sampling"
+      ],
+      "structural_change": "Build a uniform or count-power popularity distribution, optionally mix it with uniform over the catalog, then condition on each row's time-valid eligible pool excluding known positives; draw with replacement and return each selected item's conditional probability.",
+      "when_to_try": "Current negatives are too easy or popularity-biased under a fixed retrieval evaluator, and historical eligibility plus training-period positives and item counts are available.",
+      "required_evidence": "implicit_feedback, item_catalog, negative_sampler_definition; fixed task/dataset/split, baseline and evaluation protocol.",
+      "controlled_comparison": "Hold positive events, tower, objective, total negative draws and full-catalog or fixed-candidate evaluator fixed. Change only the proposal distribution; report duplicate draws, popularity/tail slices and false-negative risk. q is a proposal probability, not exposure propensity.",
+      "reject_if": "IDs and probabilities are misaligned, future positives or validation labels enter sampling, a zero-support row is silently repaired, or sampled negatives/evaluation universe change together."
     }
   ]
 }

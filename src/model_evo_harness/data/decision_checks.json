@@ -34,6 +34,21 @@
       "question": "Would competing users, items, creators or budgets invalidate an independent-row offline conclusion?",
       "guardrail": "Record randomization unit and shared constraints; treat an online rollout as a separate validation question.",
       "source_url": "https://github.com/wangshusen/RecommenderSystem/blob/8c8796c560c13059b19b51f5b5b963137f4ef287/Slides/07_ColdStart_06.pdf"
+    },
+    {
+      "id": "time_safe_repeat_exploration",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "reranking"
+      ],
+      "requires": [
+        "event_sequence",
+        "item_catalog"
+      ],
+      "question": "Do observed recall/precision differences between repeat and previously unseen items justify a two-route hypothesis with decision-time routing inputs?",
+      "guardrail": "Define history and repeat membership strictly before the decision cutoff. Future target-repeat membership may be an evaluation label, never a serving input. Separate recall coverage from conditional ranking quality; compare global and routed candidates with fixed budget, catalog and metric. Train routing on training-only/out-of-fold predictions and tune on validation; keep the final holdout sealed. Report support and uncertainty; this is not evidence of coupon treatment effect.",
+      "source_url": "https://github.com/lmxhappy/Tianchi-AntaiCup-International-E-commerce-Artificial-Intelligence-Challenge/tree/0baf46ff442bfb2dfa52eb1393c9256d732f94d1"
     }
   ]
 }

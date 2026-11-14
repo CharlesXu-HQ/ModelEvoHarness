@@ -1,0 +1,89 @@
+"""Independent PEP embedding mechanism, Liu et al., ICLR 2021, Eq. 8/Alg. 1.
+
+Sources: https://arxiv.org/abs/2101.07577 and author repository
+ssui-liu/learnable-embed-sizes-for-RecSys, commit
+e4d07d2c5e4aaefa95b939b83600adfaf47d7a6f, models/pep_embedding.py.
+Host owns vocabulary, initial-weight checkpoint, budget selection, full-model
+and optimizer reset, training and evaluation. Dense storage remains allocated;
+nonzero parameter counts do not establish memory or latency savings.
+"""
+import math
+from numbers import Real
+
+import tensorflow as tf
+
+
+class PrunableEmbedding(tf.keras.layers.Layer):
+    """Integer IDs [...] -> embeddings [...,D] using learned soft thresholds.
+
+    Search uses sign(V)*ReLU(abs(V)-sigmoid(s)). Threshold sharing is global,
+    dimension [1,D], feature [N,1], or feature_dim [N,D]. There is no field
+    offset handling. Padding rows always output zero and receive zero gradients.
+    threshold_init=-3 is a finite starting point, not a tuned pruning schedule.
+
+    Save initial_weights before search; export_mask() snapshots support. Then
+    from_mask(initial_weights, mask) creates a fresh layer for fixed-mask
+    retraining with the original weights, without threshold parameters. The
+    host must also reset the optimizer and any other model parameters required
+    by its experiment. No initial-weight copy is retained inside this layer.
+    """
+    def __init__(self, initial_weights, threshold_type="global", threshold_init=-3.0,
+                 padding_idx=None, *, fixed_mask=None):
+        values = tf.convert_to_tensor(initial_weights)
+        if values.dtype.is_complex or values.shape.rank != 2 or any(d is None or d < 1 for d in values.shape):
+            raise ValueError("initial_weights must be a finite nonempty real matrix")
+        if not values.dtype.is_floating:
+            values = tf.cast(values, tf.float32)
+        if not bool(tf.reduce_all(tf.math.is_finite(values))):
+            raise ValueError("initial_weights must be finite")
+        super().__init__(dtype=values.dtype)
+        rows, width = values.shape
+        shapes = {"global": (1, 1), "dimension": (1, width),
+                  "feature": (rows, 1), "feature_dim": (rows, width)}
+        if threshold_type not in shapes:
+            raise ValueError("invalid threshold_type")
+        if isinstance(threshold_init, bool) or not isinstance(threshold_init, Real) or not math.isfinite(threshold_init):
+            raise ValueError("threshold_init must be finite and real")
+        if padding_idx is not None and (not isinstance(padding_idx, int) or isinstance(padding_idx, bool) or
+                                        not 0 <= padding_idx < rows):
+            raise ValueError("padding_idx must be a vocabulary row or None")
+        self.retraining = fixed_mask is not None
+        mask = tf.ones(values.shape, tf.bool) if fixed_mask is None else tf.convert_to_tensor(fixed_mask)
+        if mask.dtype != tf.bool or mask.shape != values.shape:
+            raise ValueError("fixed_mask must be boolean with the table shape")
+        if padding_idx is not None:
+            mask = mask & (tf.range(rows)[:, None] != padding_idx)
+        self.mask = self.add_weight(name="mask", shape=values.shape, dtype=tf.bool, trainable=False,
+                                    initializer=tf.keras.initializers.Constant(mask))
+        self.weight = self.add_weight(name="weight", shape=values.shape,
+            initializer=tf.keras.initializers.Constant(tf.where(mask, values, 0)))
+        self.threshold_logits = (None if self.retraining else self.add_weight(
+            name="threshold_logits", shape=shapes[threshold_type],
+            initializer=tf.keras.initializers.Constant(float(threshold_init))))
+
+    @classmethod
+    def from_mask(cls, initial_weights, mask, padding_idx=None):
+        """Start fixed-support retraining from host-supplied initial weights."""
+        return cls(initial_weights, padding_idx=padding_idx, fixed_mask=mask)
+
+    def effective_weight(self):
+        """Current dense table with exact zeros outside the active support."""
+        values = self.weight
+        if not self.retraining:
+            values = tf.sign(values) * tf.nn.relu(tf.abs(values) - tf.sigmoid(self.threshold_logits))
+        return tf.where(self.mask, values, 0)
+
+    def export_mask(self):
+        """Detached search support; retraining preserves its fixed mask at zero."""
+        return tf.stop_gradient(tf.identity(self.mask) if self.retraining else self.effective_weight() != 0)
+
+    def nonzero_count(self):
+        """Count current effective nonzeros, not dense allocation or mask size."""
+        return tf.math.count_nonzero(self.effective_weight())
+
+    def call(self, ids):
+        if ids.dtype not in (tf.int32, tf.int64):
+            raise ValueError("ids must be integer vocabulary rows")
+        tf.debugging.assert_greater_equal(ids, tf.cast(0, ids.dtype))
+        tf.debugging.assert_less(ids, tf.cast(self.weight.shape[0], ids.dtype))
+        return tf.gather(self.effective_weight(), ids)

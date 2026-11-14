@@ -35,6 +35,18 @@
       "required_evidence": "Training-only saliency with field/cross lineage; protected interaction groups; a physical subset/retraining callback; immutable task/dataset/split/training/seed context; and measured hardware, batch/candidate count, concurrency, latency statistic and feature-lookup scope.",
       "controlled_comparison": "Retrain full-input and protected subsets with the same budget and evaluate validation quality and latency under exactly one serving profile. Keep the final holdout sealed; compare group ablations and critical slices before accepting a candidate.",
       "reject_if": "A callback lacks exact retained-index/context provenance, real retraining or physical-pruning attestations; protected groups disappear; metrics are invalid; or no candidate meets both constraints. Input zeroing and gate scores alone establish no speedup or feature value."
+    },
+    {
+      "id": "paired_prediction_metric_diagnosis",
+      "name": "Binary prediction diagnostics",
+      "method_ids": [
+        "binary_prediction_diagnostics"
+      ],
+      "operation": "Compare exactly paired binary probabilities on fixed labels and weights using tie-aware AUC, explicitly clipped LogLoss, positive/negative loss contributions and paired loss changes. Report metric disagreement as an observation, not a cause.",
+      "when_to_try": "AUC and LogLoss move differently, or class-specific loss changes need inspection, on the same labeled prediction rows; inspect this before replacing the backbone.",
+      "required_evidence": "paired_binary_predictions, observed_outcome_labels; fixed task/dataset/split, baseline and evaluation protocol.",
+      "controlled_comparison": "Observe baseline and candidate on identical ordered unique sample IDs, dataset/split identity and weights. Use the unchanged task metric and independent holdout policy; fit any calibration only on a separate permitted split.",
+      "reject_if": "Sample IDs, labels or weights are not paired; scores are logits instead of probabilities; a single-class AUC is invented; clipping artifacts or class-mix changes are presented as a proven explanation or significant uplift."
     }
   ]
 }

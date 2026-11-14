@@ -1,5 +1,12 @@
 # Third-party notices
 
+The PEP-inspired embedding pruning, conditional negative sampling and paired
+prediction diagnostics are independent implementations. Their pinned research
+sources and deliberate differences are documented in
+`docs/research/training-reference-gap-review-2026-11-14.md`. No torchfm/DeepCTR
+wrappers, upstream trainer code, notebooks or data are incorporated in these
+components. The independent additions use this project's Apache-2.0 license.
+
 The DICE interest/conformity masked objective in both `models/*/debias.py` is adapted from [FIB LAB DICE](https://github.com/tsinghua-fib-lab/DICE/blob/591b883cd62bf0d88c906d12ed2ab88ff8fccc36/src/model.py). Changes include stable softplus, explicit tensor contracts, a TensorFlow port and an opt-in L2 discrepancy. Its MIT notice is also embedded in each source module so Agent source extraction preserves it.
 
 MIT License

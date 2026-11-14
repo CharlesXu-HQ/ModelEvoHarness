@@ -1794,6 +1794,56 @@
       "comparison": "Within the same task/dataset/splits, quality metric, seed, training budget and serving profile, compare full-input and physically pruned retrained candidates. Protect interaction-only groups, report all trials and quality-latency feasibility, and keep the final holdout sealed.",
       "failure_signals": "Missing retraining/pruning provenance, mismatched contexts, removal of protected interactions, no feasible quality-latency result, or feature-fetch savings inferred from input zeroing.",
       "implementation_boundary": "COLD-inspired stdlib analysis protocol shared by both framework labels, not a neural model or a complete COLD system. Saliency only proposes subsets; selection uses actual comparable host retraining and measurements. Training-only saliency, feature/source-field lineage and explicitly protected indices/groups are required. All members of every protected group survive; insufficient budgets are rejected. The full baseline and each distinct physical subset must be retrained by the host under the fixed training budget. Each callback must attest retrained=True and physical_pruning=True, return exact retained_indices and unchanged context, unique train_run_id, implementation_id, finite validation_quality and positive latency_ms. Attestations are not proof: the host retains auditable artifacts and owns the actual GPU trainer. Context fixes task/dataset/train/validation identity, maximize quality metric, training budget, seed and serving profile (hardware, batch/candidate count, concurrency, latency statistic and feature-lookup inclusion). Model-only latency cannot establish end-to-end savings; multiplying inputs by zero is not physical pruning. At least one quality floor or maximum absolute baseline quality drop is required. Reports every trial, feasible Pareto candidates and the highest-quality feasible selection (or None). No QPS, acquisition-cost optimization, online-learning implementation or task-effectiveness claim."
+    },
+    {
+      "id": "prunable_embedding",
+      "family_id": "representation_adaptation",
+      "source_repo": "pep",
+      "source_url": "https://arxiv.org/abs/2101.07577",
+      "source_model": "Independent local mechanism informed by the cited reference",
+      "requires": [
+        "id_vocabulary",
+        "embedding_initialization",
+        "observed_outcome_labels"
+      ],
+      "mechanism": "Learn sign(V) * relu(abs(V) - sigmoid(s)) with a declared threshold granularity, export a nonzero-cell mask, then construct a separate fixed-mask layer from the original initialization for matched retraining.",
+      "when_to_try": "Measured embedding capacity or sparse-ID overfitting warrants a local capacity experiment and the host can retain initialization, train a mask and retrain under a declared budget.",
+      "comparison": "Keep ID mapping, backbone, data split, primary loss and total search/retrain budget fixed. Compare dense retraining, a matched random mask and the learned mask from the same initialization; evaluate rare/OOV slices and actual storage/latency separately.",
+      "failure_signals": "Pruning uses holdout labels, initialization or optimizer reset is inconsistent, protected padding changes, rare-ID quality regresses, or masked dense storage is described as measured compression or speedup.",
+      "implementation_boundary": "Independent PEP-inspired soft-threshold and fixed-mask core, not a complete PEP trainer or automatic dimension search. Thresholds can be global, per dimension, per vocabulary row or per cell; separate field tables are host-owned. The host saves original initialization and calls from_mask for retraining, resets optimizer and other model state consistently, and selects budgets using training/validation only. Padding remains zero. Nonzero cells report sparsity, not a physically smaller table or measured speedup. This implementation retains dense storage; sparse deployment, memory and latency measurement remain host-owned."
+    },
+    {
+      "id": "conditional_negative_sampling",
+      "family_id": "training_interventions",
+      "source_repo": "dssm-lookalike",
+      "source_url": "https://github.com/lmxhappy/DSSM-Lookalike/blob/07dd9442a8a721aa6db678c5dfc4aa65e5708e71/utils.py",
+      "source_model": "Independent local mechanism informed by the cited reference",
+      "requires": [
+        "implicit_feedback",
+        "item_catalog",
+        "negative_sampler_definition"
+      ],
+      "mechanism": "Build a uniform or count-power popularity distribution, optionally mix it with uniform over the catalog, then condition on each row's time-valid eligible pool excluding known positives; draw with replacement and return each selected item's conditional probability.",
+      "when_to_try": "Current negatives are too easy or popularity-biased under a fixed retrieval evaluator, and historical eligibility plus training-period positives and item counts are available.",
+      "comparison": "Hold positive events, tower, objective, total negative draws and full-catalog or fixed-candidate evaluator fixed. Change only the proposal distribution; report duplicate draws, popularity/tail slices and false-negative risk. q is a proposal probability, not exposure propensity.",
+      "failure_signals": "IDs and probabilities are misaligned, future positives or validation labels enter sampling, a zero-support row is silently repaired, or sampled negatives/evaluation universe change together.",
+      "implementation_boundary": "Independent sampling reference, not an exact RALM reproduction. Catalog row positions must share one versioned item-ID/count mapping; counts, eligibility and known positives must be derived at the permitted training cutoff. Sampling is with replacement. The uniform/popularity mixture is formed over the catalog before row exclusion and renormalization; uniform_mix is not the final per-row uniform fraction. Duplicate draws are valid and logged by the host. Returned q is each draw's conditional proposal probability, not a without-replacement inclusion probability or exposure propensity. The host must derive any loss correction for its actual objective and sampling design. Dense [B,N] candidate masks/distributions suit bounded studies, not a billion-item sampler. Empty support fails explicitly. A local/stateless seed avoids changing global RNG state; no cross-framework identical draw promise."
+    },
+    {
+      "id": "binary_prediction_diagnostics",
+      "family_id": "prediction_quality",
+      "source_repo": "loss-auc-diagnostics",
+      "source_url": "https://github.com/lmxhappy/why_loss_auc_unconsistent/blob/a6aea3647affa9d952c5b975d0180c387c584c54/why_loss_auc_unconsistent.ipynb",
+      "source_model": "Independent local mechanism informed by the cited reference",
+      "requires": [
+        "paired_binary_predictions",
+        "observed_outcome_labels"
+      ],
+      "mechanism": "Compare exactly paired binary probabilities on fixed labels and weights using tie-aware AUC, explicitly clipped LogLoss, positive/negative loss contributions and paired loss changes. Report metric disagreement as an observation, not a cause.",
+      "when_to_try": "AUC and LogLoss move differently, or class-specific loss changes need inspection, on the same labeled prediction rows; inspect this before replacing the backbone.",
+      "comparison": "Observe baseline and candidate on identical ordered unique sample IDs, dataset/split identity and weights. Use the unchanged task metric and independent holdout policy; fit any calibration only on a separate permitted split.",
+      "failure_signals": "Sample IDs, labels or weights are not paired; scores are logits instead of probabilities; a single-class AUC is invented; clipping artifacts or class-mix changes are presented as a proven explanation or significant uplift.",
+      "implementation_boundary": "Stdlib observation-only analysis shared by both framework labels. Exact ordered unique sample IDs and explicit dataset/split identity are required; host declarations do not prove correct label provenance. AUC uses original probabilities with half credit for ties and is undefined for a zero-effective-weight class. LogLoss alone uses explicit epsilon clipping; clipping counts and class conditional/contribution losses are reported. Finite nonnegative weights share one fixed estimand. Deltas are candidate minus baseline. No fitted calibration, confidence interval, causal explanation, automatic champion selection or business-uplift claim."
     }
   ]
 }

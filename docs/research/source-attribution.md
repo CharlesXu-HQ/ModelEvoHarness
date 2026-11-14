@@ -16,6 +16,11 @@ crosschecks and independent CAN/ComiRec implementations. The COLD-inspired
 analysis workflow implements a host retraining protocol rather than the complete
 paper system; source text and third-party model wrappers were not incorporated.
 
+The [training-reference review](training-reference-gap-review-2026-11-14.md)
+also records pinned PEP, DSSM-Lookalike, Antai and AUC/LogLoss notebook sources.
+Their local mechanisms and guidance are independently implemented/written;
+upstream wrappers, data and notebook code are not incorporated.
+
 ## FunRec source paths by technical family
 
 ### Task framing and measurement (`task_framing`)

@@ -31,7 +31,12 @@ def listwise_loss(scores, relevance, candidate_mask):
 
 
 def hard_negative_indices(queries, items, allowed_negative_mask, k):
-    """The host supplies eligibility after excluding positives and unexposed items."""
+    """Host masks exclude known positives and validation/test labels.
+
+    Historical eligibility and negative provenance are host-defined: declared
+    implicit-feedback pools may include unobserved non-interactions; observed
+    non-response claims require exposure records.
+    """
     assertion = tf.debugging.assert_greater_equal(
         tf.reduce_min(tf.reduce_sum(tf.cast(allowed_negative_mask, tf.int32), axis=-1)), k,
         message="each query needs at least k eligible negative candidates")

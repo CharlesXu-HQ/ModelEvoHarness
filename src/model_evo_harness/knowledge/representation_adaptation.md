@@ -23,3 +23,11 @@ Initialize, sum, or concatenate aligned pretrained ID vectors with a learned ID 
 **Boundaries:** Host aligns IDs and validates vocabulary version, padding and OOV coverage. Inputs are native integer IDs. Freezing changes pretrained gradients only: it must not silently discard appended OOV vectors or switch the inference representation.
 
 **Bundled code:** `models/pytorch/ctr_embeddings.py`, `models/tensorflow/ctr_embeddings.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/fuxictr/pytorch/layers/embeddings/pretrained_embedding.py).
+
+## Learned embedding sparsity and fixed-mask retraining
+
+When observed table capacity or sparse-ID overfitting motivates a capacity experiment, `prunable_embedding` provides native `PrunableEmbedding` references. The learned representation is `sign(V) * relu(abs(V) - sigmoid(s))`. Thresholds may be global, per dimension, per vocabulary row or per cell. A thresholded zero cell is a parameter-selection observation, not proof that the associated input feature has no value.
+
+Save the original embedding initialization. Train thresholds on training data, export a mask and use `from_mask(initial_weights, mask, padding_idx=...)` to create a separate retraining layer. Fix the mask while retraining; reset optimizer state and handle the rest of the backbone consistently. Compare against dense and matched random-mask controls with the same total search/retrain budget, splits and objective. Select sparsity on training/validation and keep the final holdout sealed. Check rare/OOV slices, protected padding and loss stability.
+
+The implementation retains dense storage and the same output width. `nonzero_count()` measures active cells; physical sparse storage, field-dimension packing, memory savings and latency require a separate deployment implementation and measurements. A sigmoid threshold bounded by one is the specific PEP-inspired parameterization, not a general guarantee for every initialization scale. There is no automatic budget search or pruning schedule. Source: [Learnable Embedding Sizes for Recommender Systems](https://arxiv.org/abs/2101.07577).
