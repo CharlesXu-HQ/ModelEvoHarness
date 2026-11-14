@@ -37,8 +37,10 @@ def listwise_loss(scores, relevance, candidate_mask):
 def hard_negative_indices(queries, items, allowed_negative_mask, k):
     """Return the hardest *eligible* item IDs for each query by dot product.
 
-    The caller must exclude positives, unexposed items, and validation rows in
-    ``allowed_negative_mask`` before calling this function.
+    The caller excludes known positives and validation/test labels, and defines
+    historical eligibility and negative provenance in ``allowed_negative_mask``.
+    Declared implicit-feedback pools may include unobserved non-interactions;
+    observed non-response claims require exposure records.
     """
     if k < 1 or not bool((allowed_negative_mask.sum(dim=-1) >= k).all()):
         raise ValueError("each query needs at least k eligible negative candidates")

@@ -48,3 +48,7 @@ not a resumable training checkpoint: exact continuation also needs optimizer, sc
 RNG and data/sampler progress. The host owns these states and must label partial resumes.
 Explicit grouped Lp penalties and decoupled optimizer decay are distinct interventions;
 avoid applying both to the same parameters without declaring the joint factor.
+
+## Prediction-metric disagreement before optimizer changes
+
+When AUC and LogLoss disagree, first read the paired `binary_prediction_diagnostics` analysis reference and [prediction-quality guide](prediction_quality.md). Check IDs, label windows, weights, class-loss contributions and clipping on the same prediction rows. Changing an optimizer, loss or backbone before ruling out a comparison artifact spends an experiment without testing the observed premise. A diagnosis is an observation; only a subsequent controlled change can support an improvement claim.

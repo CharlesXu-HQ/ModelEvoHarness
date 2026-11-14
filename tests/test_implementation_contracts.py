@@ -35,7 +35,8 @@ def test_each_method_has_explicit_framework_boundaries():
             "output_contract"]
         for entry in frameworks.values():
             if method_id in {"item_cf", "user_cf", "swing", "dpp_greedy",
-                             "representation_diagnostics", "gradient_feature_selection"}:
+                             "representation_diagnostics", "gradient_feature_selection",
+                             "binary_prediction_diagnostics"}:
                 assert entry["training_support"]["mode"] == "closed_form"
                 assert "trainer" not in entry["training_support"]["requires_host"]
             else:

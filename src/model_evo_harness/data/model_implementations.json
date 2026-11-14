@@ -7253,6 +7253,144 @@
         "history_embeddings",
         "sequence_mask"
       ]
+    },
+    {
+      "id": "prunable_embedding",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.embedding_pruning:PrunableEmbedding",
+      "file": "models/pytorch/embedding_pruning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "original_embedding_initialization",
+          "id_vocabulary",
+          "mask_training_and_selection",
+          "fixed_mask_retrainer",
+          "optimizer_reset",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent PEP-inspired soft-threshold and fixed-mask core, not a complete PEP trainer or automatic dimension search. Thresholds can be global, per dimension, per vocabulary row or per cell; separate field tables are host-owned.",
+        "The host saves original initialization and calls from_mask for retraining, resets optimizer and other model state consistently, and selects budgets using training/validation only. Padding remains zero.",
+        "Nonzero cells report sparsity, not a physically smaller table or measured speedup. This implementation retains dense storage; sparse deployment, memory and latency measurement remain host-owned."
+      ],
+      "output_contract": {
+        "kind": "embedding_representation",
+        "shape": "[*ids.shape,D]"
+      },
+      "local_guide": "knowledge/representation_adaptation.md",
+      "structure_pattern": "learned_embedding_sparsity",
+      "required_host_tensors": [
+        "initial_weights [N,D]; integer IDs; bool mask [N,D] for retraining"
+      ]
+    },
+    {
+      "id": "conditional_negative_sampling",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.negative_sampling:ConditionalNegativeSampler",
+      "file": "models/pytorch/negative_sampling.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "training_period_counts",
+          "time_valid_eligibility",
+          "known_positive_masks",
+          "versioned_id_mapping",
+          "sampling_seed",
+          "negative_sampling_objective",
+          "fixed_candidate_evaluator",
+          "trainer"
+        ]
+      },
+      "limitations": [
+        "Independent sampling reference, not an exact RALM reproduction. Catalog row positions must share one versioned item-ID/count mapping; counts, eligibility and known positives must be derived at the permitted training cutoff.",
+        "Sampling is with replacement. The uniform/popularity mixture is formed over the catalog before row exclusion and renormalization; uniform_mix is not the final per-row uniform fraction. Duplicate draws are valid and logged by the host.",
+        "Returned q is each draw's conditional proposal probability, not a without-replacement inclusion probability or exposure propensity. The host must derive any loss correction for its actual objective and sampling design.",
+        "Dense [B,N] candidate masks/distributions suit bounded studies, not a billion-item sampler. Empty support fails explicitly. A local/stateless seed avoids changing global RNG state; no cross-framework identical draw promise."
+      ],
+      "output_contract": {
+        "kind": "conditional_negative_draws",
+        "shape": "{item_ids: [B,K], sampling_probs: [B,K]}"
+      },
+      "local_guide": "knowledge/sampling_and_hard_examples.md",
+      "structure_pattern": "conditional_negative_proposal",
+      "required_host_tensors": [
+        "counts [N]; bool eligible_mask and positive_mask [B,N]"
+      ]
+    },
+    {
+      "id": "prunable_embedding",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.embedding_pruning:PrunableEmbedding",
+      "file": "models/tensorflow/embedding_pruning.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "original_embedding_initialization",
+          "id_vocabulary",
+          "mask_training_and_selection",
+          "fixed_mask_retrainer",
+          "optimizer_reset",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Independent PEP-inspired soft-threshold and fixed-mask core, not a complete PEP trainer or automatic dimension search. Thresholds can be global, per dimension, per vocabulary row or per cell; separate field tables are host-owned.",
+        "The host saves original initialization and calls from_mask for retraining, resets optimizer and other model state consistently, and selects budgets using training/validation only. Padding remains zero.",
+        "Nonzero cells report sparsity, not a physically smaller table or measured speedup. This implementation retains dense storage; sparse deployment, memory and latency measurement remain host-owned."
+      ],
+      "output_contract": {
+        "kind": "embedding_representation",
+        "shape": "[*ids.shape,D]"
+      },
+      "local_guide": "knowledge/representation_adaptation.md",
+      "structure_pattern": "learned_embedding_sparsity",
+      "required_host_tensors": [
+        "initial_weights [N,D]; integer IDs; bool mask [N,D] for retraining"
+      ]
+    },
+    {
+      "id": "conditional_negative_sampling",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.negative_sampling:ConditionalNegativeSampler",
+      "file": "models/tensorflow/negative_sampling.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "training_period_counts",
+          "time_valid_eligibility",
+          "known_positive_masks",
+          "versioned_id_mapping",
+          "sampling_seed",
+          "negative_sampling_objective",
+          "fixed_candidate_evaluator",
+          "trainer"
+        ]
+      },
+      "limitations": [
+        "Independent sampling reference, not an exact RALM reproduction. Catalog row positions must share one versioned item-ID/count mapping; counts, eligibility and known positives must be derived at the permitted training cutoff.",
+        "Sampling is with replacement. The uniform/popularity mixture is formed over the catalog before row exclusion and renormalization; uniform_mix is not the final per-row uniform fraction. Duplicate draws are valid and logged by the host.",
+        "Returned q is each draw's conditional proposal probability, not a without-replacement inclusion probability or exposure propensity. The host must derive any loss correction for its actual objective and sampling design.",
+        "Dense [B,N] candidate masks/distributions suit bounded studies, not a billion-item sampler. Empty support fails explicitly. A local/stateless seed avoids changing global RNG state; no cross-framework identical draw promise."
+      ],
+      "output_contract": {
+        "kind": "conditional_negative_draws",
+        "shape": "{item_ids: [B,K], sampling_probs: [B,K]}"
+      },
+      "local_guide": "knowledge/sampling_and_hard_examples.md",
+      "structure_pattern": "conditional_negative_proposal",
+      "required_host_tensors": [
+        "counts [N]; bool eligible_mask and positive_mask [B,N]"
+      ]
     }
   ]
 }

@@ -175,6 +175,62 @@
       },
       "local_guide": "knowledge/representation_quality.md",
       "analysis_pattern": "cost_aware_feature_retraining"
+    },
+    {
+      "id": "binary_prediction_diagnostics",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.analysis.prediction_diagnostics:BinaryPredictionDiagnostics",
+      "file": "analysis/prediction_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "paired_prediction_export",
+          "unique_ordered_sample_ids",
+          "label_and_weight_provenance",
+          "dataset_and_split_identity",
+          "independent_evaluation_protocol"
+        ]
+      },
+      "limitations": [
+        "Stdlib observation-only analysis shared by both framework labels. Exact ordered unique sample IDs and explicit dataset/split identity are required; host declarations do not prove correct label provenance.",
+        "AUC uses original probabilities with half credit for ties and is undefined for a zero-effective-weight class. LogLoss alone uses explicit epsilon clipping; clipping counts and class conditional/contribution losses are reported.",
+        "Finite nonnegative weights share one fixed estimand. Deltas are candidate minus baseline. No fitted calibration, confidence interval, causal explanation, automatic champion selection or business-uplift claim."
+      ],
+      "output_contract": {
+        "kind": "paired_prediction_diagnostics",
+        "shape": "{baseline, candidate, delta, comparison, paired_loss_changes, dataset_id, split_id}"
+      },
+      "local_guide": "knowledge/prediction_quality.md",
+      "analysis_pattern": "paired_prediction_metric_diagnosis"
+    },
+    {
+      "id": "binary_prediction_diagnostics",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.analysis.prediction_diagnostics:BinaryPredictionDiagnostics",
+      "file": "analysis/prediction_diagnostics.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "closed_form",
+        "requires_host": [
+          "paired_prediction_export",
+          "unique_ordered_sample_ids",
+          "label_and_weight_provenance",
+          "dataset_and_split_identity",
+          "independent_evaluation_protocol"
+        ]
+      },
+      "limitations": [
+        "Stdlib observation-only analysis shared by both framework labels. Exact ordered unique sample IDs and explicit dataset/split identity are required; host declarations do not prove correct label provenance.",
+        "AUC uses original probabilities with half credit for ties and is undefined for a zero-effective-weight class. LogLoss alone uses explicit epsilon clipping; clipping counts and class conditional/contribution losses are reported.",
+        "Finite nonnegative weights share one fixed estimand. Deltas are candidate minus baseline. No fitted calibration, confidence interval, causal explanation, automatic champion selection or business-uplift claim."
+      ],
+      "output_contract": {
+        "kind": "paired_prediction_diagnostics",
+        "shape": "{baseline, candidate, delta, comparison, paired_loss_changes, dataset_id, split_id}"
+      },
+      "local_guide": "knowledge/prediction_quality.md",
+      "analysis_pattern": "paired_prediction_metric_diagnosis"
     }
   ]
 }
