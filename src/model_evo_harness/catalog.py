@@ -61,6 +61,14 @@ def _implementations(catalog: dict) -> list[dict]:
     return catalog.get("model_implementations", []) + catalog.get("analysis_implementations", [])
 
 
+def _component_path(path: str, framework: str, directory: str | None = None) -> bool:
+    parts = path.split("/")
+    roots = (directory,) if directory else ("models", "analysis")
+    layout = (len(parts) == 3 and parts[0] in roots and parts[1] == framework or
+              len(parts) == 2 and parts[0] == "analysis" and "analysis" in roots)
+    return layout and parts[-1].endswith(".py") and parts[-1][:-3].isidentifier()
+
+
 def read_references(catalog: dict, request: dict) -> dict:
     """Read complete bundled model or analysis modules; never execute or fetch code.
 
@@ -94,10 +102,8 @@ def read_references(catalog: dict, request: dict) -> dict:
     result = {}
     for path in sorted(paths):
         # Paths are bundled identifiers, not arbitrary filesystem access.
-        parts = path.split("/")
-        if (len(parts) != 3 or parts[0] not in ("models", "analysis") or parts[1] != framework or
-                not parts[2].endswith(".py") or not parts[2][:-3].isidentifier()):
-            raise ValueError("reference file must be a framework model or analysis module")
+        if not _component_path(path, framework):
+            raise ValueError("reference file must be a framework model or registered analysis module")
         content = package.joinpath(path).read_text(encoding="utf-8")
         result[path] = {"content": content,
                         "sha256": hashlib.sha256(content.encode()).hexdigest()}
@@ -321,8 +327,10 @@ def validate_catalog(catalog: dict) -> None:
                 raise ValueError("implementation needs id, framework, symbol, file")
             if entry["framework"] not in ("pytorch", "tensorflow"):
                 raise ValueError("implementation framework must be pytorch or tensorflow")
-            if (not entry["file"].startswith(f"{directory}/{entry['framework']}/") or
-                    not entry["symbol"].startswith(f"model_evo_harness.{directory}.{entry['framework']}.")):
+            symbol_module, separator, symbol_name = entry["symbol"].partition(":")
+            expected_module = "model_evo_harness." + entry["file"][:-3].replace("/", ".")
+            if (not _component_path(entry["file"], entry["framework"], directory) or
+                    symbol_module != expected_module or not separator or not symbol_name.isidentifier()):
                 raise ValueError(f"{registry} needs matching {directory} paths and symbols")
             key = (entry["id"], entry["framework"])
             if key in implementation_keys:

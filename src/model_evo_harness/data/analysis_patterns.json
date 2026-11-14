@@ -23,6 +23,18 @@
       "controlled_comparison": "Keep all source fields of protected interactions. Compare full-input and screened candidates after matched retraining; ablate nominated groups and report slices, uncertainty and cost. Correlation alone never drops a field.",
       "reject_if": "Reject a proposed improvement if its controlled task metric does not support it, input/time/gradient provenance is invalid, or guardrails fail. An observation-only probe is not a performance improvement.",
       "operation": "Measure mean absolute activation-times-gradient scores and pairwise-common-valid cosine redundancy for supplied field or explicit-cross tensors; select deterministically under a budget while retaining protected indices and interaction groups."
+    },
+    {
+      "id": "cost_aware_feature_retraining",
+      "name": "COLD-inspired protected physical-subset retraining",
+      "method_ids": [
+        "cold_feature_search"
+      ],
+      "operation": "Propose deterministic protected feature subsets from training-only saliency, invoke the host physical rebuild/retrain/evaluate callback for baseline and candidates, validate provenance/context, and report measured quality-latency feasibility and selection.",
+      "when_to_try": "Supported feature-group screening and actual service measurements suggest a smaller retrained version of the current backbone may satisfy the declared quality and latency constraints.",
+      "required_evidence": "Training-only saliency with field/cross lineage; protected interaction groups; a physical subset/retraining callback; immutable task/dataset/split/training/seed context; and measured hardware, batch/candidate count, concurrency, latency statistic and feature-lookup scope.",
+      "controlled_comparison": "Retrain full-input and protected subsets with the same budget and evaluate validation quality and latency under exactly one serving profile. Keep the final holdout sealed; compare group ablations and critical slices before accepting a candidate.",
+      "reject_if": "A callback lacks exact retained-index/context provenance, real retraining or physical-pruning attestations; protected groups disappear; metrics are invalid; or no candidate meets both constraints. Input zeroing and gate scores alone establish no speedup or feature value."
     }
   ]
 }

@@ -109,6 +109,72 @@
       },
       "local_guide": "knowledge/representation_quality.md",
       "analysis_pattern": "protected_gradient_screening"
+    },
+    {
+      "id": "cold_feature_search",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.analysis.cost_aware_search:CostAwareFeatureSearch",
+      "file": "analysis/cost_aware_search.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "training_feature_saliency",
+          "feature_group_lineage",
+          "protected_interaction_groups",
+          "physical_subset_builder",
+          "retrain_evaluate_callback",
+          "serving_profile",
+          "auditable_training_and_implementation_artifacts",
+          "trainer"
+        ]
+      },
+      "limitations": [
+        "COLD-inspired stdlib analysis protocol shared by both framework labels, not a neural model or a complete COLD system. Saliency only proposes subsets; selection uses actual comparable host retraining and measurements.",
+        "Training-only saliency, feature/source-field lineage and explicitly protected indices/groups are required. All members of every protected group survive; insufficient budgets are rejected. The full baseline and each distinct physical subset must be retrained by the host under the fixed training budget.",
+        "Each callback must attest retrained=True and physical_pruning=True, return exact retained_indices and unchanged context, unique train_run_id, implementation_id, finite validation_quality and positive latency_ms. Attestations are not proof: the host retains auditable artifacts and owns the actual GPU trainer.",
+        "Context fixes task/dataset/train/validation identity, maximize quality metric, training budget, seed and serving profile (hardware, batch/candidate count, concurrency, latency statistic and feature-lookup inclusion). Model-only latency cannot establish end-to-end savings; multiplying inputs by zero is not physical pruning.",
+        "At least one quality floor or maximum absolute baseline quality drop is required. Reports every trial, feasible Pareto candidates and the highest-quality feasible selection (or None). No QPS, acquisition-cost optimization, online-learning implementation or task-effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "cost_aware_feature_search_report",
+        "shape": "{context, saliency_split, latency_budget_ms, quality_floor, latency_scope, baseline, trials, pareto_candidates, selected}; selected is None if infeasible"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "cost_aware_feature_retraining"
+    },
+    {
+      "id": "cold_feature_search",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.analysis.cost_aware_search:CostAwareFeatureSearch",
+      "file": "analysis/cost_aware_search.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "training_feature_saliency",
+          "feature_group_lineage",
+          "protected_interaction_groups",
+          "physical_subset_builder",
+          "retrain_evaluate_callback",
+          "serving_profile",
+          "auditable_training_and_implementation_artifacts",
+          "trainer"
+        ]
+      },
+      "limitations": [
+        "COLD-inspired stdlib analysis protocol shared by both framework labels, not a neural model or a complete COLD system. Saliency only proposes subsets; selection uses actual comparable host retraining and measurements.",
+        "Training-only saliency, feature/source-field lineage and explicitly protected indices/groups are required. All members of every protected group survive; insufficient budgets are rejected. The full baseline and each distinct physical subset must be retrained by the host under the fixed training budget.",
+        "Each callback must attest retrained=True and physical_pruning=True, return exact retained_indices and unchanged context, unique train_run_id, implementation_id, finite validation_quality and positive latency_ms. Attestations are not proof: the host retains auditable artifacts and owns the actual GPU trainer.",
+        "Context fixes task/dataset/train/validation identity, maximize quality metric, training budget, seed and serving profile (hardware, batch/candidate count, concurrency, latency statistic and feature-lookup inclusion). Model-only latency cannot establish end-to-end savings; multiplying inputs by zero is not physical pruning.",
+        "At least one quality floor or maximum absolute baseline quality drop is required. Reports every trial, feasible Pareto candidates and the highest-quality feasible selection (or None). No QPS, acquisition-cost optimization, online-learning implementation or task-effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "cost_aware_feature_search_report",
+        "shape": "{context, saliency_split, latency_budget_ms, quality_floor, latency_scope, baseline, trials, pareto_candidates, selected}; selected is None if infeasible"
+      },
+      "local_guide": "knowledge/representation_quality.md",
+      "analysis_pattern": "cost_aware_feature_retraining"
     }
   ]
 }

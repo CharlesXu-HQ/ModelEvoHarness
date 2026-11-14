@@ -81,3 +81,29 @@ See [RankUp](https://arxiv.org/html/2604.17878v3),
 [VarBPR](https://arxiv.org/html/2503.11067v3) and
 [UTTSI](https://arxiv.org/html/2605.24989v1); their mechanisms are not implemented
 by this addition. Paper results are not evidence of improvement on this task.
+
+
+## Separate tensor construction, missing data and measured cost
+
+A meaningful feature pair can support a local `coaction` branch; the host builds
+its parameter/feed tables and mask. Those intermediate tensors are not missing
+business fields. `comirec_sa` and `comirec_dr` require real pre-decision event
+histories and a catalog; aggregate columns cannot satisfy that requirement.
+Where inputs exist, compare a local branch or interest-token/readout composition
+inside the current backbone, with an ablation and simpler control. Existing
+CIN activation and SDIM per-hash normalization options also provide bounded
+mechanism tests. Choose from observed task/dataset evidence rather than treating
+these methods as a mandatory progression.
+
+Use `cold_feature_search` only when training saliency, source-field lineage,
+protected interactions, a real physical-subset/retraining callback and a serving
+profile exist. Keep full-input and subset trials on identical task/data/splits,
+training budget, seed and hardware/batch/candidate/concurrency/latency settings.
+Require auditable implementation/training IDs and exact retained inputs; protect
+all members of interaction-only groups even if individual saliency is low.
+An input multiplied by zero is not a removed input path. Report whether feature
+lookup is timed, the feasible quality-latency frontier and any absence of a
+feasible result. Analysis only proposes and compares evidence supplied by the
+host; it supplies neither a GPU trainer nor proof of production speedup. The
+retrained prediction model, with its controlled quality/cost result, is the
+candidate to record as an optimization trial.

@@ -9,10 +9,10 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 | 内容 | 作用 |
 | --- | --- |
 | [29 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 127 张 method card | 统一记录 125 种模型与训练方法，以及 2 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
+| 131 张 method card | 统一记录 128 种模型与训练方法，以及 3 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [125 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 252 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
-| [2 个双框架分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 4 项，包含表示诊断与梯度特征筛选。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
+| [128 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 258 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
+| [3 个可供双框架宿主使用的分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 6 项，包含表示诊断、梯度特征筛选及成本约束的子集重训；最后一项是双框架宿主共用的标准库实现。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 
 [来源署名](docs/research/source-attribution.md)记录研究目录参考的原始资料。仓库内的说明和模型代码均为原创，没有镜像上游正文或源码。[研究覆盖说明](docs/source-coverage.md)列出具体范围。
@@ -30,6 +30,10 @@ src/model_evo_harness/
 ```
 
 宿主诊断基线或已完成实验时，显式把采集的激活和训练梯度交给分析工具。Agent 据此提出模型改动，宿主接入模型组件后训练并评估候选。两类源码均可通过 `read_references` 读取；发现接口和源码读取不会自动安装 hook、执行工具或训练。分析工具不能作为独立模型实验的 `method_id`。特征筛选保留声明的交互组，删字段前仍需重训验证。
+
+## 在现有 backbone 内增加交互和兴趣结构
+
+新增 [CAN 与 ComiRec-SA/DR 组件](docs/rec-model-components.md)，用于字段对交互与多兴趣历史分支；CIN 激活和 SDIM 归一化可作为显式消融选项。Agent 可以保留当前 backbone，依据已观测瓶颈选择适用组件。独立的成本筛选流程保护交互字段，调用宿主实际裁剪、重训、评估，再在统一协议下比较质量与延迟。每项能力都有输入前提、具体变体和固定对照，是否优先尝试仍由任务证据决定。
 
 ## 折扣感知的营销模型迭代
 

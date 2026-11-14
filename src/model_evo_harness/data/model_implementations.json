@@ -2045,7 +2045,7 @@
       },
       "limitations": [
         "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
-        "Compact CIN omits split-half routing used by some xDeepFM configurations."
+        "cin_activation='relu' preserves the nonlinear default; 'identity' enables the unactivated polynomial core. Both use all-channel readout and omit split-half routing; compare activation choices at fixed embeddings, head and budget."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -2069,7 +2069,7 @@
       },
       "limitations": [
         "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
-        "Compact CIN omits split-half routing used by some xDeepFM configurations."
+        "cin_activation='relu' preserves the nonlinear default; 'identity' enables the unactivated polynomial core. Both use all-channel readout and omit split-half routing; compare activation choices at fixed embeddings, head and budget."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -2580,7 +2580,8 @@
       },
       "limitations": [
         "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system.",
-        "No paper benchmark reproduction or production improvement is implied."
+        "No paper benchmark reproduction or production improvement is implied.",
+        "Uses a learned affine input_dim-to-hidden_dim projection before fixed-width hidden_dim residual blocks. This compact variant differs from parameter-free feature stacking with input_dim-preserving residual units, where hidden_dim is the internal bottleneck width."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -2608,7 +2609,8 @@
       },
       "limitations": [
         "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system.",
-        "No paper benchmark reproduction or production improvement is implied."
+        "No paper benchmark reproduction or production improvement is implied.",
+        "Uses a learned affine input_dim-to-hidden_dim projection before fixed-width hidden_dim residual blocks. This compact variant differs from parameter-free feature stacking with input_dim-preserving residual units, where hidden_dim is the internal bottleneck width."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -6377,7 +6379,8 @@
         "Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing.",
         "Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask.",
         "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+        "Uses single-head D-to-D Q/K/V target attention without a separate output projection; this is a compact readout, not the full multi-head attention architecture from the paper."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -6416,7 +6419,8 @@
         "Dense Hamming scan, not an ANN serving index. Hash bits are discrete and non-trainable; no stochastic per-batch rehashing.",
         "Stable ties use original order; fixed K invalid slots are -1/False/zero. Hash distance reports zero at invalid events and must be interpreted with the input valid mask.",
         "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+        "Uses single-head D-to-D Q/K/V target attention without a separate output projection; this is a compact readout, not the full multi-head attention architecture from the paper."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -6452,10 +6456,11 @@
         ]
       },
       "limitations": [
-        "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention.",
+        "normalize_per_hash=False preserves raw collision-sum averaging; True divides each sum by max(L2 norm, 1e-4) before averaging. The returned per_hash always contains raw collision sums. This is not event-mean pooling or learned attention.",
         "No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index.",
         "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+        "Hash bit uses projection < 0 (zero is False). Complementing a > 0 convention is equivalent only when projections are nonzero; exact-zero collisions can differ between implementations."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -6488,10 +6493,11 @@
         ]
       },
       "limitations": [
-        "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention.",
+        "normalize_per_hash=False preserves raw collision-sum averaging; True divides each sum by max(L2 norm, 1e-4) before averaging. The returned per_hash always contains raw collision sums. This is not event-mean pooling or learned attention.",
         "No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index.",
         "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+        "Hash bit uses projection < 0 (zero is False). Complementing a > 0 convention is equivalent only when projections are nonzero; exact-zero collisions can differ between implementations."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -7018,6 +7024,234 @@
       "structure_pattern": "dense_sparse_composition",
       "required_host_tensors": [
         "dense_features"
+      ]
+    },
+    {
+      "id": "coaction",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.coaction:CoAction",
+      "file": "models/pytorch/coaction.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "meaningful_feature_pair_adapter",
+          "parameter_and_feed_tables",
+          "pooling_or_fusion",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Feature-pair tensor core only: the host builds parameter and feed tables from meaningful, supported pre-decision fields, then pools or fuses outputs inside its existing backbone. Parameters and masks are constructed host tensors, not missing business fields.",
+        "Each sample supplies one row-major micro-MLP parameter vector; each layer matrix is followed by its optional bias. All powers reuse these parameters, nonfinal layers use tanh, and every layer is read out. order_reduction=concat (default) follows the author-code readout choice; sum follows the paper order aggregation choice.",
+        "No learned parameters or history reduction inside this module; gradients flow into host parameter/feed tensors. True=valid padding is sanitized and invalid outputs are zero. Independent implementation, no whole-CAN training system or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "feature_pair_representations",
+        "shape": "[B,T,C]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "feature_pair_micro_mlp",
+      "required_host_tensors": [
+        "coaction_parameters",
+        "feed_embeddings",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "comirec_sa",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multi_interest:ComiRecSA",
+      "file": "models/pytorch/multi_interest.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "embedding_tables",
+          "training_readout",
+          "trainer",
+          "sampled_ranking_loss",
+          "catalog_search_and_deduplication",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate-independent history encoder; optional max_length enables position embeddings only in attention scores. Values remain original history embeddings, and assignments normalize over time.",
+        "interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; interest_mask reports history presence in each slot, not distinct interest usage. True=valid; masked NaN padding is sanitized and empty histories return finite zeros.",
+        "The host supplies real time-cut events, embeddings, target-aware training readout, loss, negative sampling, catalog search and deduplication. No diversity aggregator or complete ComiRec serving system. A candidate-aware readout inside an existing backbone is a separately evaluated composition."
+      ],
+      "output_contract": {
+        "kind": "multi_interest_bundle",
+        "shape": "dict",
+        "fields": {
+          "interests": "[B,K,D]",
+          "interest_mask": "bool [B,K]",
+          "assignments": "[B,K,T]"
+        }
+      },
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "multiple_interest_retrieval",
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "comirec_dr",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.multi_interest:ComiRecDR",
+      "file": "models/pytorch/multi_interest.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "embedding_tables",
+          "training_readout",
+          "trainer",
+          "sampled_ranking_loss",
+          "catalog_search_and_deduplication",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate-independent capsule encoder with position-and-interest-specific projection [max_length,K,D,D], softmax over interests per event, and capsule squash. This differs from the bundled compact MIND routing.",
+        "Deterministic zero routing logits replace author-code random initialization. stop_gradient_routing=True stops nonfinal votes and agreement updates; the final sum uses live votes. False enables gradients through all routing iterations.",
+        "interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; mask indicates history presence, not cluster occupancy. True=valid padding is sanitized and empty histories return finite zeros. Parameter cost grows with maximum length and interest count.",
+        "Host owns real time-cut history, embedding tables, losses, training readout, retrieval and deduplication; no diversity aggregator or complete paper reproduction. Compare SA, MIND and DR under matched parameter and total retrieval budgets."
+      ],
+      "output_contract": {
+        "kind": "multi_interest_bundle",
+        "shape": "dict",
+        "fields": {
+          "interests": "[B,K,D]",
+          "interest_mask": "bool [B,K]",
+          "assignments": "[B,K,T]"
+        }
+      },
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "multiple_interest_retrieval",
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "coaction",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.coaction:CoAction",
+      "file": "models/tensorflow/coaction.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "meaningful_feature_pair_adapter",
+          "parameter_and_feed_tables",
+          "pooling_or_fusion",
+          "prediction_head",
+          "trainer",
+          "task_loss",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Feature-pair tensor core only: the host builds parameter and feed tables from meaningful, supported pre-decision fields, then pools or fuses outputs inside its existing backbone. Parameters and masks are constructed host tensors, not missing business fields.",
+        "Each sample supplies one row-major micro-MLP parameter vector; each layer matrix is followed by its optional bias. All powers reuse these parameters, nonfinal layers use tanh, and every layer is read out. order_reduction=concat (default) follows the author-code readout choice; sum follows the paper order aggregation choice.",
+        "No learned parameters or history reduction inside this module; gradients flow into host parameter/feed tensors. True=valid padding is sanitized and invalid outputs are zero. Independent implementation, no whole-CAN training system or effectiveness claim."
+      ],
+      "output_contract": {
+        "kind": "feature_pair_representations",
+        "shape": "[B,T,C]"
+      },
+      "local_guide": "knowledge/feature_interactions.md",
+      "structure_pattern": "feature_pair_micro_mlp",
+      "required_host_tensors": [
+        "coaction_parameters",
+        "feed_embeddings",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "comirec_sa",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multi_interest:ComiRecSA",
+      "file": "models/tensorflow/multi_interest.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "embedding_tables",
+          "training_readout",
+          "trainer",
+          "sampled_ranking_loss",
+          "catalog_search_and_deduplication",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate-independent history encoder; optional max_length enables position embeddings only in attention scores. Values remain original history embeddings, and assignments normalize over time.",
+        "interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; interest_mask reports history presence in each slot, not distinct interest usage. True=valid; masked NaN padding is sanitized and empty histories return finite zeros.",
+        "The host supplies real time-cut events, embeddings, target-aware training readout, loss, negative sampling, catalog search and deduplication. No diversity aggregator or complete ComiRec serving system. A candidate-aware readout inside an existing backbone is a separately evaluated composition."
+      ],
+      "output_contract": {
+        "kind": "multi_interest_bundle",
+        "shape": "dict",
+        "fields": {
+          "interests": "[B,K,D]",
+          "interest_mask": "bool [B,K]",
+          "assignments": "[B,K,T]"
+        }
+      },
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "multiple_interest_retrieval",
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "comirec_dr",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.multi_interest:ComiRecDR",
+      "file": "models/tensorflow/multi_interest.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "time_safe_history_builder",
+          "embedding_tables",
+          "training_readout",
+          "trainer",
+          "sampled_ranking_loss",
+          "catalog_search_and_deduplication",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Candidate-independent capsule encoder with position-and-interest-specific projection [max_length,K,D,D], softmax over interests per event, and capsule squash. This differs from the bundled compact MIND routing.",
+        "Deterministic zero routing logits replace author-code random initialization. stop_gradient_routing=True stops nonfinal votes and agreement updates; the final sum uses live votes. False enables gradients through all routing iterations.",
+        "interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; mask indicates history presence, not cluster occupancy. True=valid padding is sanitized and empty histories return finite zeros. Parameter cost grows with maximum length and interest count.",
+        "Host owns real time-cut history, embedding tables, losses, training readout, retrieval and deduplication; no diversity aggregator or complete paper reproduction. Compare SA, MIND and DR under matched parameter and total retrieval budgets."
+      ],
+      "output_contract": {
+        "kind": "multi_interest_bundle",
+        "shape": "dict",
+        "fields": {
+          "interests": "[B,K,D]",
+          "interest_mask": "bool [B,K]",
+          "assignments": "[B,K,T]"
+        }
+      },
+      "local_guide": "knowledge/interest_retrieval.md",
+      "structure_pattern": "multiple_interest_retrieval",
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
       ]
     }
   ]

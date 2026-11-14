@@ -119,16 +119,22 @@ class ETAHistorySelector(tf.keras.Model):
 
 
 class SDIMCollisionPooling(tf.keras.Model):
-    """Sum exact bucket collisions per hash, average over hashes; no L2 norm.
+    """Sum bucket collisions, optionally L2-normalize each hash, then average.
+
+    normalize_per_hash defaults to False; True uses a norm floor of 1e-4.
+    per_hash always reports raw sums, before optional normalization.
 
     Dict: collision_mask [B,H,L], per_hash [B,H,D], representation [B,D].
     No trainable parameters; history embeddings receive gradients, while hash
     membership and target queries do not. No attention weights are inferred.
     """
-    def __init__(self, dim, num_hashes=2, hash_bits=4):
+    def __init__(self, dim, num_hashes=2, hash_bits=4, normalize_per_hash=False):
         super().__init__()
         if min(dim, num_hashes, hash_bits) < 1:
             raise ValueError("dimensions and hash counts must be positive")
+        if not isinstance(normalize_per_hash, bool):
+            raise ValueError("normalize_per_hash must be boolean")
+        self.normalize_per_hash = normalize_per_hash
         self.dim = dim
         self.rotations = self.add_weight(name="rotations", shape=(num_hashes, dim, hash_bits), initializer="random_normal", trainable=False)
 
@@ -138,7 +144,11 @@ class SDIMCollisionPooling(tf.keras.Model):
         target_bits = tf.einsum("bd,hdf->bhf", target, self.rotations) < 0
         collision = tf.reduce_all(history_bits == target_bits[:, :, None], -1) & valid[:, None]
         per_hash = tf.einsum("bhl,bld->bhd", tf.cast(collision, history.dtype), history)
-        return dict(representation=tf.reduce_mean(per_hash, 1), per_hash=per_hash, collision_mask=collision)
+        pooled = per_hash
+        if self.normalize_per_hash:
+            work = tf.cast(per_hash, tf.float32) if per_hash.dtype in (tf.float16, tf.bfloat16) else per_hash
+            pooled = tf.cast(tf.math.l2_normalize(work, axis=-1, epsilon=1e-8), per_hash.dtype)
+        return dict(representation=tf.reduce_mean(pooled, 1), per_hash=per_hash, collision_mask=collision)
 
 
 class TWINHeadwiseSelector(tf.keras.Model):

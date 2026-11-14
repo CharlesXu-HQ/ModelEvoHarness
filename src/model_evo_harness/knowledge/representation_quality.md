@@ -59,3 +59,59 @@ Original native utilities informed by [RankUp](https://arxiv.org/html/2604.17878
 and [TayFCS](https://arxiv.org/html/2507.03895v1). They are not full reproductions:
 there is no RankUp token construction, learned pruning policy, cross enumeration,
 LO-FAR estimator or causal feature-importance guarantee.
+
+
+## COLD-inspired physical feature subset search
+
+`cold_feature_search` is an analysis operation available through `analysis_api`
+and `read_reference` for either framework. Both labels return the same stdlib
+module `analysis/cost_aware_search.py`, with no deep-learning runtime import.
+`CostAwareFeatureSearch(latency_budget_ms, *, quality_floor=None,
+max_quality_drop=None)` requires at least one quality constraint. The maximum
+quality drop is an absolute difference from the retrained full-input baseline,
+not a percentage. Quality is a declared maximize metric; adapt minimize metrics
+explicitly and keep that definition fixed.
+
+Call it with `saliency`, retained-count `budgets`, `retrain_evaluate`, and keyword
+arguments `context`, `saliency_split`, `protected_indices=()` and
+`protected_groups=()`. Saliency must come from the context's training split.
+The analysis uses stable score/index ordering to propose subsets and always
+retains every protected group member, including low-saliency interaction-only
+fields. Budgets below that requirement are rejected. Keep group/cross-to-source
+field lineage in the host; the orchestrator does not discover protected groups
+or causal feature value from marginal scores.
+
+The callback receives exact `retained_indices` and `context`, first for the full
+baseline and then once per distinct proposed subset. The host must remove
+omitted feature reads and model input dimensions, rebuild the candidate, run its
+real trainer under the fixed budget, and measure validation quality and latency.
+Return `retrained=True`, `physical_pruning=True`, the exact retained tuple and
+unchanged context, `implementation_id`, a unique `train_run_id`, finite
+`validation_quality`, and positive `latency_ms`. These fields attest what the
+host did; retain auditable code/training artifacts because the function cannot
+prove that an external trainer actually ran. Zeroing inputs or recording gate
+weights does not physically prune a feature or establish speedup.
+
+Context fixes `task_id`, `dataset_id`, `train_split_id`, `validation_split_id`,
+`quality_metric`, `quality_direction="maximize"`, `training_budget_id`, `seed`,
+and `serving_profile`. The profile declares `hardware`, `batch_size`,
+`candidate_count`, `concurrency`, `latency_statistic` and
+`includes_feature_lookup`; include immutable dtype/software/timing details when
+relevant. All context fields must match every trial. Train and validation split
+identities must differ. Preserve the final holdout for a later confirmation;
+repeated validation selection does not make that validation result unbiased.
+
+The result includes baseline, every trial, feasible `pareto_candidates`, and
+`selected` (None when no trial meets the constraints). Selection maximizes
+feasible quality, then minimizes latency and subset size. It reports whether
+latency includes feature lookup; a model-only profile cannot establish overall
+service savings. This protocol does not measure QPS, implement online learning,
+or reproduce the complete [COLD system](https://dlp-kdd.github.io/dlp-kdd2020/assets/pdf/a13-wang.pdf).
+
+Use the five explicit prerequisites: `training_feature_saliency`,
+`feature_group_lineage`, `protected_interaction_groups`,
+`retrain_evaluate_callback`, and `serving_profile`. Reuse the current backbone and
+compare physically smaller retrained variants with the full-input control,
+including critical slices and group ablations. The analysis ID is not a model
+component or an optimization-trial method: the actual retrained candidate is
+the experiment, with its own source, measurements and task-bound evidence.

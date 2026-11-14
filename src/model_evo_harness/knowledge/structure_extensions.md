@@ -64,7 +64,7 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 
 **Falsification.** If histories are short or single-topic, multi-interest capacity has no sound premise. If STAMP gains survive randomizing the last-event position, its recency hypothesis is not supported. If multi-interest recall rises only because more candidates are retrieved, hold the candidate count fixed. Measure coverage/diversity jointly with relevance and cost.
 
-**Code status.** Design guidance only; no local SINE, STAMP, ComiRec or GRU4Rec method card/reference. Sources: [Torch-RecHub matching inventory](https://github.com/datawhalechina/torch-rechub/blob/main/README.md#-supported-models), [SINE](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/sine.py), [STAMP](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/stamp.py), and [ComiRec](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/comirec.py).
+**Code status.** Native `comirec_sa` / `ComiRecSA` and `comirec_dr` / `ComiRecDR` are available in both frameworks; see [their exact contracts](interest_retrieval.md). SA uses score-only optional positions and time-normalized attention; DR uses position-specific capsule projections, interest-normalized assignments and explicit nonfinal stop-gradient. Their cores are candidate-independent; the host owns training/readout/retrieval. ComiRec diversity aggregation, SINE, STAMP and GRU4Rec remain design guidance without local cards. Sources: [Torch-RecHub matching inventory](https://github.com/datawhalechina/torch-rechub/blob/main/README.md#-supported-models), [SINE](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/sine.py), [STAMP](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/stamp.py), and [ComiRec](https://github.com/datawhalechina/torch-rechub/blob/main/torch_rechub/models/matching/comirec.py).
 
 ## Generative item tokenizer and decoder boundary
 
@@ -81,3 +81,24 @@ Identify the target (CTR, conversion, next item, or value), unit of evaluation, 
 Record a technical experience (which mechanism, fields, loss/sampler, measured residual, control, support and failure mode) separately from a business experience (what user behavior or coupon response the result suggests, with uncertainty and counterexamples). Repeated failed structures may justify a human feature request only when the missing information is specific and pre-decision. A documented domain requirement can identify an essential absent business field immediately; it still does not make an unrun model experiment successful.
 
 This page is original synthesis, not copied source code or a wrapper around DeepCTR or Torch-RecHub. It was checked against the linked first-party source/docs on 2026-10-05. No effectiveness claim follows from these design hypotheses.
+
+
+## Supported local additions before a backbone replacement
+
+`coaction` adds a supported feature-pair micro-MLP branch with host-created
+parameter/feed tensors; `comirec_sa` and `comirec_dr` add candidate-independent
+interest tokens when real histories and a catalog exist. Pool or fuse them at a
+declared point in the current compatible backbone and compare against removal
+and a simpler matched control. State whether an input is a real business field,
+a time-cut event sequence, or a tensor the host can construct. New tables and
+masks do not alone justify a human data request.
+
+Available variant controls include `xdeepfm`'s `cin_activation="relu"|"identity"`
+and `sdim_collision_pooling`'s `normalize_per_hash=False|True`; existing defaults
+remain ReLU and raw-sum averaging. Change one mechanism with fixed inputs and
+training protocol. For actual cost reduction, `cold_feature_search` is a separate
+[analysis/retraining protocol](representation_quality.md), requiring protected
+field lineage, physical subset construction, real host retraining and comparable
+serving measurements. Its scores are not an inference layer or evidence of
+feature value. The four additions establish tools and testable contracts, not
+an ordering of models or guaranteed improvements.

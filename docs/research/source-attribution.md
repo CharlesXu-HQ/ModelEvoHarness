@@ -8,6 +8,14 @@ This repository contains original explanations and independent implementations, 
 - RecBole evaluation contract: [official documentation](https://recbole.io/docs/user_guide/config/evaluation_settings.html)
 - Industrial recommendation context: [Wang Shusen RecommenderSystem](https://github.com/wangshusen/RecommenderSystem/tree/8c8796c560c13059b19b51f5b5b963137f4ef287)
 
+## Recommendation component crosschecks
+
+The later [rec_models assessment](rec-models-assessment-2026-11-14.md) and
+[component contracts](../rec-model-components.md) record the source-specific
+crosschecks and independent CAN/ComiRec implementations. The COLD-inspired
+analysis workflow implements a host retraining protocol rather than the complete
+paper system; source text and third-party model wrappers were not incorporated.
+
 ## FunRec source paths by technical family
 
 ### Task framing and measurement (`task_framing`)

@@ -21,7 +21,7 @@ from .interaction import interaction_context, validate_interaction_views
 from .embeddings import validate_embedding_roles
 
 
-PACKAGE_VERSION = "0.2.0"
+PACKAGE_VERSION = "0.3.0"
 
 
 def _json_bytes(value: object) -> bytes:

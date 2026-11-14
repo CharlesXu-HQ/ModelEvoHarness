@@ -120,14 +120,18 @@ class SDIMCollisionPooling(nn.Module):
     """Sum exact target-bucket collisions per hash, then average hash outputs.
 
     Returns collision_mask [B,H,L], per_hash [B,H,D], representation [B,D].
-    This preserves the unnormalized source option, without optional L2 norm.
+    normalize_per_hash=True L2-normalizes each bucket sum (norm floor 1e-4)
+    before averaging. per_hash always reports raw sums; default is unnormalized.
     No learned parameters: gradients flow to selected history embeddings,
     while signs/collision membership are discrete and target is not trained.
     """
-    def __init__(self, dim, num_hashes=2, hash_bits=4):
+    def __init__(self, dim, num_hashes=2, hash_bits=4, normalize_per_hash=False):
         super().__init__()
         if min(dim, num_hashes, hash_bits) < 1:
             raise ValueError("dimensions and hash counts must be positive")
+        if not isinstance(normalize_per_hash, bool):
+            raise ValueError("normalize_per_hash must be boolean")
+        self.normalize_per_hash = normalize_per_hash
         self.dim = dim
         self.register_buffer("rotations", torch.randn(num_hashes, dim, hash_bits))
 
@@ -137,7 +141,11 @@ class SDIMCollisionPooling(nn.Module):
         target_bits = torch.einsum("bd,hdf->bhf", target, self.rotations) < 0
         collision = (history_bits == target_bits[:, :, None]).all(-1) & valid[:, None]
         per_hash = torch.einsum("bhl,bld->bhd", collision.to(history.dtype), history)
-        return dict(representation=per_hash.mean(1), per_hash=per_hash, collision_mask=collision)
+        pooled = per_hash
+        if self.normalize_per_hash:
+            work = per_hash.float() if per_hash.dtype in (torch.float16, torch.bfloat16) else per_hash
+            pooled = torch.nn.functional.normalize(work, dim=-1, eps=1e-4).to(per_hash.dtype)
+        return dict(representation=pooled.mean(1), per_hash=per_hash, collision_mask=collision)
 
 
 class TWINHeadwiseSelector(nn.Module):

@@ -127,12 +127,14 @@
       "id": "multiple_interest_retrieval",
       "name": "Multiple user-interest vectors",
       "method_ids": [
-        "mind"
+        "mind",
+        "comirec_sa",
+        "comirec_dr"
       ],
-      "structural_change": "Represent one user's history with multiple interest vectors and select the target-relevant interest during training or retrieval.",
+      "structural_change": "Encode real history into candidate-independent user-interest vectors through compact MIND routing, ComiRec-SA time-normalized attention or ComiRec-DR capsule routing; host readout chooses training interests and merges per-interest retrieval results.",
       "when_to_try": "A single user vector misses distinct, supported interest clusters within the same users while total top-K is held fixed.",
       "required_evidence": "Sufficient per-user behavioral diversity, stable interest-cluster slices, item embeddings, and a deduplicated fixed-K candidate protocol.",
-      "controlled_comparison": "Compare one and multiple interest vectors with the same encoder inputs, item catalog, total retrieved K, and training sampler.",
+      "controlled_comparison": "Compare one and multiple interest vectors with the same encoder inputs, item catalog, total retrieved K, and training sampler. Compare masked mean, MIND, SA and DR under matched parameter/latency budgets; isolate SA position scores and DR position-specific projections/routing.",
       "reject_if": "Interest vectors collapse, gains disappear after deduplication at fixed K, or sparse users regress beyond guardrails."
     },
     {
@@ -641,6 +643,18 @@
       "required_evidence": "Declared typed tensor/feature contracts, current candidate source, host-observed baseline residual or training evidence, fixed task/dataset version, and measured cost where relevant.",
       "controlled_comparison": "Change one mechanism at a time; preserve accumulated compatible components and use the same split, budget and objective unless that objective is the declared intervention. A versioned aligned pretrained table and sparse/cold slice evidence exist. Test fusion and freezing independently with constant ID mapping.",
       "reject_if": "Required inputs are absent or post-decision; tensors or masks are incompatible; gradients do not reach intended parameters; improvement fails its held-out criterion or disappears under the stated simpler control."
+    },
+    {
+      "id": "feature_pair_micro_mlp",
+      "name": "Feature-pair micro-MLP interactions",
+      "method_ids": [
+        "coaction"
+      ],
+      "structural_change": "Add a local branch where one supported feature supplies per-sample micro-MLP parameters and the other supplies feed positions; read every layer and explicitly sum or concatenate input orders before host pooling/fusion.",
+      "when_to_try": "A current backbone leaves repeatable residuals on a meaningful pre-decision feature pair with sufficient joint support, and a parameter-table budget permits testing a nonlinear pair transform.",
+      "required_evidence": "Typed field identities and pair semantics, pre-decision availability, support and sparse/new-ID slices, the host table/parameter layout, and measured parameter/latency budgets. Constructed parameters are not new business inputs.",
+      "controlled_comparison": "Retain the backbone/head and test one pair against no branch, bilinear/dot product and full-matrix APG; isolate order count/reduction and independent versus shared tables with the same split and training budget.",
+      "reject_if": "The branch fails supported held-out slices, depends on leaked or unsupported pairs, gains vanish under matched capacity, or table size and latency exceed budget."
     }
   ]
 }

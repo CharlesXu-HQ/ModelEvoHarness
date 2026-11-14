@@ -9,10 +9,10 @@ ModelEvoHarness is an **Agent-led offline experiment harness** for recommendatio
 | Component | Purpose |
 | --- | --- |
 | [29 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
-| 127 method cards | Cover 125 model/training methods and 2 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
+| 131 method cards | Cover 128 model/training methods and 3 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
-| [125 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 252 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
-| [2 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 4 entries for representation diagnostics and gradient feature screening. `analysis_api` exposes their classes and contracts for explicit host invocation. |
+| [128 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 258 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
+| [3 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 6 entries for representation diagnostics, gradient feature screening and cost-constrained subset retraining. The retraining workflow is one shared stdlib implementation usable by either framework. `analysis_api` exposes their classes and contracts for explicit host invocation. |
 | Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 
 The [source attribution](docs/research/source-attribution.md) records the upstream work that informed the research map. The explanations are independently written; model code includes original implementations and explicitly attributed adaptations with retained [license notices](THIRD_PARTY_NOTICES.md). Coverage is explained in [research source coverage](docs/source-coverage.md).
@@ -40,6 +40,16 @@ trains and evaluates the candidate. Both APIs support `read_references`; source
 discovery installs no hooks and runs no tools or training. Analysis tools cannot
 serve as an experiment's standalone `method_id`. Feature screening preserves
 declared interaction groups and requires retraining before removing inputs.
+
+## Add feature interactions and interests inside a backbone
+
+[Co-action and multi-interest components](docs/rec-model-components.md) let the Agent
+add CAN feature-pair networks and ComiRec-SA/DR history branches without replacing
+the current backbone. CIN activation and SDIM normalization are explicit ablation
+choices. A separate cost-search workflow screens protected field groups, invokes
+host retraining and compares measured quality/latency under one fixed protocol.
+Each option includes its input conditions, implementation variant and a matched
+control; availability alone does not give it priority over current evidence.
 
 ## Discount-aware marketing
 
