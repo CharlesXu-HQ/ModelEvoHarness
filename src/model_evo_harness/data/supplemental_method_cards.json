@@ -271,14 +271,14 @@
         "reco-011"
       ],
       "source_references": [],
-      "mechanism": "Stacked dense feature vectors processed by dimension-preserving residual MLP units.",
+      "mechanism": "The bundled variant projects encoded features to hidden_dim, then applies residual MLP units that preserve this hidden width.",
       "requires": [
         "encoded_features",
         "observed_outcome_labels"
       ],
       "comparison": "On identical inputs, labels, split and evaluation budget, ablate deepcrossing against the simplest component serving the same role. Report parameter/latency cost and relevant sparse/cold/position slices.",
       "failure_signals": "No held-out gain over the control, violated input timing/masking assumptions, or a required task guardrail regresses.",
-      "implementation_boundary": "Embedding/field encoding supplied by caller; compact residual units rather than the original distributed advertising training system."
+      "implementation_boundary": "Host supplies encoded features. The bundled learned input_dim-to-hidden_dim projection differs from the original parameter-free stacking and input_dim-preserving residual units; hidden_dim is the residual width here, rather than only the paper's internal bottleneck width."
     },
     {
       "id": "fnn",
@@ -1543,11 +1543,11 @@
         "event_sequence",
         "target_item_features"
       ],
-      "mechanism": "Sum history embeddings whose full random-hyperplane bit code equals the target code independently for each hash; average the hash-specific sums.",
-      "comparison": "At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost.",
+      "mechanism": "Sum history embeddings whose full random-hyperplane bit code equals the target code independently for each hash; optionally L2-normalize each sum before averaging while returning raw per_hash sums.",
+      "comparison": "At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost. Isolate normalize_per_hash=False versus True with identical hashes, histories and head.",
       "when_to_try": "Measured history cost or signal dilution motivates selection. Compare exact scoring, recency and random-at-equal-k controls; measure useful-event coverage and latency as well as response.",
       "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
-      "implementation_boundary": "Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "implementation_boundary": "normalize_per_hash=False preserves raw collision-sum averaging; True divides each sum by max(L2 norm, 1e-4) before averaging. The returned per_hash always contains raw collision sums. This is not event-mean pooling or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
       "required_host_tensors": [
         "sequence_mask"
       ]
@@ -1695,6 +1695,105 @@
       "required_host_tensors": [
         "dense_features"
       ]
+    },
+    {
+      "id": "coaction",
+      "family_id": "feature_interactions",
+      "source_repo": "can-paper",
+      "source_model": "CAN feature-pair micro-MLP and author gen_coaction readouts",
+      "source_url": "https://arxiv.org/html/2011.05625v2#S4",
+      "source_references": [
+        {
+          "repository": "https://github.com/CAN-Paper/Co-Action-Network",
+          "commit_sha": "98a7219105568b9420cf28467877d08a1c56ae69",
+          "path": "script/model.py",
+          "url": "https://github.com/CAN-Paper/Co-Action-Network/blob/98a7219105568b9420cf28467877d08a1c56ae69/script/model.py"
+        }
+      ],
+      "mechanism": "Apply a per-sample host-supplied micro-MLP parameter vector to each feed position and input power; concatenate all layer outputs, then explicitly concatenate or sum orders.",
+      "requires": [
+        "meaningful_feature_pairs"
+      ],
+      "required_host_tensors": [
+        "coaction_parameters",
+        "feed_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "Add one supported feature-pair branch to the current backbone; compare no branch, bilinear/dot product, full-matrix APG and one versus multiple orders with fixed fields, split, head and training budget. Match or report embedding-table cost; ablate independent versus shared interaction tables.",
+      "failure_signals": "No held-out gain beyond simpler controls, sparse/new-ID regressions, unstable powers, unsupported feature-pair semantics or excessive parameter-table/serving cost.",
+      "implementation_boundary": "Feature-pair tensor core only: the host builds parameter and feed tables from meaningful, supported pre-decision fields, then pools or fuses outputs inside its existing backbone. Parameters and masks are constructed host tensors, not missing business fields. Each sample supplies one row-major micro-MLP parameter vector; each layer matrix is followed by its optional bias. All powers reuse these parameters, nonfinal layers use tanh, and every layer is read out. order_reduction=concat (default) follows the author-code readout choice; sum follows the paper order aggregation choice. No learned parameters or history reduction inside this module; gradients flow into host parameter/feed tensors. True=valid padding is sanitized and invalid outputs are zero. Independent implementation, no whole-CAN training system or effectiveness claim."
+    },
+    {
+      "id": "comirec_sa",
+      "family_id": "interest_retrieval",
+      "source_repo": "comirec-paper",
+      "source_model": "ComiRec-SA self-attentive multi-interest extraction",
+      "source_url": "https://arxiv.org/html/2005.09347v2#S3.SS2",
+      "source_references": [
+        {
+          "repository": "https://github.com/THUDM/ComiRec",
+          "commit_sha": "7e605f1daabe1ab48e4e10469f4367429bce86c9",
+          "path": "src/model.py",
+          "url": "https://github.com/THUDM/ComiRec/blob/7e605f1daabe1ab48e4e10469f4367429bce86c9/src/model.py"
+        }
+      ],
+      "mechanism": "Produce K attention distributions over real history without a candidate query; optional positions affect attention scores while the pooled values remain original history embeddings.",
+      "requires": [
+        "event_sequence",
+        "item_catalog"
+      ],
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "Compare masked mean, bundled MIND, SA with one/multiple interests and position on/off using the same time cut, embeddings, negatives, total deduplicated candidate count and training budget. Measure interest similarity/usage, Recall/NDCG, history slices and retrieval latency.",
+      "failure_signals": "No recall gain at a fixed total retrieval budget, collapsed interest vectors, future-event leakage, or short-history and serving-cost regressions.",
+      "implementation_boundary": "Candidate-independent history encoder; optional max_length enables position embeddings only in attention scores. Values remain original history embeddings, and assignments normalize over time. interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; interest_mask reports history presence in each slot, not distinct interest usage. True=valid; masked NaN padding is sanitized and empty histories return finite zeros. The host supplies real time-cut events, embeddings, target-aware training readout, loss, negative sampling, catalog search and deduplication. No diversity aggregator or complete ComiRec serving system. A candidate-aware readout inside an existing backbone is a separately evaluated composition."
+    },
+    {
+      "id": "comirec_dr",
+      "family_id": "interest_retrieval",
+      "source_repo": "comirec-paper",
+      "source_model": "ComiRec-DR position-specific capsule routing",
+      "source_url": "https://arxiv.org/html/2005.09347v2#S3",
+      "source_references": [
+        {
+          "repository": "https://github.com/THUDM/ComiRec",
+          "commit_sha": "7e605f1daabe1ab48e4e10469f4367429bce86c9",
+          "path": "src/model.py",
+          "url": "https://github.com/THUDM/ComiRec/blob/7e605f1daabe1ab48e4e10469f4367429bce86c9/src/model.py"
+        }
+      ],
+      "mechanism": "Project each history position independently for each interest, route votes with event-wise softmax over interests, squash capsule sums and update routing agreement with explicit stop-gradient behavior.",
+      "requires": [
+        "event_sequence",
+        "item_catalog"
+      ],
+      "required_host_tensors": [
+        "history_embeddings",
+        "sequence_mask"
+      ],
+      "comparison": "Compare compact MIND, SA and DR at equal history length, parameter and total retrieval budgets; isolate position-specific projections, routing iterations and nonfinal stop-gradient while retaining the same head, sampler and evaluator.",
+      "failure_signals": "Gains disappear at matched capacity/candidate count, routing collapses, positional support is weak, or maximum-length projections exceed memory/latency budgets.",
+      "implementation_boundary": "Candidate-independent capsule encoder with position-and-interest-specific projection [max_length,K,D,D], softmax over interests per event, and capsule squash. This differs from the bundled compact MIND routing. Deterministic zero routing logits replace author-code random initialization. stop_gradient_routing=True stops nonfinal votes and agreement updates; the final sum uses live votes. False enables gradients through all routing iterations. interests [B,K,D], interest_mask [B,K], assignments [B,K,T]; mask indicates history presence, not cluster occupancy. True=valid padding is sanitized and empty histories return finite zeros. Parameter cost grows with maximum length and interest count. Host owns real time-cut history, embedding tables, losses, training readout, retrieval and deduplication; no diversity aggregator or complete paper reproduction. Compare SA, MIND and DR under matched parameter and total retrieval budgets."
+    },
+    {
+      "id": "cold_feature_search",
+      "family_id": "representation_quality",
+      "source_repo": "cold-paper",
+      "source_model": "COLD-inspired physical feature subset and matched retraining protocol",
+      "source_url": "https://dlp-kdd.github.io/dlp-kdd2020/assets/pdf/a13-wang.pdf",
+      "mechanism": "Use training saliency to propose protected feature subsets, invoke the host to physically rebuild/retrain/evaluate each subset and the full baseline, then select measured feasible quality-latency candidates under a fixed serving profile.",
+      "requires": [
+        "training_feature_saliency",
+        "feature_group_lineage",
+        "protected_interaction_groups",
+        "retrain_evaluate_callback",
+        "serving_profile"
+      ],
+      "comparison": "Within the same task/dataset/splits, quality metric, seed, training budget and serving profile, compare full-input and physically pruned retrained candidates. Protect interaction-only groups, report all trials and quality-latency feasibility, and keep the final holdout sealed.",
+      "failure_signals": "Missing retraining/pruning provenance, mismatched contexts, removal of protected interactions, no feasible quality-latency result, or feature-fetch savings inferred from input zeroing.",
+      "implementation_boundary": "COLD-inspired stdlib analysis protocol shared by both framework labels, not a neural model or a complete COLD system. Saliency only proposes subsets; selection uses actual comparable host retraining and measurements. Training-only saliency, feature/source-field lineage and explicitly protected indices/groups are required. All members of every protected group survive; insufficient budgets are rejected. The full baseline and each distinct physical subset must be retrained by the host under the fixed training budget. Each callback must attest retrained=True and physical_pruning=True, return exact retained_indices and unchanged context, unique train_run_id, implementation_id, finite validation_quality and positive latency_ms. Attestations are not proof: the host retains auditable artifacts and owns the actual GPU trainer. Context fixes task/dataset/train/validation identity, maximize quality metric, training budget, seed and serving profile (hardware, batch/candidate count, concurrency, latency statistic and feature-lookup inclusion). Model-only latency cannot establish end-to-end savings; multiplying inputs by zero is not physical pruning. At least one quality floor or maximum absolute baseline quality drop is required. Reports every trial, feasible Pareto candidates and the highest-quality feasible selection (or None). No QPS, acquisition-cost optimization, online-learning implementation or task-effectiveness claim."
     }
   ]
 }

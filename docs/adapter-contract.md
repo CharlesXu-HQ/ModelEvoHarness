@@ -87,7 +87,7 @@ class Agent:
 
 `context` contains the task snapshot, catalog, family/method/decision/training applicability reports, relevant local `knowledge` guides (including all shared training/exploration guides), ready `model_api` and `analysis_api` signatures and implementation contracts, baseline, completed trials, best ID and remaining steps. `model_api` contains model components; `analysis_api` contains diagnostic and screening tools. Set `snapshot.framework` to expose only that framework's APIs; omitting it exposes both.
 
-The catalog includes 29 research families and 127 unified method cards: 125 model/training methods and 2 analysis tools. `model_implementations.json` has 252 entries, including generic `two_tower` in both frameworks; `analysis_implementations.json` has 4 entries. TwoTower remains outside the method cards. `method_applicability.frameworks` reports native PyTorch/TensorFlow availability for either kind. Model changes use `structure_patterns` with `structural_change`; analysis uses `analysis_patterns` with `operation`. A `ready` status means the inputs are declared; it does not establish effectiveness.
+The catalog includes 29 research families and 131 unified method cards: 128 model/training methods and 3 analysis tools. `model_implementations.json` has 258 entries, including generic `two_tower` in both frameworks; `analysis_implementations.json` has 6 entries. TwoTower remains outside the method cards. `method_applicability.frameworks` reports native PyTorch/TensorFlow availability for either kind. Model changes use `structure_patterns` with `structural_change`; analysis uses `analysis_patterns` with `operation`. A `ready` status means the inputs are declared; it does not establish effectiveness.
 
 Analysis tools live in `analysis/<framework>/research_diagnostics.py`. The host explicitly invokes them on captured activations and training gradients while diagnosing a baseline or completed trial, and may report the observations as host evidence. Model components under `models/<framework>` are integrated into the candidate's forward computation. API discovery and source retrieval install no hooks, invoke no analysis tools and run no training.
 
@@ -229,3 +229,13 @@ capability declarations; it is not permission to issue a human raw-data request 
 Consult the packaged feature-gap guide before deciding whether a code or dataset change is needed.
 
 New component metadata separates raw/declared prerequisites in `requires` from candidate-produced inputs in `required_host_tensors`. The latter are exposed in `model_api` and source contracts and do not block discovery. Construct and verify them in the candidate before training. A field layout needs a stable declared axis; locality still needs a justified semantic hypothesis. Next-event negatives require an explicit eligible pool and sampler, not invented observed labels. A recent-N mask can use event order; a time-window mask additionally needs real event timestamps.
+
+## Framework-neutral cost search
+
+`cold_feature_search` is an analysis workflow shared by PyTorch and TensorFlow hosts.
+Its source at `analysis/cost_aware_search.py` is delivered through `read_references`,
+and `analysis_api` exposes the class. Hosts explicitly invoke its callback workflow
+with task/dataset/split/training-budget/seed and serving-profile provenance. A
+callback must physically construct the requested inputs, retrain, evaluate and
+return auditable run/code IDs and measured quality/latency. Screening and source
+reading do not automatically train a candidate. See [the component contract](rec-model-components.md).

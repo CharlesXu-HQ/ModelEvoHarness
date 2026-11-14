@@ -156,9 +156,9 @@ Sum history embeddings whose full random-hyperplane bit code equals the target c
 
 **Input contract:** event_sequence, target_item_features, sequence_mask. See `model_api` for the framework constructor and calls. **Output:** `dict`.
 
-**Controlled test:** At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
+**Controlled test:** At fixed history and projection seed, compare exact collision pooling with top-K Hamming selection and masked mean; measure empty-bucket rate and cost. Isolate `normalize_per_hash=False` versus `True` with identical hashes, histories and head. Reject the explanation if its matched control accounts for the gain, the intended path has no gradients, or the supported target slice does not improve.
 
-**Boundaries:** Preserves the unnormalized source option; no optional per-hash L2 normalization. Collision sums are not event means or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
+**Boundaries:** The default `normalize_per_hash=False` averages raw collision sums. `True` divides each hash sum by `max(L2 norm, 1e-4)` before averaging; returned `per_hash` stays raw in both modes. Zero buckets remain finite zeros. This is not event-mean pooling or learned attention. No trainable parameters inside this component: gradients flow to collided history embeddings; discrete bucket membership does not train target/hash rotations. No ANN index. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
 
 **Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/SDIM/SDIM.py).
 
@@ -189,3 +189,17 @@ Target, masked recent-history mean and global-history mean independently query f
 **Boundaries:** Corrects unused selection masks and diagonal-only einsum: full off-diagonal channel mixing is deliberate and independently implemented. Orthogonal rFFT/irFFT with explicit n=K supports odd K; complex matrices are shared across frequencies. Zero-padded invalid slots are part of the declared K-point transform, masked both before FFT and after residual LayerNorm. Omits upstream recency-position additions, dropout and short-history attention branch. Recent mask must be a subset of valid; missing recent history produces no recent interest. Dense hash scans, no ANN cache. Fixed K with chronological valid selections and invalid -1 slots. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.
 
 **Bundled code:** `models/pytorch/history_retrieval.py`, `models/tensorflow/history_retrieval.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/LongCTR/MIRRN/MIRRN.py).
+
+
+## Composing candidate-independent interests into a ranking backbone
+
+`comirec_sa` and `comirec_dr` are native history-to-interest cores described in
+[interest retrieval](interest_retrieval.md). Their standalone cards are screened
+for retrieval, but a ranking backbone with actual pre-decision events can reuse
+`interests[B,K,D]` as intermediate tokens or apply a separate candidate-aware
+readout before fusion. The encoder itself has no target input. Preserve the
+current compatible branches and compare the added interest path with its
+ablation, masked pooling and existing MIND under matched head/training budgets.
+Do not infer event sequences from aggregate columns. A ranking composition needs
+its own labels, evaluator and fusion experiment; it does not inherit ComiRec's
+retrieval results or provide a bundled diversity selector.

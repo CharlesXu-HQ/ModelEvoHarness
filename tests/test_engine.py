@@ -1,6 +1,7 @@
 import json
 import math
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -98,6 +99,14 @@ class EngineTests(unittest.TestCase):
             "stages": ["ranking"], "requires": ["tabular"],
             "source_docs": [], "source_models": [],
         }]}
+
+    def test_journal_records_the_published_package_version(self):
+        release = tomllib.loads((Path(__file__).resolve().parents[1] / "pyproject.toml").read_text())
+        result = run_search(Task(), Agent([{"action": "stop", "reason": "version check"}]),
+                            output=self.output, catalog=self.catalog, max_steps=1)
+        journal = json.loads((self.output / "journal.json").read_text())
+        self.assertEqual(result["identity"]["package_version"], release["project"]["version"])
+        self.assertEqual(journal["identity"]["package_version"], release["project"]["version"])
 
     def test_promotion_policy_uses_host_implementation_status_without_attribution_gate(self):
         for strict, status, expected in (

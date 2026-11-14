@@ -57,7 +57,7 @@
       "source_url": "https://github.com/wzhe06/Reco-papers/blob/2c617a1659c38f60848c051b377f3faef5df831f/Retrieval%20and%20Rerank/%5BCOLD%5D%20Towards%20the%20Next%20Generation%20of%20Pre-ranking%20System.pdf",
       "category": "Retrieval and Rerank",
       "disposition": "excluded",
-      "reason": "Pre-ranking system optimization and feature-budget/serving tradeoffs; no distinct portable core is claimed.",
+      "reason": "Full COLD pre-ranking, online learning and serving-system optimization remain outside the portable network-core inventory. The separate cold_feature_search analysis protocol orchestrates host-owned physical feature pruning, retraining and measured quality-latency selection; it does not implement the full system or claim production speedup.",
       "method_ids": [],
       "family_ids": [],
       "local_guides": [],

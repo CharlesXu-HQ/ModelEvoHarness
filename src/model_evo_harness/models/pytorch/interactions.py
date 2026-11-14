@@ -200,12 +200,16 @@ class XDeepFM(nn.Module):
     """Compressed interaction network plus MLP; categorical IDs to ``[B]``."""
 
     def __init__(self, cardinalities: list[int], embedding_dim: int,
-                 hidden_dim: int = 32, cin_channels: list[int] | None = None):
+                 hidden_dim: int = 32, cin_channels: list[int] | None = None,
+                 cin_activation: str = "relu"):
         super().__init__()
         self.fields = _Fields(cardinalities, embedding_dim)
         channels = [8, 8] if cin_channels is None else cin_channels
         if not channels or any(n <= 0 for n in channels):
             raise ValueError("cin_channels must contain positive sizes")
+        if cin_activation not in ("relu", "identity"):
+            raise ValueError("cin_activation must be relu or identity")
+        self.cin_activation = cin_activation
         self.cin_weights = nn.ParameterList()
         previous = self.fields.count
         for width in channels:
@@ -224,7 +228,9 @@ class XDeepFM(nn.Module):
         outputs = []
         for weight in self.cin_weights:
             outer = (original[:, :, None, :] * hidden[:, None, :, :]).flatten(1, 2)
-            hidden = torch.relu(torch.einsum("bmk,cm->bck", outer, weight))
+            hidden = torch.einsum("bmk,cm->bck", outer, weight)
+            if self.cin_activation == "relu":
+                hidden = torch.relu(hidden)
             outputs.append(hidden.sum(dim=-1))
         return torch.cat(outputs, dim=1)
 

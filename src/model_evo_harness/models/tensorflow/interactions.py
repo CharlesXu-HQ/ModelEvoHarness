@@ -218,12 +218,16 @@ class XDeepFM(tf.keras.Model):
     """Compressed interaction network plus MLP; categorical IDs to ``[B]``."""
 
     def __init__(self, cardinalities: list[int], embedding_dim: int,
-                 hidden_dim: int = 32, cin_channels: list[int] | None = None):
+                 hidden_dim: int = 32, cin_channels: list[int] | None = None,
+                 cin_activation: str = "relu"):
         super().__init__()
         self.fields = _Fields(cardinalities, embedding_dim)
         channels = [8, 8] if cin_channels is None else cin_channels
         if not channels or any(n <= 0 for n in channels):
             raise ValueError("cin_channels must contain positive sizes")
+        if cin_activation not in ("relu", "identity"):
+            raise ValueError("cin_activation must be relu or identity")
+        self.cin_activation = cin_activation
         self.cin_weights = []
         previous = self.fields.count
         for i, width in enumerate(channels):
@@ -244,7 +248,9 @@ class XDeepFM(tf.keras.Model):
             outer = original[:, :, None, :] * hidden[:, None, :, :]
             outer = tf.reshape(outer, (tf.shape(outer)[0], tf.shape(weight)[1],
                                        self.fields.dim))
-            hidden = tf.nn.relu(tf.einsum("bmk,cm->bck", outer, weight))
+            hidden = tf.einsum("bmk,cm->bck", outer, weight)
+            if self.cin_activation == "relu":
+                hidden = tf.nn.relu(hidden)
             outputs.append(tf.reduce_sum(hidden, axis=-1))
         return tf.concat(outputs, axis=1)
 

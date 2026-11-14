@@ -8,7 +8,7 @@ from model_evo_harness import catalog
 from model_evo_harness.provider import OpenAICompatibleAgent
 
 
-TOOLS = {"representation_diagnostics", "gradient_feature_selection"}
+TOOLS = {"representation_diagnostics", "gradient_feature_selection", "cold_feature_search"}
 
 
 @pytest.mark.parametrize("framework", ["pytorch", "tensorflow"])
@@ -20,9 +20,13 @@ def test_analysis_has_separate_manifest_api_and_patterns(framework):
     assert catalog.model_api(data, framework=framework, method_ids=TOOLS) == {}
     api = catalog.analysis_api(data, framework=framework, method_ids=TOOLS)
     assert set(api) == TOOLS
-    for entry in api.values():
-        assert entry["file"].startswith(f"analysis/{framework}/")
-        assert entry["symbol"].startswith(f"model_evo_harness.analysis.{framework}.")
+    for method, entry in api.items():
+        if method == "cold_feature_search":
+            assert entry["file"] == "analysis/cost_aware_search.py"
+            assert entry["symbol"] == "model_evo_harness.analysis.cost_aware_search:CostAwareFeatureSearch"
+        else:
+            assert entry["file"].startswith(f"analysis/{framework}/")
+            assert entry["symbol"].startswith(f"model_evo_harness.analysis.{framework}.")
         assert "__call__" in entry["methods"]
         assert "analysis_pattern" in entry
         assert "structure_pattern" not in entry

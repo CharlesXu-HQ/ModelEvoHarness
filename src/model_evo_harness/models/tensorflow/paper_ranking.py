@@ -8,6 +8,7 @@ class DeepCrossing(tf.keras.Model):
 
     def __init__(self, input_dim: int, hidden_dim: int, num_blocks: int = 2):
         super().__init__()
+        self.input_spec = tf.keras.layers.InputSpec(ndim=2, axes={-1: input_dim})
         self.stack = tf.keras.layers.Dense(hidden_dim)
         self.blocks = [tf.keras.Sequential((tf.keras.layers.Dense(hidden_dim, activation="relu"),
                                             tf.keras.layers.Dense(hidden_dim)))

@@ -485,3 +485,55 @@ Apply a raw-logit affine head when hidden_dims is empty, or a ReLU MLP for a dec
 **Boundaries:** Generic LR/DNN control or host prediction head; no tokenizer, implicit sigmoid or causal interpretation.
 
 **Bundled code:** `models/pytorch/ctr_embeddings.py`, `models/tensorflow/ctr_embeddings.py`. [Research source](https://github.com/reczoo/FuxiCTR/blob/183da1c944ba8930fcdcd54114837c081959d748/model_zoo/DNN/DNN_torch/src/DNN.py).
+
+
+## CIN activation is a structural choice
+
+The bundled `xdeepfm` exposes `cin_activation="relu"|"identity"`. The default ReLU
+preserves existing behavior; both choices concatenate every layer's sum-pooled channels.
+Its field-pair contraction can match an identity CIN algebraically before activation,
+while its outputs differ when coordinates
+are negative. Do not treat identity and ReLU variants as interchangeable or attribute
+their difference to an incorrect einsum layout. The original xDeepFM paper uses identity
+CIN activation and compares alternatives in Section 4.4; see
+[the paper](https://arxiv.org/html/1803.05170). An identity-versus-ReLU ablation with fixed
+embeddings, head and budget is a useful local experiment. Both native frameworks expose
+the option and retain all-channel readout; split-half routing is not bundled. A nonlinear
+variant does not inherit the exact global polynomial interpretation unchanged.
+
+
+## Feature-pair micro-MLP: CAN / CoAction
+
+`coaction` provides `CoAction(input_dim, layer_dims, order=1,
+order_reduction="concat", use_bias=False)` in both native frameworks. The host
+supplies `parameters[B,P]`, `feed[B,T,D]` and a True=valid mask `[B,T]`; the output
+is `[B,T,C]`. A single position (`T=1`) supports ordinary feature pairs without
+inventing an event sequence. Parameters are host-created trainable table lookups
+or composed tensors, not business fields that need new data collection.
+
+For each sample, flatten each row-major layer matrix `[d_in,d_out]`, followed
+immediately by its optional bias, in layer order. `parameter_dim` gives the total
+required width. Each power of the feed traverses the same micro-MLP, with tanh on
+nonfinal layers and readout from every layer. `order_reduction="concat"` joins
+orders in ascending order and follows the pinned author's readout choice;
+`"sum"` follows the paper's order aggregation choice. `output_dim` is
+`sum(layer_dims) * order` for concat and `sum(layer_dims)` for sum. The module
+owns no trainable parameters and performs no history pooling; gradients flow to
+both host inputs. Padding, including masked NaNs, is sanitized and output is zero.
+
+Use one meaningful, pre-decision pair with adequate joint support, then pool or
+fuse its result inside the current backbone. The catalog requires
+`tabular_features` and `meaningful_feature_pairs`; lookup tables and masks belong
+to the host tensor contract. Do not enumerate every pair or fabricate history
+from aggregate columns. CAN differs from a conditional APG layer in its explicit
+parameter layout, pair semantics, feed powers and layer readout; it does not
+introduce the first possible conditional matrix transform.
+
+Compare the current backbone, a bilinear/dot-product branch, full-matrix APG and
+CoAction with one versus several orders under the same fields, split, head and
+training budget. Match or report table size; isolate shared versus independent
+interaction tables, order aggregation and fusion. Inspect sparse/new-ID slices,
+branch gradients, quality and latency. Tensor correctness does not demonstrate
+task improvement. This is an independent core, without the whole CAN training
+system. Sources: [CAN section 4](https://arxiv.org/html/2011.05625v2#S4) and
+[pinned author code](https://github.com/CAN-Paper/Co-Action-Network/blob/98a7219105568b9420cf28467877d08a1c56ae69/script/model.py).
