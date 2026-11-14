@@ -1,5 +1,7 @@
 # Research-guided components validation
 
+> GPU follow-up: [PR #3 GPU validation](pr3-gpu-validation-2026-11-14.md) records the 2026-11-14 target-machine checks of these components and the 21 previously skipped GPU cases. The original CPU-only record below is preserved.
+
 Date: 2026-11-11. Base: `c3b8ae520b17da3b66c3e023574de66ed7c1b16e`.
 Scope: the four user-selected additions in ModelEvoHarness, represented by five
 native components in each framework. No consumer project is changed.
