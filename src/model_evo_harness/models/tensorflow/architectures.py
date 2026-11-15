@@ -65,28 +65,37 @@ class DCN(tf.keras.Model):
 
 
 class DIN(tf.keras.Model):
-    """Target-conditioned attention over a supplied history embedding sequence."""
+    """Finite target/history, boolean mask; masked padding is sanitized first.
 
-    def __init__(self, embedding_dim: int, hidden_dim: int):
+    Default keeps sigmoid/ReLU scoring. Inject LocalActivationPooling for
+    raw/softmax weights or padding-aware Dice, with training propagated.
+    """
+    def __init__(self, embedding_dim: int, hidden_dim: int, pooling=None):
         super().__init__()
-        self.attention = tf.keras.Sequential([
-            tf.keras.layers.Dense(hidden_dim, activation="relu"),
-            tf.keras.layers.Dense(1),
-        ])
+        self.embedding_dim, self.pooling = embedding_dim, pooling
+        self.attention = None if pooling is not None else tf.keras.Sequential([
+            tf.keras.layers.Dense(hidden_dim, activation="relu"), tf.keras.layers.Dense(1)])
         self.head = tf.keras.Sequential([
-            tf.keras.layers.Dense(hidden_dim, activation="relu"),
-            tf.keras.layers.Dense(1),
-        ])
+            tf.keras.layers.Dense(hidden_dim, activation="relu"), tf.keras.layers.Dense(1)])
 
     def call(self, target: tf.Tensor, history: tf.Tensor,
-             mask: tf.Tensor) -> tf.Tensor:
-        repeated = tf.broadcast_to(target[:, None, :], tf.shape(history))
-        attention_input = tf.concat([repeated, history, repeated - history,
-                                     repeated * history], axis=-1)
-        scores = tf.squeeze(self.attention(attention_input), axis=-1)
-        # DIN retains activation intensity instead of normalizing weights to sum to one.
-        weights = tf.sigmoid(scores) * tf.cast(mask, scores.dtype)
-        pooled = tf.reduce_sum(history * weights[:, :, None], axis=1)
+             mask: tf.Tensor, training=None) -> tf.Tensor:
+        if mask.dtype != tf.bool:
+            raise ValueError("mask must be boolean")
+        tf.debugging.assert_rank(history, 3)
+        tf.debugging.assert_equal(tf.shape(mask), tf.shape(history)[:2])
+        tf.debugging.assert_equal(tf.shape(target), [tf.shape(history)[0], self.embedding_dim])
+        tf.debugging.assert_equal(tf.shape(history)[-1], self.embedding_dim)
+        history = tf.where(mask[..., None], history, tf.zeros_like(history))
+        tf.debugging.assert_all_finite(target, "target must be finite")
+        tf.debugging.assert_all_finite(history, "valid history must be finite")
+        if self.pooling is not None:
+            pooled = self.pooling(target, history, mask, training=training)['representation']
+        else:
+            repeated = tf.broadcast_to(target[:, None, :], tf.shape(history))
+            joined = tf.concat([repeated, history, repeated-history, repeated*history], -1)
+            weights = tf.sigmoid(tf.squeeze(self.attention(joined), -1)) * tf.cast(mask, history.dtype)
+            pooled = tf.reduce_sum(history * weights[:, :, None], axis=1)
         return tf.squeeze(self.head(tf.concat([target, pooled], axis=-1)), axis=-1)
 
 

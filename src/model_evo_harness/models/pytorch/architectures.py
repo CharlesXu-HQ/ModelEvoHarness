@@ -60,24 +60,35 @@ class DCN(nn.Module):
 
 
 class DIN(nn.Module):
-    """Target-conditioned attention over a supplied history embedding sequence."""
+    """Target-conditioned history readout; finite valid data, arbitrary bool mask.
 
-    def __init__(self, embedding_dim: int, hidden_dim: int):
+    Default preserves sigmoid/ReLU scoring. Supply a LocalActivationPooling
+    instance for raw/softmax weights or masked Dice activation.
+    """
+    def __init__(self, embedding_dim: int, hidden_dim: int, pooling=None):
         super().__init__()
-        self.attention = nn.Sequential(nn.Linear(4 * embedding_dim, hidden_dim),
-                                       nn.ReLU(), nn.Linear(hidden_dim, 1))
+        self.embedding_dim, self.pooling = embedding_dim, pooling
+        self.attention = None if pooling is not None else nn.Sequential(
+            nn.Linear(4 * embedding_dim, hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1))
         self.head = nn.Sequential(nn.Linear(2 * embedding_dim, hidden_dim),
                                   nn.ReLU(), nn.Linear(hidden_dim, 1))
 
     def forward(self, target: torch.Tensor, history: torch.Tensor,
                 mask: torch.Tensor) -> torch.Tensor:
-        repeated = target.unsqueeze(1).expand_as(history)
-        attention_input = torch.cat([repeated, history, repeated - history,
-                                     repeated * history], dim=-1)
-        scores = self.attention(attention_input).squeeze(-1)
-        # DIN retains activation intensity instead of normalizing weights to sum to one.
-        weights = torch.sigmoid(scores) * mask.to(scores.dtype)
-        pooled = (history * weights.unsqueeze(-1)).sum(dim=1)
+        if (history.ndim != 3 or mask.dtype != torch.bool or mask.shape != history.shape[:2]
+                or target.shape != (history.shape[0], self.embedding_dim)
+                or history.shape[-1] != self.embedding_dim):
+            raise ValueError("expected target [B,D], history [B,T,D], boolean mask [B,T]")
+        history = torch.where(mask[..., None], history, 0.)
+        if not torch.isfinite(target).all().item() or not torch.isfinite(history).all().item():
+            raise ValueError("target and valid history must be finite")
+        if self.pooling is not None:
+            pooled = self.pooling(target, history, mask)['representation']
+        else:
+            repeated = target.unsqueeze(1).expand_as(history)
+            joined = torch.cat([repeated, history, repeated-history, repeated*history], -1)
+            weights = torch.sigmoid(self.attention(joined).squeeze(-1)) * mask
+            pooled = (history * weights.unsqueeze(-1)).sum(dim=1)
         return self.head(torch.cat([target, pooled], dim=-1)).squeeze(-1)
 
 

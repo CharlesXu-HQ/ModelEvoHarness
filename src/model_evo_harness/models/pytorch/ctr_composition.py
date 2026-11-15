@@ -227,12 +227,18 @@ class FieldMatrixInteraction(nn.Module):
 
     matrix uses e_i^T M_ij e_j; vector uses sum(e_i*v_ij*e_j).
     Existing embeddings are supplied; no feature-ID table or classifier.
+    symmetric=True uses M=W+W^T (no factor 1/2), the FEFM constraint.
+    Default unconstrained matrix/vector behavior is unchanged.
     """
-    def __init__(self, num_fields: int, embedding_dim: int, interaction_type: str = 'matrix'):
+    def __init__(self, num_fields: int, embedding_dim: int, interaction_type: str = 'matrix',
+                 symmetric: bool = False):
         super().__init__()
         _positive(num_fields, embedding_dim)
         if num_fields < 2 or interaction_type not in ('matrix', 'vector'):
             raise ValueError('at least two fields and matrix/vector interaction_type required')
+        if symmetric and interaction_type != 'matrix':
+            raise ValueError('symmetric is only defined for matrix interactions')
+        self.symmetric = symmetric
         self.num_fields, self.embedding_dim, self.interaction_type = num_fields, embedding_dim, interaction_type
         pairs = list(combinations(range(num_fields), 2))
         self.register_buffer('left_indices', torch.tensor([i for i, _ in pairs]))
@@ -245,7 +251,8 @@ class FieldMatrixInteraction(nn.Module):
         _tokens(tokens, self.num_fields, self.embedding_dim)
         left, right = tokens[:, self.left_indices], tokens[:, self.right_indices]
         if self.interaction_type == 'matrix':
-            return torch.einsum('bpi,pij,bpj->bp', left, self.pair_weight, right)
+            weight = self.pair_weight + self.pair_weight.transpose(-1, -2) if self.symmetric else self.pair_weight
+            return torch.einsum('bpi,pij,bpj->bp', left, weight, right)
         return (left * self.pair_weight * right).sum(-1)
 
 

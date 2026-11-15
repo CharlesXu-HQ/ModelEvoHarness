@@ -68,6 +68,9 @@ class NextBehaviorObjective(nn.Module):
 
     Host performs the next-event shift and supplies eligible negatives. Average
     positive and negative BCE over valid transitions; empty transitions yield zero.
+    Precisely sum(softplus(-positive_logit) + softplus(negative_logit)) / (2*N),
+    where N counts valid transitions across the batch, not users or padded time.
+    Host adds alpha*loss to its separately reduced main task loss.
     """
     def __init__(self, state_dim, event_dim, hidden_dim):
         super().__init__()
@@ -119,6 +122,8 @@ class GroupedRegularization(nn.Module):
 
     Host names nonoverlapping trainable parameter groups and excludes biases/norms
     when appropriate. Shared objects may appear only once, including within a group.
+    No batch/parameter-count normalization: p=2 uses lambda/2 * sum(w**2).
+    Match this convention when comparing coefficients from other implementations.
     """
     def __init__(self, embedding_weight=0.0, network_weight=0.0, p=2):
         super().__init__()

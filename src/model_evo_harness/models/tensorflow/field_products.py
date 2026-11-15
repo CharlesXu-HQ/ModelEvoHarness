@@ -64,17 +64,27 @@ class FieldAwareFactorization(tf.keras.layers.Layer):
 
 
 class OperationAwareInteraction(FieldAwareFactorization):
-    """ONNv2: diagonal copy embeddings followed by partner-specific pair dots.
+    """Partner embeddings [B,F,F,D] -> ONNv2 copy+dots or ONN pair vectors.
 
-    [B,F,F,D] -> [B,F*D+P]. Distinct copy/pair operation embeddings must come
-    from the host. No DNN, embedding table or prediction head is included.
+    Default copy_and_dots preserves [B,F*D+P]: diagonal copy embeddings then
+    pair dots. pair_vectors returns [B,P,D] coordinate products, without any
+    diagonal copy or dimension reduction. P=F(F-1)/2, lexicographic i<j.
+    Host owns partner-specific embedding banks, flattening and prediction head.
     """
+    def __init__(self, num_fields, dim, output_mode='copy_and_dots'):
+        super().__init__(num_fields, dim)
+        if output_mode not in ('copy_and_dots', 'pair_vectors'):
+            raise ValueError('output_mode must be copy_and_dots or pair_vectors')
+        self.output_mode = output_mode
+
     def call(self, embeddings, valid_mask=None):
         x, _ = self._prepare(embeddings, valid_mask)
+        products = tf.stack([x[:, i, j] * x[:, j, i] for i, j in self.pairs], 1)
+        if self.output_mode == 'pair_vectors':
+            return products
         diagonal = tf.reshape(tf.stack([x[:, i, i] for i in range(self.num_fields)], 1),
                               (-1, self.num_fields*self.dim))
-        dots = tf.stack([tf.reduce_sum(x[:, i, j]*x[:, j, i], -1) for i,j in self.pairs], -1)
-        return tf.concat((diagonal, dots), -1)
+        return tf.concat((diagonal, tf.reduce_sum(products, -1)), -1)
 
 
 class HigherOrderFactorization(tf.keras.layers.Layer):

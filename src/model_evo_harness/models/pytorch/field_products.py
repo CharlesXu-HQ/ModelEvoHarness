@@ -64,16 +64,26 @@ class FieldAwareFactorization(nn.Module):
 
 
 class OperationAwareInteraction(FieldAwareFactorization):
-    """ONNv2 representation: diagonal copy embeddings, then partner pair dots.
+    """Partner embeddings [B,F,F,D] -> ONNv2 copy+dots or ONN pair vectors.
 
-    [B,F,F,D] -> [B,F*D+P]. Diagonal embeddings serve the copy operation and
-    off-diagonal embeddings serve each pair operation. No DNN/head is added.
+    Default copy_and_dots preserves [B,F*D+P]: diagonal copy embeddings then
+    pair dots. pair_vectors returns [B,P,D] coordinate products, without any
+    diagonal copy or dimension reduction. P=F(F-1)/2, lexicographic i<j.
+    Host owns partner-specific embedding banks, flattening and prediction head.
     """
+    def __init__(self, num_fields, dim, output_mode='copy_and_dots'):
+        super().__init__(num_fields, dim)
+        if output_mode not in ('copy_and_dots', 'pair_vectors'):
+            raise ValueError('output_mode must be copy_and_dots or pair_vectors')
+        self.output_mode = output_mode
+
     def forward(self, embeddings, valid_mask=None):
         x, _ = self._prepare(embeddings, valid_mask)
+        products = torch.stack([x[:, i, j] * x[:, j, i] for i, j in self.pairs], 1)
+        if self.output_mode == 'pair_vectors':
+            return products
         diagonal = torch.stack([x[:, i, i] for i in range(self.num_fields)], 1).flatten(1)
-        dots = torch.stack([(x[:, i, j] * x[:, j, i]).sum(-1) for i, j in self.pairs], -1)
-        return torch.cat((diagonal, dots), -1)
+        return torch.cat((diagonal, products.sum(-1)), -1)
 
 
 class HigherOrderFactorization(nn.Module):

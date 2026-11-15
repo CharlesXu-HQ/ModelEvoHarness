@@ -76,25 +76,39 @@ class _Refiner(nn.Module):
 
 
 class BSTHistoryEncoder(nn.Module):
-    """Append candidate token, bidirectionally transform history+candidate.
+    """Two explicit candidate-injection variants with one native Transformer.
 
-    Dict: states [B,L,D] for the original history, mask [B,L],
-    candidate_state/representation [B,D], has_history [B]. One learned-position
-    Transformer block and target-token readout; no source concat/sum pooling,
-    causal option or full prediction head. Candidate state is zero when there
-    is no history, while host can keep a separate target-only branch.
+    target_token (default) encodes history plus candidate, then reads that token.
+    history_attention encodes history independently and uses injected
+    LocalActivationPooling for target-conditioned readout; states stay candidate
+    independent. Dict: states [B,L,D], mask [B,L], representation/candidate_state
+    [B,D], has_history [B]; history_attention also returns attention [B,L].
+    Empty history readout is zero. Host supplies the prediction head.
     """
-    def __init__(self, dim, num_heads=2, max_len=128):
+    def __init__(self, dim, num_heads=2, max_len=128, readout="target_token", pooling=None):
         super().__init__()
         if min(dim, num_heads, max_len) < 1 or dim % num_heads:
             raise ValueError("positive sizes and dim divisible by heads required")
+        if readout not in ('target_token', 'history_attention'):
+            raise ValueError("readout must be target_token or history_attention")
+        if (readout == 'history_attention') != (pooling is not None):
+            raise ValueError("history_attention requires a pooling component; target_token takes none")
+        self.readout, self.pooling = readout, pooling
         self.dim, self.max_len = dim, max_len
         self.position = nn.Parameter(torch.randn(max_len+1, dim) * .02)
         self.refiner = _Refiner(dim, num_heads)
 
     def forward(self, target, history, valid):
         history = _inputs(target, history, valid, self.dim, self.max_len)
+        if not torch.isfinite(target).all().item() or not torch.isfinite(history).all().item():
+            raise ValueError("target and valid history must be finite")
         length = history.shape[1]
+        if self.readout == 'history_attention':
+            values = torch.where(valid[..., None], history+self.position[:length], 0.)
+            states = self.refiner(values, valid, False)
+            result = self.pooling(target, states, valid)
+            return dict(representation=result['representation'], candidate_state=result['representation'],
+                        states=states, mask=valid, has_history=valid.any(1), attention=result['attention'])
         values = torch.cat([history, target[:, None]], 1) + self.position[:length+1]
         mask = torch.cat([valid, valid.new_ones(valid.shape[0], 1)], 1)
         values = torch.where(mask[..., None], values, 0.)

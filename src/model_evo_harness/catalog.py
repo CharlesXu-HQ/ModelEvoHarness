@@ -54,7 +54,8 @@ def common_knowledge() -> dict[str, str]:
         "training_objectives", "sampling_and_hard_examples",
         "optimization_and_regularization", "feature_gap_decisions",
         "business_insight_synthesis", "exploration_strategy", "structure_extensions",
-        "causal_policy_experiments", "horizontal_composition", "evidence_driven_iteration")}
+        "causal_policy_experiments", "horizontal_composition", "evidence_driven_iteration",
+        "native_ctr_refinements")}
 
 
 def _implementations(catalog: dict) -> list[dict]:
@@ -72,8 +73,8 @@ def _component_path(path: str, framework: str, directory: str | None = None) -> 
 def read_references(catalog: dict, request: dict) -> dict:
     """Read complete bundled model or analysis modules; never execute or fetch code.
 
-    Whole modules preserve shared helpers and base classes. The bundled modules
-    use only their framework and stdlib, so their imports need no other sources.
+    Whole modules preserve shared helpers and base classes. Explicit companion
+    modules supply optional injected components; all imports remain framework/stdlib.
     """
     framework = request.get("framework")
     methods = request.get("method_ids", [])
@@ -92,6 +93,8 @@ def read_references(catalog: dict, request: dict) -> dict:
     if set(methods) - entries.keys():
         raise ValueError("reference method_ids must exist in the implementation manifest")
     paths = {entries[item]["file"] for item in methods}
+    for item in methods:
+        paths.update(entries[item].get("companion_files", []))
     if training:
         paths.add(f"models/{framework}/training.py")
     if composition:
@@ -109,7 +112,7 @@ def read_references(catalog: dict, request: dict) -> dict:
                         "sha256": hashlib.sha256(content.encode()).hexdigest()}
     contracts = {item: {key: entries[item][key] for key in (
         "reference_scope", "training_support", "output_contract", "limitations",
-        "paper_ids", "local_guide", "structure_pattern", "analysis_pattern", "required_host_tensors")
+        "paper_ids", "local_guide", "structure_pattern", "analysis_pattern", "required_host_tensors", "companion_files")
         if key in entries[item]} for item in sorted(set(methods))}
     _record_reference_read(result)
     return {"framework": framework, "method_ids": sorted(set(methods)), "files": result,
@@ -166,7 +169,7 @@ def _component_api(implementations: list[dict], framework: str, method_ids: set[
             **{key: entry[key] for key in ("reference_scope", "training_support",
                                           "output_contract", "limitations", "paper_ids",
                                           "local_guide", "structure_pattern", "analysis_pattern",
-                                          "required_host_tensors") if key in entry},
+                                          "required_host_tensors", "companion_files") if key in entry},
         }
     return result
 
@@ -336,6 +339,14 @@ def validate_catalog(catalog: dict) -> None:
             if key in implementation_keys:
                 raise ValueError("duplicate implementation")
             implementation_keys.add(key)
+    for entry in _implementations(catalog):
+        companions = entry.get("companion_files", [])
+        registered = {item["file"] for item in _implementations(catalog)
+                      if item["framework"] == entry["framework"]}
+        if (not isinstance(companions, list) or len(companions) > 8 or
+                any(not isinstance(path, str) or path not in registered
+                    for path in companions)):
+            raise ValueError("companion files must be at most eight registered same-framework modules")
     ctr_inventory = catalog.get("fuxictr_inventory")
     if ctr_inventory is not None:
         entries = ctr_inventory.get("entries", [])

@@ -89,32 +89,55 @@ class AutoInt(nn.Module):
 
 
 class FiBiNET(nn.Module):
-    """Field squeeze gates and bilinear pair terms; categorical IDs to ``[B]``."""
+    """Field squeeze gates and bilinear terms; categorical IDs [B,F] -> [B].
+
+    bilinear_type='all' shares one transform; 'field' uses one per left field;
+    'pair' uses one per lexicographic i<j pair. separate_branches gives the
+    raw and gated paths distinct transforms. Defaults preserve one transform
+    shared across both paths. The existing sigmoid squeeze gate is retained.
+    bilinear_features accepts embedded [B,F,D] and returns [B,P,D].
+    """
 
     def __init__(self, cardinalities: list[int], embedding_dim: int,
-                 hidden_dim: int = 32):
+                 hidden_dim: int = 32, bilinear_type: str = 'all',
+                 separate_branches: bool = False):
         super().__init__()
+        if bilinear_type not in ('all', 'field', 'pair'):
+            raise ValueError('bilinear_type must be all, field or pair')
+        self.bilinear_type, self.separate_branches = bilinear_type, separate_branches
         self.fields = _Fields(cardinalities, embedding_dim)
         field_count = self.fields.count
         self.squeeze = nn.Sequential(nn.Linear(field_count, max(1, field_count // 2)),
                                      nn.ReLU(), nn.Linear(max(1, field_count // 2),
                                                           field_count), nn.Sigmoid())
-        self.bilinear = nn.Linear(embedding_dim, embedding_dim, bias=False)
+        count = field_count - 1 if bilinear_type == 'field' else len(self.fields.pairs)
+        def make_bank():
+            if bilinear_type == 'all':
+                return nn.Linear(embedding_dim, embedding_dim, bias=False)
+            return nn.ModuleList(nn.Linear(embedding_dim, embedding_dim, bias=False) for _ in range(count))
+        self.bilinear = make_bank()
+        self.gated_bilinear = make_bank() if separate_branches else None
         self.head = nn.Sequential(nn.Linear(2 * len(self.fields.pairs) * embedding_dim,
                                             hidden_dim), nn.ReLU(), nn.Linear(hidden_dim, 1))
 
     def field_gates(self, fields: torch.Tensor) -> torch.Tensor:
         return self.squeeze(self.fields.encode(fields).mean(dim=-1))
 
+    def bilinear_features(self, vectors: torch.Tensor, gated: bool = False):
+        """Transform supplied embeddings; gated selects a bank, not squeeze gating."""
+        bank = self.gated_bilinear if gated and self.separate_branches else self.bilinear
+        products = []
+        for index, (i, j) in enumerate(self.fields.pairs):
+            transform = bank if self.bilinear_type == 'all' else bank[i if self.bilinear_type == 'field' else index]
+            products.append(transform(vectors[:, i]) * vectors[:, j])
+        return torch.stack(products, 1)
+
     def forward(self, fields: torch.Tensor) -> torch.Tensor:
         vectors = self.fields.encode(fields)
         gated = vectors * self.squeeze(vectors.mean(dim=-1)).unsqueeze(-1)
-        products = [self.bilinear(vectors[:, i]) * vectors[:, j]
-                    for i, j in self.fields.pairs]
-        products += [self.bilinear(gated[:, i]) * gated[:, j]
-                     for i, j in self.fields.pairs]
-        return self.fields.first_order(fields) + self.head(
-            torch.cat(products, dim=-1)).squeeze(-1)
+        products = torch.cat([self.bilinear_features(vectors).flatten(1),
+                              self.bilinear_features(gated, gated=True).flatten(1)], -1)
+        return self.fields.first_order(fields) + self.head(products).squeeze(-1)
 
 
 class NFM(nn.Module):
