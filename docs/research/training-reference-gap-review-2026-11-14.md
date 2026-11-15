@@ -5,6 +5,9 @@ The review concerns the three references selected after inspecting lmxhappy's
 public repositories. It does not claim complete reproduction of their trainers
 or datasets. No upstream model wrappers, notebooks or prediction arrays were copied.
 
+GPU verification was subsequently completed in the
+[2026-11-15 follow-up](pr7-gpu-validation-2026-11-15.md).
+
 ## Findings and disposition
 
 | Reference | Existing harness coverage | Non-overlapping addition |
