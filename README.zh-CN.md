@@ -4,14 +4,18 @@
 
 ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离线实验框架**。Agent 读取固定任务、历史实验和本地技术资料，提出可证伪的改动，通过业务方的评估器执行，再根据结果记录经验。可迭代的对象不仅是模型结构，还包括 loss、采样、困难样本挖掘、优化过程、校准、特征表示和预测到决策的规则。
 
+## 在现有骨干内优化交互与序列训练
+
+[原生 CTR 组件](docs/native-ctr-refinements.md)补充 CrossNetMix、IFM/DIFM、带 mask 的 Dice、注意力与池化。现有 ONN、FiBiNET、字段矩阵、DIEN、DSIN、BST 增加局部变体；序列输入约定与 DIEN 辅助目标接线明确输入有效性和损失尺度。Agent 选择相应方法后可同时取得组合所需的本地源码。
+
 ## 给算法工程师提供什么
 
 | 内容 | 作用 |
 | --- | --- |
 | [30 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 134 张 method card | 统一记录 130 种模型与训练方法，以及 4 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
+| 140 张 method card | 统一记录 136 种模型与训练方法，以及 4 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [130 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 262 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
+| [136 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 274 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
 | [4 个可供双框架宿主使用的分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 8 项，包含表示诊断、梯度特征筛选、成本约束的子集重训和配对预测诊断；后两项是双框架宿主共用的标准库实现。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 

@@ -69,3 +69,46 @@ def test_proposal_embedding_roles_are_checked_and_retained():
     research["embedding_roles"][1]["width"] = 4
     with pytest.raises(ValueError, match="shared"):
         validate_research({"research": research}, task, load_catalog())
+
+
+def test_encoding_transform_is_part_of_shared_id_identity():
+    original = roles()
+    for role in original:
+        role["encoding_transform"] = "stable-item-map-v2"
+    assert validator()(original, ["item", "history"]) == original
+    original[1]["encoding_transform"] = "different-hash-seed"
+    with pytest.raises(ValueError, match="shared"):
+        validator()(original, ["item", "history"])
+
+
+def test_sequence_contract_is_optional_explicit_and_retained():
+    original = roles()
+    original[1]["sequence_contract"] = {"max_length": 20, "mask_layout": "prefix",
+        "pooling": "mean", "weight_normalization": "softmax", "alignment_group": "browse",
+        "length_field": "history_length", "mask_field": "history_mask", "event_id_field": "event_id"}
+    fields = ["item", "history", "history_length", "history_mask", "event_id"]
+    assert validator()(original, fields) == original
+    for key, value in (("max_length", 0), ("mask_layout", "unknown"), ("pooling", "concat"),
+                       ("weight_normalization", "divide_sum"), ("length_field", "missing"),
+                       ("alignment_group", "")):
+        invalid = [{**r} for r in original]
+        invalid[1]["sequence_contract"] = {**original[1]["sequence_contract"], key: value}
+        with pytest.raises(ValueError):
+            validator()(invalid, fields)
+
+
+def test_aligned_sequence_declarations_require_consistent_capacity_and_mask_layout():
+    original = roles()
+    original[1]["sequence_contract"] = {"max_length": 20, "mask_layout": "prefix", "alignment_group": "browse"}
+    other = {**original[1], "id": "price_history", "module_path": "encoder.prices", "fields": ["prices"],
+             "sequence_contract": {"max_length": 10, "mask_layout": "prefix", "alignment_group": "browse"}}
+    with pytest.raises(ValueError, match="alignment"):
+        validator()(original + [other], ["item", "history", "prices"])
+
+
+@pytest.mark.parametrize("contract", [None, {}, {"max_length": 3, "mask_field": []}])
+def test_sequence_contract_rejects_malformed_declarations(contract):
+    original = roles()
+    original[1]["sequence_contract"] = contract
+    with pytest.raises(ValueError):
+        validator()(original, ["item", "history"])

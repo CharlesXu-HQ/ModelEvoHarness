@@ -96,18 +96,35 @@ class AutoInt(tf.keras.Model):
 
 
 class FiBiNET(tf.keras.Model):
-    """Field squeeze gates and bilinear pair terms; categorical IDs to ``[B]``."""
+    """Field squeeze gates and bilinear terms; categorical IDs [B,F] -> [B].
+
+    bilinear_type='all' shares one transform; 'field' uses one per left field;
+    'pair' uses one per lexicographic i<j pair. separate_branches gives the
+    raw and gated paths distinct transforms. Defaults preserve one transform
+    shared across both paths. The existing sigmoid squeeze gate is retained.
+    bilinear_features accepts embedded [B,F,D] and returns [B,P,D].
+    """
 
     def __init__(self, cardinalities: list[int], embedding_dim: int,
-                 hidden_dim: int = 32):
+                 hidden_dim: int = 32, bilinear_type: str = 'all',
+                 separate_branches: bool = False):
         super().__init__()
+        if bilinear_type not in ('all', 'field', 'pair'):
+            raise ValueError('bilinear_type must be all, field or pair')
+        self.bilinear_type, self.separate_branches = bilinear_type, separate_branches
         self.fields = _Fields(cardinalities, embedding_dim)
         field_count = self.fields.count
         self.squeeze = tf.keras.Sequential([
             tf.keras.layers.Dense(max(1, field_count // 2), activation="relu"),
             tf.keras.layers.Dense(field_count, activation="sigmoid"),
         ])
-        self.bilinear = tf.keras.layers.Dense(embedding_dim, use_bias=False)
+        count = field_count - 1 if bilinear_type == 'field' else len(self.fields.pairs)
+        def make_bank():
+            if bilinear_type == 'all':
+                return tf.keras.layers.Dense(embedding_dim, use_bias=False)
+            return [tf.keras.layers.Dense(embedding_dim, use_bias=False) for _ in range(count)]
+        self.bilinear = make_bank()
+        self.gated_bilinear = make_bank() if separate_branches else None
         self.head = tf.keras.Sequential([
             tf.keras.layers.Dense(hidden_dim, activation="relu"),
             tf.keras.layers.Dense(1),
@@ -116,15 +133,22 @@ class FiBiNET(tf.keras.Model):
     def field_gates(self, fields: tf.Tensor) -> tf.Tensor:
         return self.squeeze(tf.reduce_mean(self.fields.encode(fields), axis=-1))
 
+    def bilinear_features(self, vectors: tf.Tensor, gated: bool = False):
+        """Transform supplied embeddings; gated selects a bank, not squeeze gating."""
+        bank = self.gated_bilinear if gated and self.separate_branches else self.bilinear
+        products = []
+        for index, (i, j) in enumerate(self.fields.pairs):
+            transform = bank if self.bilinear_type == 'all' else bank[i if self.bilinear_type == 'field' else index]
+            products.append(transform(vectors[:, i]) * vectors[:, j])
+        return tf.stack(products, 1)
+
     def call(self, fields: tf.Tensor) -> tf.Tensor:
         vectors = self.fields.encode(fields)
         gated = vectors * self.squeeze(tf.reduce_mean(vectors, axis=-1))[:, :, None]
-        products = [self.bilinear(vectors[:, i]) * vectors[:, j]
-                    for i, j in self.fields.pairs]
-        products += [self.bilinear(gated[:, i]) * gated[:, j]
-                     for i, j in self.fields.pairs]
-        return self.fields.first_order(fields) + tf.squeeze(
-            self.head(tf.concat(products, axis=-1)), axis=-1)
+        width = len(self.fields.pairs) * self.fields.dim
+        products = tf.concat([tf.reshape(self.bilinear_features(vectors), (-1, width)),
+                              tf.reshape(self.bilinear_features(gated, gated=True), (-1, width))], -1)
+        return self.fields.first_order(fields) + tf.squeeze(self.head(products), axis=-1)
 
 
 class NFM(tf.keras.Model):

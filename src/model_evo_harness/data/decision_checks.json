@@ -34,6 +34,21 @@
       "question": "Would competing users, items, creators or budgets invalidate an independent-row offline conclusion?",
       "guardrail": "Record randomization unit and shared constraints; treat an online rollout as a separate validation question.",
       "source_url": "https://github.com/wangshusen/RecommenderSystem/blob/8c8796c560c13059b19b51f5b5b963137f4ef287/Slides/07_ColdStart_06.pdf"
+    },
+    {
+      "id": "sequence_contract_and_loss_scale",
+      "stages": [
+        "ranking",
+        "retrieval",
+        "policy",
+        "advertising"
+      ],
+      "requires": [
+        "event_sequence"
+      ],
+      "question": "Are event attributes aligned, lengths/masks consistent, and loss reductions and coefficients fixed for this comparison?",
+      "guardrail": "Validate candidate/history ID domains, event identity alignment, cutoff and padding before architecture changes. Declare main reduction, valid transition count, auxiliary alpha and regularization formula. Test alpha=0 separately from structure and sampling changes.",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/sequence/dien.py"
     }
   ]
 }

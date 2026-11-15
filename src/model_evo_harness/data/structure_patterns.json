@@ -41,7 +41,9 @@
         "afm",
         "fibinet",
         "fwfm",
-        "predictive_bilinear"
+        "predictive_bilinear",
+        "ifm",
+        "difm"
       ],
       "structural_change": "Add second-order field interactions through factorized products, pooled product vectors, field-pair weights, or attention and gating over pairs.",
       "when_to_try": "A linear or plain MLP baseline leaves repeatable validation errors on supported pairs of pre-decision fields, such as user segment by offer attribute.",
@@ -57,7 +59,8 @@
         "dcn",
         "dcn_v2",
         "xdeepfm",
-        "autoint"
+        "autoint",
+        "crossnet_mix"
       ],
       "structural_change": "Add configured wide crosses, bounded-degree cross layers, matrix or expert cross layers, vector-wise crossing, or field attention alongside the prediction backbone.",
       "when_to_try": "Pairwise interactions still leave stable residual patterns across three or more supported fields, or the existing wide crosses require excessive manual enumeration.",
@@ -99,7 +102,9 @@
         "din",
         "dien",
         "dsin",
-        "transact"
+        "transact",
+        "dice_activation",
+        "local_activation_pooling"
       ],
       "structural_change": "Condition attention over past behavior on the candidate item; optionally model interest evolution or aggregate within and across sessions before target activation.",
       "when_to_try": "The same user receives different outcomes for candidate types and a pooled-history baseline has persistent target-specific residuals.",
@@ -679,6 +684,18 @@
       "required_evidence": "implicit_feedback, item_catalog, negative_sampler_definition; fixed task/dataset/split, baseline and evaluation protocol.",
       "controlled_comparison": "Hold positive events, tower, objective, total negative draws and full-catalog or fixed-candidate evaluator fixed. Change only the proposal distribution; report duplicate draws, popularity/tail slices and false-negative risk. q is a proposal probability, not exposure propensity.",
       "reject_if": "IDs and probabilities are misaligned, future positives or validation labels enter sampling, a zero-support row is silently repaired, or sampled negatives/evaluation universe change together."
+    },
+    {
+      "id": "sequence_input_reduction",
+      "name": "Declared masked event aggregation",
+      "method_ids": [
+        "masked_sequence_pooling"
+      ],
+      "structural_change": "Aggregate real event embeddings with explicit masking, pooling and optional weighting semantics.",
+      "when_to_try": "An event-history branch needs a simple baseline or a controlled aggregation change.",
+      "required_evidence": "Actual event schema, cutoff, length/mask consistency and field alignment; weighting provenance when used.",
+      "controlled_comparison": "Keep event rows and downstream network fixed; change one aggregation or weighting mechanism.",
+      "reject_if": "Invalid event alignment, zero-support mishandling, or no held-out gain over the simple aggregation control."
     }
   ]
 }

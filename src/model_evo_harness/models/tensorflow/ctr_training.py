@@ -74,6 +74,9 @@ class NextBehaviorObjective(tf.keras.layers.Layer):
 
     Host shifts events and samples negatives. Mean positive/negative BCE over
     valid transitions; empty transition sets contribute differentiable zero.
+    Precisely sum(softplus(-positive_logit) + softplus(negative_logit)) / (2*N),
+    where N counts valid transitions across the batch, not users or padded time.
+    Host adds alpha*loss to its separately reduced main task loss.
     """
     def __init__(self, state_dim, event_dim, hidden_dim):
         super().__init__()
@@ -127,6 +130,8 @@ class GroupedRegularization:
 
     No implicit parameter-name selection or decoupled optimizer weight decay.
     The plain callable preserves variable identity when checking group overlap.
+    No batch/parameter-count normalization: p=2 uses lambda/2 * sum(w**2).
+    Match this convention when comparing coefficients from other implementations.
     """
     def __init__(self, embedding_weight=0.0, network_weight=0.0, p=2):
         self.embedding_weight, self.network_weight = _weight(embedding_weight), _weight(network_weight)

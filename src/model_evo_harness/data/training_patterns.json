@@ -502,6 +502,25 @@
       "required_evidence": "implicit_feedback, item_catalog, negative_sampler_definition; fixed training budget and evaluation protocol.",
       "controlled_comparison": "Hold positive events, tower, objective, total negative draws and full-catalog or fixed-candidate evaluator fixed. Change only the proposal distribution; report duplicate draws, popularity/tail slices and false-negative risk. q is a proposal probability, not exposure propensity.",
       "reject_if": "IDs and probabilities are misaligned, future positives or validation labels enter sampling, a zero-support row is silently repaired, or sampled negatives/evaluation universe change together."
+    },
+    {
+      "id": "dien_auxiliary_wiring",
+      "category": "loss",
+      "stages": [
+        "ranking",
+        "advertising",
+        "policy"
+      ],
+      "requires": [
+        "event_sequence",
+        "target_item_features",
+        "negative_behavior_samples"
+      ],
+      "mechanism": "Predict next pre-decision behavior from DIEN extraction states using the existing NextBehaviorObjective and explicit shifted valid transitions.",
+      "when_to_try": "Interest states underfit real histories after a valid baseline; legal training-only positive/negative transitions exist.",
+      "required_evidence": "Prefix mask, aligned next-event positives/negatives before cutoff, main loss reduction, valid_count and declared auxiliary coefficient.",
+      "controlled_comparison": "Fix backbone, evolution, scorer, sampler and optimizer budget; compare alpha=0 with a declared auxiliary weight. Report main, auxiliary and regularization separately.",
+      "reject_if": "Auxiliary loss falls without held-out primary improvement, gradients fail to reach the extractor, or transitions leak future outcomes."
     }
   ]
 }

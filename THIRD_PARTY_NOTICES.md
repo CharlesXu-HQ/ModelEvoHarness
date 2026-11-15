@@ -69,3 +69,11 @@ weights and datasets are not redistributed. The pinned source inventory, code-le
 differences and boundaries are recorded in `docs/fuxictr-coverage.md`, the method cards
 and packaged original guides. Source names provide attribution and do not imply endorsement
 or full paper reproduction. The new independent code is covered by this project's Apache-2.0 license.
+
+## Native CTR refinements
+
+The CrossNetMix, IFM/DIFM, masked attention/pooling and local sequence/interaction
+variants are independently implemented from mechanisms described in DeepCTR and
+DeepCTR-Torch. No upstream code or wrapper dependencies are incorporated in these
+additions. Pinned sources and precise differences are recorded in
+`docs/native-ctr-refinements.md`; the additions use Apache-2.0.

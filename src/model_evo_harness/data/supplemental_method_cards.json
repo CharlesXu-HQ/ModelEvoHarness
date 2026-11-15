@@ -6,7 +6,7 @@
       "source_repo": "torch-rechub",
       "source_model": "torch_rechub/models/ranking/dcn_v2.py",
       "source_url": "https://github.com/datawhalechina/torch-rechub/blob/beb8b46fb718ce486ea5feb6847ac3abf0c491d4/torch_rechub/models/ranking/dcn_v2.py",
-      "mechanism": "Uses matrix-based explicit crosses, with optional low-rank expert mixtures, instead of the original vector cross.",
+      "mechanism": "Uses full matrices or a single linear low-rank factorization for explicit crosses. Nonlinear expert mixtures are the separate crossnet_mix component.",
       "requires": [
         "tabular_features",
         "typed_feature_schema",
@@ -1085,7 +1085,7 @@
       "comparison": "Keep host embeddings, head, objective, data split and budget fixed; compare this local block with its ablation and a parameter/latency-matched simpler control. Report supported slices, gradients and branch redundancy.",
       "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
       "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
-      "implementation_boundary": "Uses host embeddings and returns pair scores without first-order terms or a classifier. Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension.",
+      "implementation_boundary": "Default unconstrained pair matrices remain available; symmetric=True applies W+W^T only to matrix mode. Host supplies embeddings and a head. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied.",
       "required_host_tensors": [
         "field_tokens"
       ]
@@ -1204,7 +1204,7 @@
       "comparison": "Compare operation-specific copy/pair banks with shared embeddings while fixing downstream DNN width and reporting parameter/storage cost.",
       "when_to_try": "Known field identities and supported pair/group errors justify distinct partner parameters. Compare shared-bank and pair-specific encodings under a memory ceiling.",
       "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
-      "implementation_boundary": "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added. Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim.",
+      "implementation_boundary": "Default copy_and_dots returns ONNv2 diagonal copies plus off-diagonal dot products. pair_vectors returns un-summed [B,pairs,D] products without diagonal copies. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied.",
       "required_host_tensors": [
         "field_embeddings",
         "partner_specific_embeddings"
@@ -1452,7 +1452,7 @@
       "comparison": "Keep the same events, embedding width and training budget; compare candidate-in-encoder with history-only encoding followed by target attention. Test positional contribution separately.",
       "when_to_try": "Real ordered histories and candidate features are available. Test candidate inclusion, causal refinement or separate user/item matching rather than treating numeric columns as events.",
       "failure_signals": "Missing or mistimed inputs; ineffective gradients; unsupported slices; instability, unacceptable cost, or no gain against the declared ablation.",
-      "implementation_boundary": "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option. No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch. Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone. True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim.",
+      "implementation_boundary": "Default target_token readout retains candidate-in-encoder semantics. history_attention encodes history independently and requires an injected target-conditioned pooling component. Empty-history readouts are zero; the host supplies ordered pre-decision events, prediction head and objective. No causal-mask option or full paper-reproduction claim.",
       "required_host_tensors": [
         "sequence_mask"
       ]
@@ -1844,6 +1844,124 @@
       "comparison": "Observe baseline and candidate on identical ordered unique sample IDs, dataset/split identity and weights. Use the unchanged task metric and independent holdout policy; fit any calibration only on a separate permitted split.",
       "failure_signals": "Sample IDs, labels or weights are not paired; scores are logits instead of probabilities; a single-class AUC is invented; clipping artifacts or class-mix changes are presented as a proven explanation or significant uplift.",
       "implementation_boundary": "Stdlib observation-only analysis shared by both framework labels. Exact ordered unique sample IDs and explicit dataset/split identity are required; host declarations do not prove correct label provenance. AUC uses original probabilities with half credit for ties and is undefined for a zero-effective-weight class. LogLoss alone uses explicit epsilon clipping; clipping counts and class conditional/contribution losses are reported. Finite nonnegative weights share one fixed estimand. Deltas are candidate minus baseline. No fitted calibration, confidence interval, causal explanation, automatic champion selection or business-uplift claim."
+    },
+    {
+      "id": "crossnet_mix",
+      "family_id": "feature_interactions",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/layers/interaction.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/layers/interaction.py",
+      "mechanism": "Low-rank experts apply V, tanh, C, tanh, U inside each cross layer; a per-example softmax mixes their cross residuals.",
+      "requires": [
+        "tabular_features",
+        "typed_feature_schema"
+      ],
+      "required_host_tensors": [
+        "encoded_features"
+      ],
+      "when_to_try": "A dense cross backbone leaves supported context-dependent residuals after linear low-rank controls.",
+      "comparison": "Compare full matrix, linear low-rank, one nonlinear expert and multiple experts separately with matched compute and the same backbone.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Produces a cross representation, not logits; expert routing is not an explanation of causal effects. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+    },
+    {
+      "id": "ifm",
+      "family_id": "feature_interactions",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/models/ifm.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/ifm.py",
+      "mechanism": "Generate F*softmax field factors from each example; the same factors reweight first-order terms and FM field embeddings.",
+      "requires": [
+        "tabular_features",
+        "categorical_field_identities"
+      ],
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ],
+      "when_to_try": "Supported residuals suggest that field relevance varies by context, with required fields already present.",
+      "comparison": "Keep embeddings and head fixed; compare unweighted FM, IFM and an equal-capacity control.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Host supplies learned first-order contributions [B,F] and field tokens [B,F,D]; no ID lookup, dense-feature adapter or global bias is built in. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+    },
+    {
+      "id": "difm",
+      "family_id": "feature_interactions",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/models/difm.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/models/difm.py",
+      "mechanism": "An attention path and an MLP path each project to field factors [B,F]; their sum jointly reweights first-order terms and FM embeddings.",
+      "requires": [
+        "tabular_features",
+        "categorical_field_identities"
+      ],
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ],
+      "when_to_try": "An input-conditioned FM baseline still underfits supported inter-field contextual dependencies.",
+      "comparison": "Against IFM, isolate attention-path addition with the same fields, embedding width and declared capacity; report the different factor normalization.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Final factors are field-level, not coordinate-level; unlike IFM the two projected factors are summed without a final softmax. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+    },
+    {
+      "id": "dice_activation",
+      "family_id": "sequence_ranking",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/layers/activation.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/layers/activation.py",
+      "mechanism": "Use masked activation statistics, a sigmoid gate and learned alpha to adapt the positive/negative response of each coordinate.",
+      "requires": [
+        "event_sequence"
+      ],
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask"
+      ],
+      "when_to_try": "A fixed activation in a history scorer limits supported residuals; valid-position statistics have adequate support.",
+      "comparison": "Keep scorer weights/width and pooling normalization fixed; compare ReLU with Dice and record train/eval statistics.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Requires explicit training/evaluation mode and mask semantics. Distinct from the DICE disentanglement method; no attention or objective is included. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+    },
+    {
+      "id": "local_activation_pooling",
+      "family_id": "sequence_ranking",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/layers/sequence.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/layers/sequence.py",
+      "mechanism": "Score [query,history,query-history,query*history] with a local MLP, then aggregate with explicit sigmoid, raw or masked-softmax weights.",
+      "requires": [
+        "event_sequence",
+        "target_item_features"
+      ],
+      "required_host_tensors": [
+        "history_representations",
+        "target_representation",
+        "sequence_mask"
+      ],
+      "when_to_try": "A target-aware backbone needs a controlled scorer activation or normalization intervention.",
+      "comparison": "Change one of activation or normalization at a time; compare with the same events and masked-mean pooling.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Raw attention scores can be negative and are not probabilities; pooling weights do not establish causal feature importance. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+    },
+    {
+      "id": "masked_sequence_pooling",
+      "family_id": "sequence_ranking",
+      "source_repo": "deepctr",
+      "source_model": "deepctr/layers/sequence.py",
+      "source_url": "https://github.com/shenweichen/DeepCTR/blob/1b5fe40e158d1ee6af8b1d9df217a5ed5aea9136/deepctr/layers/sequence.py",
+      "mechanism": "Validate sequence lengths/masks and pool valid values using sum, mean or max with explicit optional weighting and normalization.",
+      "requires": [
+        "event_sequence"
+      ],
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask_or_lengths"
+      ],
+      "when_to_try": "A baseline or local history branch needs a declared, reproducible aggregation over real event inputs.",
+      "comparison": "Freeze events, embeddings and head; isolate aggregation mode and external-weight normalization as separate experiments.",
+      "failure_signals": "No held-out gain over the controlled ablation, unstable gradients/statistics, unsupported slices, or excessive measured cost.",
+      "implementation_boundary": "Weighted mean divides by nonnegative weight sum; softmax treats weights as logits. Zero-support rows return zero. Host verifies event timing and supplies aligned identities. Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
     }
   ]
 }

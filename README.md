@@ -4,14 +4,18 @@
 
 ModelEvoHarness is an **Agent-led offline experiment harness** for recommendation, search, advertising, and marketing. The Agent sees a frozen task, prior trials, and local technical knowledge; it proposes a falsifiable change, runs it through the host's evaluator, then records what the result supports. Model selection is only one direction. Losses, sampling, hard-example mining, optimization, calibration, feature representations, and decision rules can be tested under the same fixed protocol.
 
+## Refine interactions and history training
+
+[Native CTR refinements](docs/native-ctr-refinements.md) add CrossNetMix, IFM/DIFM and masked Dice/attention/pooling components. Existing ONN, FiBiNET, field-matrix, DIEN, DSIN and BST references expose local variants. Sequence contracts and DIEN auxiliary wiring make input validity and loss scaling explicit; the Agent receives companion source modules for composition.
+
 ## What an algorithm engineer gets
 
 | Component | Purpose |
 | --- | --- |
 | [30 family guides and 10 shared guides](docs/knowledge/README.md) | Independently written mechanisms, input contracts, controlled comparisons, failure signals, and feature-gap interpretation for all catalog families. The Agent reads applicable family guides plus shared training, exploration and horizontal-composition guidance from the installed package. |
-| 134 method cards | Cover 130 model/training methods and 4 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
+| 140 method cards | Cover 136 model/training methods and 4 analysis tools. [Structure patterns](docs/multi-source-guidance.md) guide model changes; [analysis patterns](src/model_evo_harness/data/analysis_patterns.json) guide measurements and screening. A `ready` status means task prerequisites are declared; candidate tensors still need construction and checks. |
 | [Training patterns](src/model_evo_harness/data/training_patterns.json) | Put loss, negative mining, sample weighting, regularization, calibration, and augmentation alongside architecture proposals. |
-| [130 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 262 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
+| [136 model/training methods in both frameworks](docs/models.md) | The [model manifest](src/model_evo_harness/data/model_implementations.json) contains 274 entries, including generic TwoTower in both frameworks. `model_api` exposes their classes and contracts; the host supplies the appropriate loss and evaluator. |
 | [4 analysis tools in both frameworks](docs/research-guided-components.md) | The [analysis manifest](src/model_evo_harness/data/analysis_implementations.json) contains 8 entries for representation diagnostics, gradient feature screening, cost-constrained subset retraining and paired prediction diagnostics. The last two are shared stdlib implementations usable by either framework. `analysis_api` exposes their classes and contracts for explicit host invocation. |
 | Experiment journal | Keeps the task/dataset/protocol fingerprint, hypotheses, evaluated trials, failures, and separate technical and business experience. A changed dataset or protocol starts a new evidence context. |
 

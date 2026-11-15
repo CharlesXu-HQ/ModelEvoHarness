@@ -87,24 +87,39 @@ class _Refiner(tf.keras.layers.Layer):
 
 
 class BSTHistoryEncoder(tf.keras.Model):
-    """Candidate appended to history, bidirectional Transformer, target readout.
+    """Two explicit candidate-injection variants with one native Transformer.
 
-    Dict: states [B,L,D], mask [B,L], candidate_state/representation [B,D],
-    has_history [B]. One block with learned positions; excludes source's other
-    pooling choices, causal option and prediction head. No-history readout is
-    zero; a target-only branch belongs to the host.
+    target_token (default) encodes history plus candidate, then reads that token.
+    history_attention encodes history independently and uses injected
+    LocalActivationPooling for target-conditioned readout; states stay candidate
+    independent. Dict: states [B,L,D], mask [B,L], representation/candidate_state
+    [B,D], has_history [B]; history_attention also returns attention [B,L].
+    Empty history readout is zero. Host supplies the prediction head.
     """
-    def __init__(self, dim, num_heads=2, max_len=128):
+    def __init__(self, dim, num_heads=2, max_len=128, readout="target_token", pooling=None):
         super().__init__()
         if min(dim, num_heads, max_len) < 1 or dim % num_heads:
             raise ValueError("positive sizes and dim divisible by heads required")
+        if readout not in ('target_token', 'history_attention'):
+            raise ValueError("readout must be target_token or history_attention")
+        if (readout == 'history_attention') != (pooling is not None):
+            raise ValueError("history_attention requires a pooling component; target_token takes none")
+        self.readout, self.pooling = readout, pooling
         self.dim, self.max_len = dim, max_len
         self.position = self.add_weight(name="position", shape=(max_len+1, dim), initializer=tf.keras.initializers.RandomNormal(stddev=.02))
         self.refiner = _Refiner(dim, num_heads)
 
-    def call(self, target, history, valid):
+    def call(self, target, history, valid, training=None):
         history = _inputs(target, history, valid, self.dim, self.max_len)
+        tf.debugging.assert_all_finite(target, "target must be finite")
+        tf.debugging.assert_all_finite(history, "valid history must be finite")
         length = tf.shape(history)[1]
+        if self.readout == 'history_attention':
+            values = tf.where(valid[..., None], history+self.position[:length], tf.zeros_like(history))
+            states = self.refiner(values, valid, causal=False)
+            result = self.pooling(target, states, valid, training=training)
+            return dict(representation=result['representation'], candidate_state=result['representation'],
+                        states=states, mask=valid, has_history=tf.reduce_any(valid, 1), attention=result['attention'])
         values = tf.concat([history, target[:, None]], 1) + self.position[:length+1]
         mask = tf.concat([valid, tf.ones([tf.shape(valid)[0], 1], tf.bool)], 1)
         values = tf.where(mask[..., None], values, tf.zeros_like(values))

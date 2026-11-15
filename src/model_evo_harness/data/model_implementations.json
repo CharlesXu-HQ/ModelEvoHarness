@@ -402,13 +402,18 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "The auxiliary next-behavior loss of DIEN is omitted; only GRU extraction and attention-gated evolution are present."
+        "Consumes pre-decision embeddings with Boolean contiguous-prefix masks; invalid padding is sanitized and nonfinite valid values rejected.",
+        "Default evolution is AUGRU; GRU/AIGRU/AGRU are opt-in. Supply an auxiliary_objective to auxiliary_next_event_loss; the host combines main + alpha*auxiliary + regularization and owns negative provenance."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/pytorch/sequence_attention.py",
+        "models/pytorch/ctr_training.py",
+        "models/pytorch/sequence_inputs.py"
+      ]
     },
     {
       "id": "dien",
@@ -426,13 +431,18 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "The auxiliary next-behavior loss of DIEN is omitted; only GRU extraction and attention-gated evolution are present."
+        "Consumes pre-decision embeddings with Boolean contiguous-prefix masks; invalid padding is sanitized and nonfinite valid values rejected.",
+        "Default evolution is AUGRU; GRU/AIGRU/AGRU are opt-in. Supply an auxiliary_objective to auxiliary_next_event_loss; the host combines main + alpha*auxiliary + regularization and owns negative provenance."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/tensorflow/sequence_attention.py",
+        "models/tensorflow/ctr_training.py",
+        "models/tensorflow/sequence_inputs.py"
+      ]
     },
     {
       "id": "din",
@@ -450,13 +460,17 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "The target-conditioned activation core has no feature-embedding pipeline or calibrated serving head."
+        "Consumes pre-decision target/history embeddings and Boolean masks; padding is sanitized before arithmetic.",
+        "Default sigmoid/ReLU local scorer is preserved; optional injected pooling exposes raw/softmax and Dice variants. Host owns encoding, loss and calibration."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/pytorch/sequence_attention.py",
+        "models/pytorch/sequence_inputs.py"
+      ]
     },
     {
       "id": "din",
@@ -474,13 +488,17 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "The target-conditioned activation core has no feature-embedding pipeline or calibrated serving head."
+        "Consumes pre-decision target/history embeddings and Boolean masks; padding is sanitized before arithmetic.",
+        "Default sigmoid/ReLU local scorer is preserved; optional injected pooling exposes raw/softmax and Dice variants. Host owns encoding, loss and calibration."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/tensorflow/sequence_attention.py",
+        "models/tensorflow/sequence_inputs.py"
+      ]
     },
     {
       "id": "dsin",
@@ -498,13 +516,16 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "Session bias encoding and paper-specific local activation are omitted; BiLSTM uses both directions."
+        "Consumes real pre-decision sessions and target embeddings; host defines session boundaries.",
+        "Optional bias_encoding adds session/position/coordinate bias within declared capacities. Session attention/readout remains a compact reference, not full upstream reproduction."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/pytorch/sequence_inputs.py"
+      ]
     },
     {
       "id": "dsin",
@@ -522,13 +543,16 @@
         ]
       },
       "limitations": [
-        "Consumes pre-decision target and history embeddings; item encoding and history construction remain host-owned.",
-        "Session bias encoding and paper-specific local activation are omitted; BiLSTM uses both directions."
+        "Consumes real pre-decision sessions and target embeddings; host defines session boundaries.",
+        "Optional bias_encoding adds session/position/coordinate bias within declared capacities. Session attention/readout remains a compact reference, not full upstream reproduction."
       ],
       "output_contract": {
         "kind": "binary_logit",
         "shape": "[B]"
-      }
+      },
+      "companion_files": [
+        "models/tensorflow/sequence_inputs.py"
+      ]
     },
     {
       "id": "dssm",
@@ -694,8 +718,8 @@
         ]
       },
       "limitations": [
-        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
-        "Uses one shared bilinear transform rather than all field/pair-specific bilinear variants."
+        "Accepts one categorical ID per field; host owns dense/multi-hot handling.",
+        "Default all-pair, cross-branch shared bilinear parameters are preserved; bilinear_type and separate_branches isolate sharing choices. Squeeze activation remains the documented local variant."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -718,8 +742,8 @@
         ]
       },
       "limitations": [
-        "Accepts one categorical ID per field; dense, multi-hot, and missing-value processing remain host-owned.",
-        "Uses one shared bilinear transform rather than all field/pair-specific bilinear variants."
+        "Accepts one categorical ID per field; host owns dense/multi-hot handling.",
+        "Default all-pair, cross-branch shared bilinear parameters are preserved; bilinear_type and separate_branches isolate sharing choices. Squeeze activation remains the documented local variant."
       ],
       "output_contract": {
         "kind": "binary_logit",
@@ -4752,8 +4776,8 @@
         ]
       },
       "limitations": [
-        "Uses host embeddings and returns pair scores without first-order terms or a classifier.",
-        "Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension."
+        "Default unconstrained pair matrices remain available; symmetric=True applies W+W^T only to matrix mode. Host supplies embeddings and a head.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
       ],
       "output_contract": {
         "kind": "interaction_representations",
@@ -4781,8 +4805,8 @@
         ]
       },
       "limitations": [
-        "Uses host embeddings and returns pair scores without first-order terms or a classifier.",
-        "Adds explicit field-pair parameter sharing policy to existing bilinear primitives; matrix storage grows quadratically in field count and embedding dimension."
+        "Default unconstrained pair matrices remain available; symmetric=True applies W+W^T only to matrix mode. Host supplies embeddings and a head.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
       ],
       "output_contract": {
         "kind": "interaction_representations",
@@ -5174,12 +5198,12 @@
         ]
       },
       "limitations": [
-        "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added.",
-        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+        "Default copy_and_dots returns ONNv2 diagonal copies plus off-diagonal dot products. pair_vectors returns un-summed [B,pairs,D] products without diagonal copies.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
       ],
       "output_contract": {
         "kind": "interaction_representation",
-        "shape": "[B,F*D+F*(F-1)/2]"
+        "shape": "[B,F*D+pairs] by default; [B,pairs,D] for pair_vectors"
       },
       "local_guide": "knowledge/feature_interactions.md",
       "structure_pattern": "field_specific_parameters",
@@ -5204,12 +5228,12 @@
         ]
       },
       "limitations": [
-        "ONNv2 tensor convention is explicit: diagonal is the copy operation, off-diagonal is the partner operation. No lookup bank, DNN or prediction head is added.",
-        "Independent tensor mechanism reference; host owns preprocessing, embeddings, training, prediction head and dataset evaluation. No task-specific lift or speed claim."
+        "Default copy_and_dots returns ONNv2 diagonal copies plus off-diagonal dot products. pair_vectors returns un-summed [B,pairs,D] products without diagonal copies.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
       ],
       "output_contract": {
         "kind": "interaction_representation",
-        "shape": "[B,F*D+F*(F-1)/2]"
+        "shape": "[B,F*D+pairs] by default; [B,pairs,D] for pair_vectors"
       },
       "local_guide": "knowledge/feature_interactions.md",
       "structure_pattern": "field_specific_parameters",
@@ -6054,10 +6078,8 @@
         ]
       },
       "limitations": [
-        "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option.",
-        "No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch.",
-        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "Default target_token readout retains candidate-in-encoder semantics. history_attention encodes history independently and requires an injected target-conditioned pooling component.",
+        "Empty-history readouts are zero; the host supplies ordered pre-decision events, prediction head and objective. No causal-mask option or full paper-reproduction claim."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -6074,6 +6096,10 @@
       "structure_pattern": "history_relations_and_states",
       "required_host_tensors": [
         "sequence_mask"
+      ],
+      "companion_files": [
+        "models/pytorch/sequence_attention.py",
+        "models/pytorch/sequence_inputs.py"
       ]
     },
     {
@@ -6092,10 +6118,8 @@
         ]
       },
       "limitations": [
-        "One Transformer block with target-token pooling; excludes source concat/mean/sum readouts and causal-mask option.",
-        "No-history target readout is deliberately zero rather than a target-only prediction; retain target-only information in a host branch.",
-        "Host supplies time-safe embeddings, ordered histories, prediction heads, task loss and evaluator; this is an independent mechanism reference, not a complete production clone.",
-        "True=valid; invalid history values are sanitized, all-masked/empty readouts are zero. No training experiment or effectiveness claim."
+        "Default target_token readout retains candidate-in-encoder semantics. history_attention encodes history independently and requires an injected target-conditioned pooling component.",
+        "Empty-history readouts are zero; the host supplies ordered pre-decision events, prediction head and objective. No causal-mask option or full paper-reproduction claim."
       ],
       "output_contract": {
         "kind": "history_representation_bundle",
@@ -6112,6 +6136,10 @@
       "structure_pattern": "history_relations_and_states",
       "required_host_tensors": [
         "sequence_mask"
+      ],
+      "companion_files": [
+        "models/tensorflow/sequence_attention.py",
+        "models/tensorflow/sequence_inputs.py"
       ]
     },
     {
@@ -7390,6 +7418,376 @@
       "structure_pattern": "conditional_negative_proposal",
       "required_host_tensors": [
         "counts [N]; bool eligible_mask and positive_mask [B,N]"
+      ]
+    },
+    {
+      "id": "crossnet_mix",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interaction_variants:CrossNetMix",
+      "file": "models/pytorch/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Produces a cross representation, not logits; expert routing is not an explanation of causal effects.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,D]; return_routing=True also returns [B,layers,experts]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "explicit_high_order_cross",
+      "required_host_tensors": [
+        "encoded_features"
+      ]
+    },
+    {
+      "id": "crossnet_mix",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interaction_variants:CrossNetMix",
+      "file": "models/tensorflow/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Produces a cross representation, not logits; expert routing is not an explanation of causal effects.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,D]; return_routing=True also returns [B,layers,experts]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "explicit_high_order_cross",
+      "required_host_tensors": [
+        "encoded_features"
+      ]
+    },
+    {
+      "id": "ifm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interaction_variants:InputAwareFM",
+      "file": "models/pytorch/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies learned first-order contributions [B,F] and field tokens [B,F,D]; no ID lookup, dense-feature adapter or global bias is built in.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "pairwise_feature_interaction",
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ]
+    },
+    {
+      "id": "ifm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interaction_variants:InputAwareFM",
+      "file": "models/tensorflow/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Host supplies learned first-order contributions [B,F] and field tokens [B,F,D]; no ID lookup, dense-feature adapter or global bias is built in.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "pairwise_feature_interaction",
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ]
+    },
+    {
+      "id": "difm",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.interaction_variants:DualInputAwareFM",
+      "file": "models/pytorch/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Final factors are field-level, not coordinate-level; unlike IFM the two projected factors are summed without a final softmax.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "pairwise_feature_interaction",
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ]
+    },
+    {
+      "id": "difm",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.interaction_variants:DualInputAwareFM",
+      "file": "models/tensorflow/interaction_variants.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Final factors are field-level, not coordinate-level; unlike IFM the two projected factors are summed without a final softmax.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "binary_logit",
+        "shape": "[B]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "pairwise_feature_interaction",
+      "required_host_tensors": [
+        "field_tokens",
+        "first_order_fields"
+      ]
+    },
+    {
+      "id": "dice_activation",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence_attention:MaskedDice",
+      "file": "models/pytorch/sequence_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires explicit training/evaluation mode and mask semantics. Distinct from the DICE disentanglement method; no attention or objective is included.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "activation",
+        "shape": "same as input [...,D]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "target_conditioned_history",
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "dice_activation",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence_attention:MaskedDice",
+      "file": "models/tensorflow/sequence_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Requires explicit training/evaluation mode and mask semantics. Distinct from the DICE disentanglement method; no attention or objective is included.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "activation",
+        "shape": "same as input [...,D]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "target_conditioned_history",
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "local_activation_pooling",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence_attention:LocalActivationPooling",
+      "file": "models/pytorch/sequence_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Raw attention scores can be negative and are not probabilities; pooling weights do not establish causal feature importance.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "attention": "[B,T]",
+          "scores": "[B,T]"
+        }
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "target_conditioned_history",
+      "required_host_tensors": [
+        "history_representations",
+        "target_representation",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "local_activation_pooling",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence_attention:LocalActivationPooling",
+      "file": "models/tensorflow/sequence_attention.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Raw attention scores can be negative and are not probabilities; pooling weights do not establish causal feature importance.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "history_representation_bundle",
+        "shape": "dict",
+        "fields": {
+          "representation": "[B,D]",
+          "attention": "[B,T]",
+          "scores": "[B,T]"
+        }
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "target_conditioned_history",
+      "required_host_tensors": [
+        "history_representations",
+        "target_representation",
+        "sequence_mask"
+      ]
+    },
+    {
+      "id": "masked_sequence_pooling",
+      "framework": "pytorch",
+      "symbol": "model_evo_harness.models.pytorch.sequence_inputs:MaskedSequencePooling",
+      "file": "models/pytorch/sequence_inputs.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Weighted mean divides by nonnegative weight sum; softmax treats weights as logits. Zero-support rows return zero. Host verifies event timing and supplies aligned identities.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "sequence_input_reduction",
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask_or_lengths"
+      ]
+    },
+    {
+      "id": "masked_sequence_pooling",
+      "framework": "tensorflow",
+      "symbol": "model_evo_harness.models.tensorflow.sequence_inputs:MaskedSequencePooling",
+      "file": "models/tensorflow/sequence_inputs.py",
+      "reference_scope": "mechanism_reference",
+      "training_support": {
+        "mode": "host_trained",
+        "requires_host": [
+          "feature_adapter",
+          "trainer",
+          "objective",
+          "evaluator"
+        ]
+      },
+      "limitations": [
+        "Weighted mean divides by nonnegative weight sum; softmax treats weights as logits. Zero-support rows return zero. Host verifies event timing and supplies aligned identities.",
+        "Independent native tensor component. Host supplies pre-decision inputs, a prediction head where needed, trainer, fixed evaluator and parameter/latency budget. No task-level gain is implied."
+      ],
+      "output_contract": {
+        "kind": "representation",
+        "shape": "[B,D]"
+      },
+      "local_guide": "knowledge/native_ctr_refinements.md",
+      "structure_pattern": "sequence_input_reduction",
+      "required_host_tensors": [
+        "history_representations",
+        "sequence_mask_or_lengths"
       ]
     }
   ]

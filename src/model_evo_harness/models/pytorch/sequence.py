@@ -198,45 +198,115 @@ class HSTU(nn.Module):
 
 
 class _AUGRUCell(nn.Module):
-    def __init__(self, dim: int):
+    """Reset-before-affine GRU family; default preserves the original AUGRU."""
+    def __init__(self, dim: int, mode='augru'):
         super().__init__()
+        self.mode = mode
         self.gates = nn.Linear(2 * dim, 2 * dim)
         self.candidate = nn.Linear(2 * dim, dim)
 
     def forward(self, x: torch.Tensor, previous: torch.Tensor,
                 attention: torch.Tensor) -> torch.Tensor:
+        if self.mode == 'aigru':
+            x = x * attention[:, None]
         reset, update = self.gates(torch.cat([x, previous], dim=-1)).sigmoid().chunk(2, -1)
         proposal = torch.tanh(self.candidate(torch.cat([x, reset * previous], dim=-1)))
-        update = update * attention[:, None]
+        if self.mode == 'agru':
+            update = attention[:, None]
+        elif self.mode == 'augru':
+            update = update * attention[:, None]
         return previous + update * (proposal - previous)
 
 
 class DIEN(nn.Module):
-    """GRU interest extraction and target-aware AUGRU interest evolution."""
+    """GRU extraction with selectable GRU/AIGRU/AGRU/AUGRU evolution.
 
-    def __init__(self, dim: int, hidden_dim: int):
+    History [B,T,D] uses left-aligned contiguous-prefix boolean masks. Masked
+    padding is removed before arithmetic; target and valid events must be finite.
+    Default AUGRU retains the original reset-before-affine cell parameterization.
+    Inject NextBehaviorObjective to train the exposed interests with next-event
+    supervision. Host owns eligible negatives, loss weighting and time cutoff.
+    """
+    def __init__(self, dim: int, hidden_dim: int, evolution='augru', auxiliary_objective=None):
         super().__init__()
+        if evolution not in ('gru', 'aigru', 'agru', 'augru'):
+            raise ValueError("evolution must be gru, aigru, agru or augru")
+        self.dim = dim
         self.extractor = nn.GRU(dim, dim, batch_first=True)
-        self.evolution = _AUGRUCell(dim)
+        self.evolution = _AUGRUCell(dim, evolution)
+        self.auxiliary_objective = auxiliary_objective
         self.head = nn.Sequential(nn.Linear(2 * dim, hidden_dim), nn.ReLU(),
                                   nn.Linear(hidden_dim, 1))
 
+    def interest_states(self, history, mask):
+        """Return [B,T,D] extracted states, zero at padding; T=0 is supported."""
+        if (history.ndim != 3 or history.shape[-1] != self.dim or mask.dtype != torch.bool
+                or mask.shape != history.shape[:2]):
+            raise ValueError("expected history [B,T,D] and boolean mask [B,T]")
+        _require_prefix(mask)
+        history = torch.where(mask[..., None], history, 0.)
+        if not torch.isfinite(history).all().item():
+            raise ValueError("valid history must be finite")
+        # A trailing dummy permits T=0 without a separate non-differentiable path.
+        padded = torch.cat([history, history.new_zeros(history.shape[0], 1, self.dim)], 1)
+        interests, _ = self.extractor(padded)
+        return torch.where(mask[..., None], interests[:, :-1], 0.)
+
+    def auxiliary_next_event_loss(self, history, mask, negative_history, interests=None):
+        """Match state[t] to event[t+1] and negative_history[t+1].
+
+        Negatives align to original event positions [B,T,D], not already shifted.
+        Valid transitions need both adjacent mask entries; empty sets yield zero.
+        An optional interests tensor must come from this history's forward pass.
+        """
+        if self.auxiliary_objective is None:
+            raise ValueError("inject an auxiliary_objective before requesting next-event loss")
+        if negative_history.shape != history.shape:
+            raise ValueError("negative_history must align to unshifted history")
+        if interests is None:
+            interests = self.interest_states(history, mask)
+        else:
+            if interests.shape != history.shape or mask.dtype != torch.bool or mask.shape != history.shape[:2]:
+                raise ValueError("interests/history/mask must align")
+            _require_prefix(mask)
+        return self.auxiliary_objective(interests[:, :-1], history[:, 1:],
+                                        negative_history[:, 1:], mask[:, :-1] & mask[:, 1:])
+
     def forward(self, target: torch.Tensor, history: torch.Tensor,
-                mask: torch.Tensor) -> torch.Tensor:
-        interests, _ = self.extractor(history)
+                mask: torch.Tensor, return_details=False):
+        interests = self.interest_states(history, mask)
+        if target.shape != (history.shape[0], self.dim) or not torch.isfinite(target).all().item():
+            raise ValueError("finite target [B,D] required")
         attention = _attention(torch.einsum("btd,bd->bt", interests, target), mask)
         state = torch.zeros_like(target)
         for index in range(history.shape[1]):
             evolved = self.evolution(interests[:, index], state, attention[:, index])
             state = torch.where(mask[:, index, None], evolved, state)
-        return self.head(torch.cat([target, state], dim=-1)).squeeze(-1)
+        logit = self.head(torch.cat([target, state], dim=-1)).squeeze(-1)
+        return dict(logit=logit, interests=interests, attention=attention,
+                    representation=state) if return_details else logit
 
 
 class DSIN(nn.Module):
-    """Session self-attention, cross-session BiLSTM, and target activation."""
+    """Session attention, BiLSTM and target activation; optional bias encoding.
 
-    def __init__(self, dim: int, hidden_dim: int, heads: int):
+    bias_encoding adds independent session scalars, within-session position
+    scalars and a shared coordinate vector before attention. Bounds are required
+    when enabled; default remains content-only within-session attention.
+    Empty sessions are excluded from BiLSTM evolution, including internal holes;
+    valid sessions retain original order and original bias-encoding indices.
+    """
+
+    def __init__(self, dim: int, hidden_dim: int, heads: int, bias_encoding=False,
+                 max_sessions=None, max_session_len=None):
         super().__init__()
+        self.bias_encoding = bias_encoding
+        if bias_encoding:
+            if not max_sessions or not max_session_len or min(max_sessions, max_session_len) < 1:
+                raise ValueError("positive max_sessions and max_session_len required for bias encoding")
+            self.session_bias = nn.Parameter(torch.randn(max_sessions)*.02)
+            self.position_bias = nn.Parameter(torch.randn(max_session_len)*.02)
+            self.coordinate_bias = nn.Parameter(torch.randn(dim)*.02)
         self.self_attention = nn.MultiheadAttention(dim, heads, dropout=0, batch_first=True)
         self.evolution = nn.LSTM(dim, dim, batch_first=True, bidirectional=True)
         self.evolution_query = nn.Linear(dim, 2 * dim, bias=False)
@@ -246,14 +316,36 @@ class DSIN(nn.Module):
     def forward(self, target: torch.Tensor, sessions: torch.Tensor,
                 mask: torch.Tensor) -> torch.Tensor:
         batch, count, length, dim = sessions.shape
+        if mask.dtype != torch.bool or mask.shape != sessions.shape[:-1] or min(count, length) < 1:
+            raise ValueError("nonempty session axes and boolean aligned mask required")
+        sessions = torch.where(mask[..., None], sessions, 0.)
+        if not torch.isfinite(sessions).all().item() or not torch.isfinite(target).all().item():
+            raise ValueError("target and valid sessions must be finite")
+        if self.bias_encoding:
+            if count > len(self.session_bias) or length > len(self.position_bias):
+                raise ValueError("session/position length exceeds bias encoding bounds")
+            sessions = sessions + self.session_bias[:count][None, :, None, None] + self.position_bias[:length][None, None, :, None] + self.coordinate_bias
+            sessions = torch.where(mask[..., None], sessions, 0.)
         flat = sessions.reshape(batch * count, length, dim)
         flat_mask = mask.reshape(batch * count, length)
         safe = flat_mask.clone()
         safe[~safe.any(dim=1), 0] = True
         attended, _ = self.self_attention(flat, flat, flat, key_padding_mask=~safe)
         pooled = _mean(attended, flat_mask).reshape(batch, count, dim)
-        evolved, _ = self.evolution(pooled)
         session_mask = mask.any(dim=-1)
+        # Compact valid sessions before the bidirectional recurrence. Otherwise
+        # trailing padding changes the backward state of real sessions.
+        positions = torch.arange(count, device=sessions.device)[None]
+        order = torch.argsort(torch.where(session_mask, positions, positions+count), dim=1)
+        compact = pooled.gather(1, order[..., None].expand(-1, -1, dim))
+        lengths = session_mask.sum(1).clamp_min(1)
+        packed = nn.utils.rnn.pack_padded_sequence(compact, lengths.cpu(),
+                                                   batch_first=True, enforce_sorted=False)
+        encoded, _ = self.evolution(packed)
+        encoded, _ = nn.utils.rnn.pad_packed_sequence(encoded, batch_first=True,
+                                                       total_length=count)
+        evolved = torch.zeros_like(encoded).scatter(1, order[..., None].expand(-1, -1, 2*dim), encoded)
+        evolved = torch.where(session_mask[..., None], evolved, 0.)
         scores = torch.einsum("bsd,bd->bs", pooled, target)
         evolved_scores = torch.einsum("bsd,bd->bs", evolved,
                                       self.evolution_query(target))
