@@ -1,6 +1,6 @@
 # Local technical knowledge
 
-These 29 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 127 method cards also have direct PyTorch and TensorFlow [model and diagnostic components](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
+These 30 substantive, independently written family guides are packaged with ModelEvoHarness. The Agent can read them without fetching upstream repositories. They explain the mechanism, data contract, controlled experiment, failure condition, and when a human feature request is justified. All 134 method cards have references available to PyTorch and TensorFlow hosts through [model and diagnostic components](../models.md); a runnable structure still needs the host's preprocessing, loss, sampling and evaluator. Source links attribute the research; adapted code retains its [license notices](../../THIRD_PARTY_NOTICES.md).
 
 ## Catalog families
 
@@ -33,7 +33,7 @@ These 29 substantive, independently written family guides are packaged with Mode
 
 ## Cross-cutting training and interpretation
 
-Nine shared guides accompany the family guides in Agent context:
+Ten shared guides accompany the family guides in Agent context:
 
 - [Training objectives and losses](../../src/model_evo_harness/knowledge/training_objectives.md)
 - [Negative sampling and hard-example mining](../../src/model_evo_harness/knowledge/sampling_and_hard_examples.md)
@@ -67,3 +67,5 @@ The [discount response guide](../../src/model_evo_harness/knowledge/discount_res
 - [Representation adaptation](../../src/model_evo_harness/knowledge/representation_adaptation.md)
 
 The [FuxiCTR coverage](../fuxictr-coverage.md) links 43 additional native mechanisms to the expanded family guides.
+
+- [Paired prediction quality](../../src/model_evo_harness/knowledge/prediction_quality.md): AUC/LogLoss disagreements, exact row alignment, class contributions and controlled follow-up hypotheses.

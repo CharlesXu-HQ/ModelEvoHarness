@@ -169,9 +169,9 @@ class CatalogTests(unittest.TestCase):
         analysis = self.catalog["analysis_implementations"]
         analysis_ids = {item["id"] for item in analysis}
         card_ids = {card["id"] for card in self.catalog["method_cards"]}
-        self.assertEqual(len(card_ids), 131)
-        self.assertEqual(len(analysis), 6)
-        self.assertEqual(len(implementations), 258)
+        self.assertEqual(len(card_ids), 134)
+        self.assertEqual(len(analysis), 8)
+        self.assertEqual(len(implementations), 262)
         self.assertEqual({item["id"] for item in implementations}, (card_ids - analysis_ids) | {"two_tower"})
         for method_id in card_ids:
             with self.subTest(method=method_id):

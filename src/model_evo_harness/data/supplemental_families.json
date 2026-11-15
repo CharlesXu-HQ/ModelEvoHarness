@@ -212,6 +212,29 @@
       "source_models": [],
       "source_support": [],
       "source_project": []
+    },
+    {
+      "id": "prediction_quality",
+      "name": "Paired prediction quality diagnostics",
+      "source_repo": "loss-auc-diagnostics",
+      "source_url": "https://github.com/lmxhappy/why_loss_auc_unconsistent/blob/a6aea3647affa9d952c5b975d0180c387c584c54/why_loss_auc_unconsistent.ipynb",
+      "stages": [
+        "retrieval",
+        "ranking",
+        "reranking",
+        "policy",
+        "advertising",
+        "generation",
+        "search"
+      ],
+      "requires": [],
+      "question": "Does a paired prediction comparison support a ranking, confidence or class-loss hypothesis before changing the model?",
+      "experiment": "Observe baseline and candidate on identical ordered unique sample IDs, dataset/split identity and weights. Use the unchanged task metric and independent holdout policy; fit any calibration only on a separate permitted split.",
+      "pitfalls": "Sample IDs, labels or weights are not paired; scores are logits instead of probabilities; a single-class AUC is invented; clipping artifacts or class-mix changes are presented as a proven explanation or significant uplift.",
+      "source_docs": [],
+      "source_models": [],
+      "source_support": [],
+      "source_project": []
     }
   ]
 }

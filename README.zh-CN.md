@@ -8,14 +8,18 @@ ModelEvoHarness 是面向推荐、搜索、广告和营销的 **Agent 主导离�
 
 | 内容 | 作用 |
 | --- | --- |
-| [29 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
-| 131 张 method card | 统一记录 128 种模型与训练方法，以及 3 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
+| [30 篇方向指南与 10 篇通用指南](docs/knowledge/README.md) | 覆盖目录中的全部技术方向，原创说明机制、输入条件、对照实验、失败信号及特征缺口如何判断。Agent 直接读取适用方向指南及通用训练、探索和横向组合指南，无需联网获取上游仓库。 |
+| 134 张 method card | 统一记录 130 种模型与训练方法，以及 4 个分析工具。[结构选择模式](docs/multi-source-guidance.md)指导模型改动，[分析模式](src/model_evo_harness/data/analysis_patterns.json)指导测量和筛选。`ready` 表示已声明任务前置条件；候选内部张量仍需构建和校验。 |
 | [训练策略](src/model_evo_harness/data/training_patterns.json) | 把 loss、负采样、样本加权、正则化、校准和数据增强，与结构实验放在同一套可证伪的实验协议下。 |
-| [128 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 258 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
-| [3 个可供双框架宿主使用的分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 6 项，包含表示诊断、梯度特征筛选及成本约束的子集重训；最后一项是双框架宿主共用的标准库实现。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
+| [130 种双框架模型与训练方法](docs/models.md) | [模型实现清单](src/model_evo_harness/data/model_implementations.json)共 262 项，含通用 TwoTower 的双框架实现。`model_api` 提供类路径和契约；训练与评估由业务方执行。 |
+| [4 个可供双框架宿主使用的分析工具](docs/research-guided-components.md) | [分析实现清单](src/model_evo_harness/data/analysis_implementations.json)共 8 项，包含表示诊断、梯度特征筛选、成本约束的子集重训和配对预测诊断；后两项是双框架宿主共用的标准库实现。`analysis_api` 提供类路径和契约，供宿主显式调用。 |
 | 实验日志 | 保存任务、数据集和评估协议指纹，以及假设、已执行实验、失败记录、技术经验与业务经验。数据集或协议改变后，建立新的证据上下文。 |
 
 [来源署名](docs/research/source-attribution.md)记录研究目录参考的原始资料。仓库内的说明和模型代码均为原创，没有镜像上游正文或源码。[研究覆盖说明](docs/source-coverage.md)列出具体范围。
+
+## 根据证据优化表示与训练
+
+新增[训练参考组件](docs/training-reference-components.md)：学习 Embedding 稀疏掩码后固定掩码重训、返回真实条件概率的负采样，以及同一批样本上的 AUC/LogLoss 配对诊断。Agent 根据观测选择局部改动。诊断结果本身不算优化收益；稠密参数置零也不代表已经节省部署成本。
 
 ## 根据内部观测选择 backbone 内的改动
 

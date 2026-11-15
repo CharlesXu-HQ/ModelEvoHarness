@@ -1,6 +1,6 @@
 # Direct-framework model references
 
-ModelEvoHarness keeps **131 method cards: 128 model/training methods and 3 analysis tools**. Tensor components have native PyTorch and TensorFlow implementations; the cost-search workflow is framework-neutral. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 258 entries: the 128 model/training methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 6 entries for `representation_diagnostics`, `gradient_feature_selection` and `cold_feature_search`. The last is a shared stdlib workflow used by either framework.
+ModelEvoHarness keeps **134 method cards: 130 model/training methods and 4 analysis tools**. Tensor components have native PyTorch and TensorFlow implementations; the cost-search and prediction-diagnostic workflows are framework-neutral. The [model manifest](../src/model_evo_harness/data/model_implementations.json) contains 262 entries: the 130 model/training methods in both frameworks plus generic `TwoTower` in both. The separate [analysis manifest](../src/model_evo_harness/data/analysis_implementations.json) contains 8 entries for `representation_diagnostics`, `gradient_feature_selection`, `cold_feature_search` and `binary_prediction_diagnostics`. The last two are shared stdlib workflows used by either framework.
 
 `model_api` exposes model constructors and contracts; `analysis_api` exposes analysis tools. Both include class paths, `reference_scope`, `training_support`, `output_contract`, and `limitations`, and both support whole-module `read_references`. These are compact mechanism references for controlled experiments; the host supplies the remaining data, training and evaluation code.
 
@@ -108,3 +108,7 @@ Discovery and source reading install no hooks and execute no tools or training.
 ## CTR and long-history additions
 
 The [complete coverage and component map](fuxictr-coverage.md) documents 43 additions across ten paired modules. These include objectives and input adapters as well as network structures. Their manifest contracts specify host responsibilities and omitted full-model mechanisms.
+
+## Embedding capacity, sampling and paired metrics
+
+See [training-reference components](training-reference-components.md) for native PEP-inspired embedding pruning/fixed-mask retraining, conditional uniform/popularity negative sampling, and separate stdlib prediction diagnostics. Input readiness, source delivery and evaluation boundaries use the existing contracts.
